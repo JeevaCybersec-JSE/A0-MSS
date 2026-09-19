@@ -1,0 +1,8 @@
+node.exe
+*.exe
+*.bat
+.git
+.gitignore
+Dockerfile
+render.yaml
+*.log

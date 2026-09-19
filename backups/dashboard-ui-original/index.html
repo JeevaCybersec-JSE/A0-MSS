@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A0 MSS KPI Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=5.0">
+</head>
+
+<body>
+
+  <!-- Subtle Enterprise Cursor Interaction System -->
+  <div id="cursor-spotlight" class="cursor-spotlight" aria-hidden="true"></div>
+  <div id="cursor-glow" class="cursor-glow-aura" aria-hidden="true"></div>
+  <div id="cursor-dot" class="cursor-glow-dot" aria-hidden="true"></div>
+
+  <!-- ===================== LOGIN SCREEN ===================== -->
+  <div id="login-screen" class="login-screen">
+    <canvas id="login-canvas" class="login-canvas"></canvas>
+    <div class="login-scanlines"></div>
+    <div class="login-radar-sweep"></div>
+    <div class="login-glow-orb orb-1"></div>
+    <div class="login-glow-orb orb-2"></div>
+    <div class="login-glow-orb orb-3"></div>
+    <div class="login-glow-orb orb-4"></div>
+    <div class="login-grid"></div>
+
+    <!-- Futuristic Ambient SOC Telemetry HUD in Viewport Corners -->
+    <div class="login-hud-corner hud-tl">
+      <div class="hud-line"><span class="hud-dot"></span> SYSTEM: <span class="hud-val">ONLINE [NODE #A0]</span></div>
+      <div class="hud-line sub">PROTO: <span class="hud-val">TLS 1.3 / AES-256 GCM</span></div>
+    </div>
+    <div class="hud-corner-bracket bracket-tl"></div>
+
+    <div class="login-hud-corner hud-tr">
+      <div class="hud-line">DEFENSE: <span class="hud-val live">LEVEL-5 SHIELD</span></div>
+      <div class="hud-line sub">LATENCY: <span id="login-hud-latency" class="hud-val">12ms</span> // SOC-MSS</div>
+    </div>
+    <div class="hud-corner-bracket bracket-tr"></div>
+
+    <div class="login-hud-corner hud-bl">
+      <div class="hud-line">SECURITY OPS: <span class="hud-val">SURVEILLANCE ACTIVE</span></div>
+      <div class="hud-line sub">HASH VERIFY: <span class="hud-val">SHA-512 SECURE</span></div>
+    </div>
+    <div class="hud-corner-bracket bracket-bl"></div>
+
+    <div class="login-hud-corner hud-br">
+      <div class="hud-line">MSS NODE: <span class="hud-val">#A0-OPS-9942</span></div>
+      <div class="hud-line sub">TERMINAL: <span class="hud-val">CYBER CONSOLE V3.6</span></div>
+    </div>
+    <div class="hud-corner-bracket bracket-br"></div>
+
+    <form id="login-form" class="login-card" autocomplete="off">
+      <div class="card-glow-border"></div>
+
+      <!-- Tech HUD Corners -->
+      <div class="tech-corner corner-tl"></div>
+      <div class="tech-corner corner-tr"></div>
+      <div class="tech-corner corner-bl"></div>
+      <div class="tech-corner corner-br"></div>
+
+      <div class="login-badge-row">
+        <span class="cyber-badge"><span class="live-dot"></span> SECURE SOC NODE #A0</span>
+        <span class="cyber-badge secondary">AES-256 GCM</span>
+      </div>
+
+      <div class="login-mark">
+        <div class="mark-pulse"></div>
+        <div class="mark-scan-ring"></div>
+        <svg viewBox="0 0 40 40" width="38" height="38" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M20 4 L34 10 V19 C34 28 28 34 20 37 C12 34 6 28 6 19 V10 Z" stroke-linejoin="round" />
+          <path d="M14 20 L18 24 L27 14" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <div class="login-title">A0 MSS Dashboard</div>
+      <div class="login-sub">Security Operations Console &middot; Enterprise Security Portal</div>
+
+      <div class="input-group">
+        <label class="field-label" for="login-username">Operator Username</label>
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"
+            stroke-width="1.6">
+            <path d="M16 17v-1.5a3.5 3.5 0 00-3.5-3.5h-5A3.5 3.5 0 004 15.5V17" stroke-linecap="round" />
+            <circle cx="10" cy="6.5" r="3.5" />
+          </svg>
+          <input id="login-username" class="text-input with-icon" type="text" autocomplete="off"
+            placeholder="Enter username" required>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="field-label" for="login-password">Access Key</label>
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"
+            stroke-width="1.6">
+            <rect x="4" y="9" width="12" height="8.5" rx="2" />
+            <path d="M7 9V6a3 3 0 016 0v3" stroke-linecap="round" />
+          </svg>
+          <input id="login-password" class="text-input with-icon" type="password" autocomplete="new-password"
+            placeholder="Enter password" required>
+          <button type="button" id="toggle-password-btn" class="btn-input-action" title="Toggle password visibility">
+            <svg id="eye-icon" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M10 4C5 4 1.7 8.3 1.7 10s3.3 6 8.3 6 8.3-4.3 8.3-6-3.3-6-8.3-6z" />
+              <circle cx="10" cy="10" r="2.5" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="login-error" class="login-error" hidden></div>
+
+      <button type="submit" id="login-btn-submit" class="btn btn-primary login-submit">
+        <span>Sign in to Console</span>
+        <svg class="btn-arrow" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <!-- Quick Demo Login Pill -->
+      <div class="quick-login-box">
+        <span class="quick-login-label">Quick Sign-in:</span>
+        <button type="button" id="quick-demo-login" class="quick-login-chip" title="Click to autofill Operator credentials">
+          <span class="chip-sparkle">⚡</span>
+          <span>Fill Demo Credentials (Jeeva)</span>
+        </button>
+      </div>
+
+      <div class="login-foot">
+        <span class="live-dot"></span> Local encrypted instance &middot; Data persisted on this node
+      </div>
+    </form>
+  </div>
+
+  <!-- ===================== WELCOME TRANSITION ===================== -->
+  <div id="welcome-transition" class="wt-screen" aria-hidden="true" hidden>
+
+    <!-- Canvas for particle interaction -->
+    <canvas id="wt-canvas" class="wt-canvas" aria-hidden="true"></canvas>
+
+    <!-- Radial glow -->
+    <div class="wt-radial-glow" aria-hidden="true"></div>
+
+    <!-- Orbit rings (A0 design language, large scale) -->
+    <div class="wt-orbits" aria-hidden="true">
+      <div class="wt-orbit wt-orbit-1">
+        <div class="wt-orbit-ellipse wt-ellipse-1"></div>
+        <div class="wt-orbit-sat wt-sat-cw-1"><span class="wt-particle wt-p-cyan"></span></div>
+      </div>
+      <div class="wt-orbit wt-orbit-2">
+        <div class="wt-orbit-ellipse wt-ellipse-2"></div>
+        <div class="wt-orbit-sat wt-sat-ccw-2"><span class="wt-particle wt-p-violet"></span></div>
+      </div>
+      <div class="wt-orbit wt-orbit-3">
+        <div class="wt-orbit-ellipse wt-ellipse-3"></div>
+        <div class="wt-orbit-sat wt-sat-cw-3"><span class="wt-particle wt-p-sky"></span></div>
+      </div>
+    </div>
+
+    <!-- MSS Brand Mark — top left -->
+    <div class="wt-brand" aria-label="MSS brand">
+      <!-- Shield SVG + wordmark — pure SVG, inline, no images needed -->
+      <svg class="wt-brand-svg" viewBox="0 0 68 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Shield outline -->
+        <path d="M34 4 L58 14 L58 34 C58 50 47 62 34 68 C21 62 10 50 10 34 L10 14 Z"
+              stroke="#111827" stroke-width="2.2" stroke-linejoin="round" fill="none"/>
+        <!-- Inner shield line (subtle double-line premium look) -->
+        <path d="M34 10 L52 18.5 L52 34 C52 47 43 57 34 62 C25 57 16 47 16 34 L16 18.5 Z"
+              stroke="#111827" stroke-width="0.8" stroke-linejoin="round" stroke-opacity="0.35" fill="none"/>
+        <!-- Tiny check mark inside shield -->
+        <path d="M26 35 L31 41 L43 28" stroke="#111827" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="wt-brand-wordmark">MSS</span>
+    </div>
+
+    <!-- Central welcome content -->
+    <div class="wt-center" id="wt-center">
+      <div class="wt-welcome-text" id="wt-welcome-text">
+        Welcome, <span id="wt-username" class="wt-username-span"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================== APP SHELL ===================== -->
+  <div id="app" class="app" hidden>
+    <!-- Backdrop Overlay for Mobile / Slide Drawer -->
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="window.closeSidebar && window.closeSidebar(event)"></div>
+
+    <aside id="main-sidebar" class="sidebar">
+      <div class="brand">
+        <div class="brand-a0-icon" id="sidebar-brand-a0" title="A0 MSS KPI Console">
+          <div class="brand-atom-ambient-glow"></div>
+          <div class="brand-atom-stage" id="sidebar-brand-atom-stage">
+            <!-- Orbit 1: Electric Blue / Cyan (Slow CW) -->
+            <div class="brand-atom-orbit brand-orbit-1">
+              <div class="brand-orbit-ellipse brand-ellipse-1"></div>
+              <div class="brand-orbit-satellite brand-spin-cw-1">
+                <span class="brand-atom-particle brand-particle-cyan"></span>
+              </div>
+            </div>
+            <!-- Orbit 2: Subtle Violet (Slow CCW) -->
+            <div class="brand-atom-orbit brand-orbit-2">
+              <div class="brand-orbit-ellipse brand-ellipse-2"></div>
+              <div class="brand-orbit-satellite brand-spin-ccw-2">
+                <span class="brand-atom-particle brand-particle-violet"></span>
+              </div>
+            </div>
+            <!-- Orbit 3: Subtle Pink / Purple Highlight (Very Slow CW) -->
+            <div class="brand-atom-orbit brand-orbit-3">
+              <div class="brand-orbit-ellipse brand-ellipse-3"></div>
+              <div class="brand-orbit-satellite brand-spin-cw-3">
+                <span class="brand-atom-particle brand-particle-pink"></span>
+              </div>
+            </div>
+          </div>
+          <!-- Stable Central Nucleus (Does NOT rotate) -->
+          <div class="brand-a0-nucleus">
+            <span class="brand-a0-text">A0</span>
+          </div>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">A0 MSS KPI</div>
+          <div class="brand-sub">Ops Console</div>
+        </div>
+        <button id="sidebar-close-btn" class="btn-sidebar-close" onclick="window.closeSidebar && window.closeSidebar(event)" title="Close Sidebar">
+          <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 5l10 10M15 5L5 15" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-nav-scroll">
+        <nav id="nav-primary" class="nav-group">
+          <div class="nav-label">Monitor</div>
+          <button class="nav-item" data-view="overview">
+            <span class="nav-icon" data-icon="grid"></span><span>Overview</span>
+          </button>
+          <button class="nav-item" data-view="trends">
+            <span class="nav-icon" data-icon="trend"></span><span>Trends</span>
+          </button>
+        </nav>
+
+        <nav id="nav-sections" class="nav-group">
+          <div class="nav-label">Sections</div>
+          <!-- section nav items injected by app.js -->
+        </nav>
+
+        <nav class="nav-group">
+          <div class="nav-label">Report</div>
+          <button class="nav-item" data-view="exec">
+            <span class="nav-icon" data-icon="file"></span><span>Executive Summary</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="sidebar-foot">
+        <div class="user-chip">
+          <span class="user-dot"></span>
+          <span id="user-name">Jeeva</span>
+        </div>
+        <button id="logout-btn" class="btn-sidebar-logout" title="Sign out of account">
+          <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M7 16H4.5a1.5 1.5 0 01-1.5-1.5V5.5A1.5 1.5 0 014.5 4H7" stroke-linecap="round" />
+            <path d="M12 14l4-4-4-4M16 10H7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-col">
+      <header class="topbar">
+        <div class="topbar-left">
+          <!-- Ultra-Dynamic A0 Signature Menu Button (Matching Brand A0) -->
+          <button id="sidebar-toggle-a0" class="btn-a0-toggle" onclick="window.toggleSidebar && window.toggleSidebar(event)" title="Toggle Navigation Sidebar (A0)">
+            <div class="a0-btn-icon-wrap" aria-hidden="true">
+              <div class="a0-atom-box" id="a0-atom-container">
+                <div class="a0-atom-ambient-glow"></div>
+                <div class="a0-atom-stage">
+                  <!-- Orbit 1: Electric Blue / Cyan (Slow CW) -->
+                  <div class="a0-atom-orbit orbit-1">
+                    <div class="a0-orbit-ellipse ellipse-1"></div>
+                    <div class="a0-orbit-satellite spin-cw-1">
+                      <span class="a0-atom-particle particle-cyan"></span>
+                    </div>
+                  </div>
+                  <!-- Orbit 2: Violet / Deep Blue (Slow CCW) -->
+                  <div class="a0-atom-orbit orbit-2">
+                    <div class="a0-orbit-ellipse ellipse-2"></div>
+                    <div class="a0-orbit-satellite spin-ccw-2">
+                      <span class="a0-atom-particle particle-violet"></span>
+                    </div>
+                  </div>
+                  <!-- Orbit 3: Subtle Magenta / Purple (Extremely Slow CW) -->
+                  <div class="a0-atom-orbit orbit-3">
+                    <div class="a0-orbit-ellipse ellipse-3"></div>
+                    <div class="a0-orbit-satellite spin-cw-3">
+                      <span class="a0-atom-particle particle-pink"></span>
+                    </div>
+                  </div>
+                  <!-- Central Stable Nucleus -->
+                  <div class="a0-atom-nucleus">
+                    <span class="a0-btn-icon-text">A0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="a0-btn-info">
+              <div class="a0-btn-title-row">
+                <span class="a0-btn-title">A0 MENU</span>
+                <span class="a0-btn-live-dot"></span>
+              </div>
+              <span class="a0-btn-sub">Ops Console</span>
+            </div>
+          </button>
+
+          <div class="topbar-title">
+            <h1 id="view-title">Overview</h1>
+            <div id="view-subtitle" class="view-subtitle">Reporting period summary</div>
+          </div>
+        </div>
+
+        <div class="topbar-controls">
+          <div class="month-selector-group">
+            <button id="prev-month-btn" class="btn-icon-nav" title="Previous Month">
+              <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <label class="month-picker" title="Reporting month">
+              <svg class="month-picker-cal-icon" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="4" width="14" height="13" rx="1.5"/>
+                <path d="M3 8h14M7 2.3v3M13 2.3v3" stroke-linecap="round"/>
+              </svg>
+              <input id="month-input" type="month">
+            </label>
+            <button id="next-month-btn" class="btn-icon-nav" title="Next Month">
+              <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7.5 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+
+          <button id="export-csv-btn" class="btn btn-export-topbar" title="Export current month metrics to CSV">
+            <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 16v1a1 1 0 001 1h10a1 1 0 001-1v-1M10 3v10M6 9l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Export CSV</span>
+          </button>
+
+          <button id="topbar-logout-btn" class="btn btn-logout-topbar" title="Sign out of account">
+            <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M7 16H4.5a1.5 1.5 0 01-1.5-1.5V5.5A1.5 1.5 0 014.5 4H7" stroke-linecap="round" />
+              <path d="M12 14l4-4-4-4M16 10H7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </header>
+
+      <main id="view-root" class="view-root">
+        <!-- rendered by app.js -->
+      </main>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="app.js?v=5.1"></script>
+</body>
+
+</html>

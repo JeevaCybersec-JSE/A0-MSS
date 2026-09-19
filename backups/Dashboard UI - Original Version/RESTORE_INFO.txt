@@ -1,0 +1,25 @@
+================================================================================
+Dashboard UI - Original Version
+================================================================================
+Backup Created : 2026-09-19 15:44
+Label          : "Dashboard UI - Original Version"
+Source Folder  : C:\Users\jeeva\Downloads\a0-old\a0-old\public
+Destination    : C:\Users\jeeva\Downloads\a0-old\a0-old\backups\Dashboard UI - Original Version
+
+Files Backed Up:
+  - app.js     (Frontend Application Logic & State)
+  - index.html (Main Layout, DOM Structure & Templates)
+  - style.css  (Design System, Typography & Stylesheet)
+
+Status:
+  - Preserves working dashboard exactly as it is.
+  - Backend/API logic, authentication, and data calculations are untouched.
+  - Ready for immediate full rollback at any time.
+
+HOW TO RESTORE THIS EXACT VERSION:
+Option 1 (Automated):
+  Double-click the 'restore.bat' file located in this folder.
+
+Option 2 (Manual):
+  Copy 'app.js', 'index.html', and 'style.css' from this folder into the 'public/' directory.
+================================================================================

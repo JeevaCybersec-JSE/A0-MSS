@@ -1,0 +1,7 @@
+﻿Dashboard UI - Original Version
+================================
+Backed up : 2026-09-18 18:09:15
+Source     : C:\Users\jeeva\Downloads\a0-old\a0-old\public
+Files      : index.html, style.css, app.js
+
+To restore, copy these three files back to the public\ folder.
