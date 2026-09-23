@@ -1030,99 +1030,93 @@
       `;
     }
 
-    // ---- 2b. Interactive filter + search controls ----
+    // ---- 2b. Interactive filter + search controls + Rich Target KPI Details Grid ----
     const controlsEl = document.getElementById('target-controls-bar');
-    const chartEl    = document.getElementById('target-chart-container');
+    const cardsEl    = document.getElementById('target-kpi-cards');
 
-    if (!chartEl) return;
+    if (!cardsEl) return;
 
     if (targetMetrics.length === 0) {
       if (controlsEl) controlsEl.innerHTML = '';
-      chartEl.innerHTML = '<p class="no-data-notice">No target-defined KPIs with computed values available for this reporting period.</p>';
-    } else {
-      let activeFilter = 'all';
-      let searchQuery  = '';
+      cardsEl.innerHTML = '<p class="no-data-notice">No target-defined KPIs with computed values available for this reporting period.</p>';
+      return;
+    }
 
-      // Count per RAG for pill badges
-      const counts = { green: 0, amber: 0, red: 0 };
-      targetMetrics.forEach(({ data }) => {
-        const r = (data.rag || '').toLowerCase();
-        if (counts[r] !== undefined) counts[r]++;
+    let activeFilter = 'all';
+    let searchQuery  = '';
+
+    // Count per RAG for pill badges
+    const counts = { green: 0, amber: 0, red: 0 };
+    targetMetrics.forEach(({ data }) => {
+      const r = (data.rag || '').toLowerCase();
+      if (counts[r] !== undefined) counts[r]++;
+    });
+
+    if (controlsEl) {
+      controlsEl.innerHTML = `
+        <button class="target-filter-pill active" data-filter="all" aria-pressed="true">
+          All <span style="opacity:0.65">${targetMetrics.length}</span>
+        </button>
+        <button class="target-filter-pill pill-met" data-filter="green" aria-pressed="false">
+          &#9679; Met <span style="opacity:0.65">${counts.green}</span>
+        </button>
+        <button class="target-filter-pill pill-warning" data-filter="amber" aria-pressed="false">
+          &#9679; Warning <span style="opacity:0.65">${counts.amber}</span>
+        </button>
+        <button class="target-filter-pill pill-notmet" data-filter="red" aria-pressed="false">
+          &#9679; Not Met <span style="opacity:0.65">${counts.red}</span>
+        </button>
+        <div class="target-search-wrap">
+          <svg class="target-search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3" stroke-linecap="round"/>
+          </svg>
+          <input class="target-search-input" id="target-kpi-search" type="search"
+            placeholder="Search Target KPIs\u2026" autocomplete="off" spellcheck="false"
+            aria-label="Search Target KPIs">
+        </div>
+      `;
+
+      controlsEl.querySelectorAll('.target-filter-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          activeFilter = pill.getAttribute('data-filter');
+          controlsEl.querySelectorAll('.target-filter-pill').forEach(p => {
+            p.classList.toggle('active', p === pill);
+            p.setAttribute('aria-pressed', String(p === pill));
+          });
+          renderFilteredCards();
+        });
       });
 
-      if (controlsEl) {
-        controlsEl.innerHTML = `
-          <button class="target-filter-pill active" data-filter="all" aria-pressed="true">
-            All <span style="opacity:0.65">${targetMetrics.length}</span>
-          </button>
-          <button class="target-filter-pill pill-met" data-filter="green" aria-pressed="false">
-            &#9679; Met <span style="opacity:0.65">${counts.green}</span>
-          </button>
-          <button class="target-filter-pill pill-warning" data-filter="amber" aria-pressed="false">
-            &#9679; Warning <span style="opacity:0.65">${counts.amber}</span>
-          </button>
-          <button class="target-filter-pill pill-notmet" data-filter="red" aria-pressed="false">
-            &#9679; Not Met <span style="opacity:0.65">${counts.red}</span>
-          </button>
-          <div class="target-search-wrap">
-            <svg class="target-search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
-              <circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3" stroke-linecap="round"/>
-            </svg>
-            <input class="target-search-input" id="target-kpi-search" type="search"
-              placeholder="Search KPIs\u2026" autocomplete="off" spellcheck="false"
-              aria-label="Search KPIs">
-          </div>
-        `;
-
-        function refreshBulletList() {
-          let filtered = targetMetrics;
-          if (activeFilter !== 'all') {
-            filtered = filtered.filter(({ data }) => (data.rag || '').toLowerCase() === activeFilter);
-          }
-          if (searchQuery) {
-            const q = searchQuery.toLowerCase();
-            filtered = filtered.filter(({ def }) => cleanText(def.label).toLowerCase().includes(q));
-          }
-          buildBulletBarRows(chartEl, filtered, sectionMap);
-        }
-
-        // Filter pill logic
-        controlsEl.querySelectorAll('.target-filter-pill').forEach(pill => {
-          pill.addEventListener('click', () => {
-            activeFilter = pill.getAttribute('data-filter');
-            controlsEl.querySelectorAll('.target-filter-pill').forEach(p => {
-              p.classList.toggle('active', p === pill);
-              p.setAttribute('aria-pressed', String(p === pill));
-            });
-            refreshBulletList();
-          });
+      const searchInput = controlsEl.querySelector('#target-kpi-search');
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          searchQuery = searchInput.value.trim();
+          renderFilteredCards();
         });
-
-        // Search logic
-        const searchInput = controlsEl.querySelector('#target-kpi-search');
-        if (searchInput) {
-          searchInput.addEventListener('input', () => {
-            searchQuery = searchInput.value.trim();
-            refreshBulletList();
-          });
-        }
-
-        // Initial render
-        refreshBulletList();
-      } else {
-        // Fallback: render all without controls
-        buildBulletBarRows(chartEl, targetMetrics, sectionMap);
       }
     }
 
-    // ---- 2c. Target KPI detail cards (scorecard grid) ----
-    const cardsEl = document.getElementById('target-kpi-cards');
-    if (cardsEl) {
-      if (targetMetrics.length === 0) {
-        cardsEl.innerHTML = '<p class="no-data-notice">No target-defined KPIs with computed values available for this reporting period.</p>';
+    function renderFilteredCards() {
+      let filtered = targetMetrics;
+      if (activeFilter !== 'all') {
+        filtered = filtered.filter(({ data }) => (data.rag || '').toLowerCase() === activeFilter);
+      }
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(({ def }) => {
+          const lbl = cleanText(def.label).toLowerCase();
+          const sec = (sectionMap[def.section] || '').toLowerCase();
+          return lbl.includes(q) || sec.includes(q);
+        });
+      }
+
+      if (filtered.length === 0) {
+        cardsEl.innerHTML = '<div class="table-empty-row" style="grid-column: 1 / -1;">No matching target KPIs found for the current filter.</div>';
         return;
       }
-      cardsEl.innerHTML = targetMetrics.map(({ def, data }) => {
+
+      cardsEl.innerHTML = '';
+      filtered.forEach(({ def, data }, idx) => {
         const rag       = (data.rag || 'neutral').toLowerCase();
         const actual    = safeNum(data.computed);
         const target    = safeNum(def.target);
@@ -1132,59 +1126,143 @@
         const targetFmt = target !== null ? `${target}${unit}` : '\u2014';
         const gapVal    = computeGap(actual, target, dir);
         const gapFmt    = formatGap(gapVal, unit);
-        const gapCls    = gapVal === null ? '' : gapVal >= 0 ? 'gap-positive' : 'gap-negative';
-        const dirLabel  = dir === 'higher' ? '\u2191 Higher is better' : dir === 'lower' ? '\u2193 Lower is better' : '';
+        const isSurplus = gapVal !== null && gapVal >= 0;
+        const gapPillCls = gapVal === null ? 'gap-pill-neutral' : isSurplus ? 'gap-pill-positive' : 'gap-pill-negative';
+        const gapPrefix = isSurplus && gapVal > 0 ? '\u2713 ' : '';
+        const dirArrow  = dir === 'higher' ? '\u2191' : dir === 'lower' ? '\u2193' : '\u2014';
+        const dirLabel  = dir === 'higher' ? 'Higher is better' : dir === 'lower' ? 'Lower is better' : 'Trend';
         const badgeCls  = `rag-badge-${['green','amber','red'].includes(rag) ? rag : 'neutral'}`;
+        const sectionName = sectionMap[def.section] || '';
 
-        // Mini gauge percentage
-        let gaugePct = 0;
-        if (actual !== null && target !== null && target !== 0) {
-          if (dir === 'higher') gaugePct = Math.min(Math.round((actual / target) * 100), 100);
-          else if (dir === 'lower') gaugePct = actual > 0 ? Math.min(Math.round((target / actual) * 100), 100) : 100;
+        // Calculate Attainment & Gauge Percentage
+        let attainmentPct = 0;
+        let displayPctText = '';
+        if (actual !== null && target !== null) {
+          if (dir === 'higher') {
+            if (target > 0) {
+              const ratio = (actual / target) * 100;
+              attainmentPct = Math.min(Math.max(ratio, 0), 100);
+              displayPctText = ratio >= 100 ? '100%' : `${ratio.toFixed(1)}%`;
+            } else {
+              attainmentPct = 100;
+              displayPctText = '100%';
+            }
+          } else if (dir === 'lower') {
+            if (actual <= target) {
+              attainmentPct = 100;
+              displayPctText = '100%';
+            } else {
+              const over = actual - target;
+              const denom = target > 0 ? target : actual;
+              const ratio = Math.max(0, 100 - (over / denom) * 50);
+              attainmentPct = Math.min(Math.max(ratio, 8), 98);
+              displayPctText = `${Math.round(ratio)}%`;
+            }
+          }
+        } else {
+          attainmentPct = rag === 'green' ? 100 : rag === 'amber' ? 75 : 45;
+          displayPctText = `${attainmentPct}%`;
         }
-        const gaugeColor = rag === 'green' ? '#10b981' : rag === 'amber' ? '#f59e0b' : '#ef4444';
-        const circumference = 2 * Math.PI * 22; // r=22
-        const dashOffset = circumference * (1 - gaugePct / 100);
 
-        return `<div class="target-kpi-card target-kpi-${rag}">
-          <div class="tkpi-header">
-            <div class="tkpi-name">${cleanText(def.label)}</div>
-            <span class="tkpi-rag-badge ${badgeCls}">&#9679; ${ragLabel(rag)}</span>
+        // SVG Radial Gauge calculation
+        const gaugeColor = rag === 'green' ? '#10b981' : rag === 'amber' ? '#f59e0b' : '#ef4444';
+        const meterColorCls = rag === 'green' ? 'meter-green' : rag === 'amber' ? 'meter-amber' : 'meter-red';
+        const circumference = 2 * Math.PI * 22; // r=22
+        const dashOffset = circumference * (1 - attainmentPct / 100);
+
+        const card = document.createElement('div');
+        card.className = `target-kpi-card target-kpi-${rag}`;
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `${cleanText(def.label)}: actual ${actualFmt}, target ${targetFmt}, status ${ragLabel(rag)}`);
+
+        card.innerHTML = `
+          <div class="tkpi-header-top">
+            <div class="tkpi-header-left">
+              ${sectionName ? `<span class="tkpi-domain-tag">${sectionName}</span>` : ''}
+              <span class="target-dir-badge">${dirArrow} ${dirLabel}</span>
+            </div>
+            <span class="rag-badge ${badgeCls}" style="font-size:10px;padding:2px 8px">&#9679;&nbsp;${ragLabel(rag)}</span>
           </div>
-          <div class="tkpi-body">
-            <div class="tkpi-actual-block" style="position:relative;display:flex;flex-direction:column;align-items:center">
-              <svg width="60" height="60" viewBox="0 0 60 60" style="transform:rotate(-90deg)" aria-hidden="true">
-                <circle cx="30" cy="30" r="22" fill="none" stroke="#f1f5f9" stroke-width="7"/>
-                <circle cx="30" cy="30" r="22" fill="none" stroke="${gaugeColor}" stroke-width="7"
+
+          <div class="tkpi-name">${cleanText(def.label)}</div>
+
+          <div class="tkpi-main-row">
+            <div class="tkpi-actual-col">
+              <span class="tkpi-actual-val">${actualFmt}</span>
+              <span class="tkpi-actual-lbl">Current Actual</span>
+            </div>
+            <div class="tkpi-gauge-wrap" title="Attainment: ${displayPctText}">
+              <svg width="56" height="56" viewBox="0 0 60 60" style="transform:rotate(-90deg)" aria-hidden="true">
+                <circle cx="30" cy="30" r="22" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+                <circle cx="30" cy="30" r="22" fill="none" stroke="${gaugeColor}" stroke-width="6"
                   stroke-dasharray="${circumference.toFixed(2)}"
-                  stroke-dashoffset="${dashOffset.toFixed(2)}"
+                  stroke-dashoffset="${circumference.toFixed(2)}"
                   stroke-linecap="round"
+                  class="tkpi-gauge-ring"
                   style="transition:stroke-dashoffset 0.8s cubic-bezier(0.22,1,0.36,1)"/>
               </svg>
-              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
-                <div class="tkpi-actual-val" style="font-size:12px;line-height:1">${gaugePct}%</div>
+              <div class="tkpi-gauge-center">
+                <span class="tkpi-gauge-pct">${displayPctText}</span>
               </div>
-              <div class="tkpi-actual-sub" style="margin-top:4px">Achievement</div>
-            </div>
-            <div class="tkpi-meta">
-              <div class="tkpi-target-row">
-                <span class="tkpi-meta-label">Actual</span>
-                <span class="tkpi-meta-val" style="font-weight:800">${actualFmt}</span>
-              </div>
-              <div class="tkpi-target-row">
-                <span class="tkpi-meta-label">Target</span>
-                <span class="tkpi-meta-val">${targetFmt}</span>
-              </div>
-              <div class="tkpi-gap-row">
-                <span class="tkpi-meta-label">Gap</span>
-                <span class="tkpi-meta-val ${gapCls}">${gapFmt}</span>
-              </div>
-              ${dirLabel ? `<div class="tkpi-dir-label">${dirLabel}</div>` : ''}
             </div>
           </div>
-        </div>`;
-      }).join('');
+
+          <div class="tkpi-meter-block">
+            <div class="tkpi-meter-track">
+              <div class="tkpi-meter-fill ${meterColorCls}" style="width:0%" data-pct="${attainmentPct.toFixed(1)}"></div>
+            </div>
+            <div class="tkpi-meter-legend">
+              <span>0</span>
+              <span>Target SLA: <strong>${targetFmt}</strong></span>
+            </div>
+          </div>
+
+          <div class="tkpi-stats-footer">
+            <div class="tkpi-target-label">
+              <span style="opacity:0.7">&#127919;</span> SLA: <strong>${targetFmt}</strong>
+            </div>
+            <span class="readout-gap ${gapPillCls}" style="font-size:11px">${gapPrefix}${gapFmt}</span>
+          </div>
+
+          <div class="tkpi-drilldown-row">
+            <span>Inspect in Tier 3 Telemetry</span>
+            <span class="drill-arrow">&#8250;</span>
+          </div>
+        `;
+
+        // Animate meter & gauge
+        setTimeout(() => {
+          const ring = card.querySelector('.tkpi-gauge-ring');
+          if (ring) ring.style.strokeDashoffset = dashOffset.toFixed(2);
+          const fill = card.querySelector('.tkpi-meter-fill');
+          if (fill) fill.style.width = fill.getAttribute('data-pct') + '%';
+        }, 50 + idx * 30);
+
+        // Click / keyboard drill to Tier 3
+        function drillToTier3() {
+          const secId = def.section;
+          if (!secId) return;
+          const t3Block = document.getElementById('telemetry-section-' + secId);
+          if (t3Block) {
+            t3Block.classList.remove('is-collapsed');
+            const hdr = t3Block.querySelector('.telemetry-domain-toggle');
+            if (hdr) hdr.setAttribute('aria-expanded', 'true');
+            t3Block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            t3Block.classList.add('telemetry-block-focused');
+            setTimeout(() => t3Block.classList.remove('telemetry-block-focused'), 2400);
+          }
+        }
+        card.addEventListener('click', drillToTier3);
+        card.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); drillToTier3(); }
+        });
+
+        cardsEl.appendChild(card);
+      });
     }
+
+    renderFilteredCards();
   }
 
   // ===========================================================

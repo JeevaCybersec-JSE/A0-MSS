@@ -1727,29 +1727,35 @@ body {
    TARGET KPI CARDS — REDESIGNED
    ============================================================ */
 
+/* ============================================================
+   TARGET KPI CARDS — REDESIGNED & ENRICHED
+   ============================================================ */
+
 .target-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 16px;
+  margin-top: var(--gap-md);
 }
 
 .target-kpi-card {
   background: #ffffff;
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
-  padding: 18px;
+  padding: 18px 20px;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   cursor: pointer;
   position: relative;
+  overflow: hidden;
 }
 
 .target-kpi-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px -4px rgba(37, 99, 235, 0.1), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 12px 28px -4px rgba(37, 99, 235, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
   border-color: #93c5fd;
 }
 
@@ -1770,75 +1776,119 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tkpi-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .tkpi-domain-tag {
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: #475569;
   background: #f1f5f9;
   padding: 2px 8px;
   border-radius: 4px;
 }
 
 .tkpi-name {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-h);
   line-height: 1.35;
   margin-top: 2px;
 }
 
-.tkpi-value-row {
+.tkpi-main-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+  gap: 16px;
+  background: #f8fafc;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #f1f5f9;
+}
+
+.tkpi-actual-col {
+  display: flex;
+  flex-direction: column;
 }
 
 .tkpi-actual-val {
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   font-family: var(--mono);
   color: var(--text-h);
   line-height: 1;
 }
 
 .tkpi-actual-lbl {
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 600;
   text-transform: uppercase;
   color: var(--text-muted);
   letter-spacing: 0.05em;
+  margin-top: 4px;
 }
 
-/* Mini Gauge on Card */
-.tkpi-mini-gauge {
-  height: 8px;
-  background: #f1f5f9;
+.tkpi-gauge-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tkpi-gauge-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.tkpi-gauge-pct {
+  font-size: 12px;
+  font-weight: 800;
+  font-family: var(--mono);
+  color: var(--text-h);
+  line-height: 1;
+}
+
+.tkpi-meter-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tkpi-meter-track {
+  height: 7px;
+  background: #e2e8f0;
   border-radius: 999px;
   position: relative;
-  overflow: visible;
-  margin: 6px 0;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  overflow: hidden;
 }
 
-.tkpi-gauge-fill {
+.tkpi-meter-fill {
   height: 100%;
   border-radius: 999px;
-  transition: width 0.6s ease;
+  transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.tkpi-gauge-pin {
-  position: absolute;
-  top: -2px;
-  bottom: -2px;
-  width: 2px;
-  background: #0f172a;
-  border-radius: 1px;
+.tkpi-meter-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .tkpi-stats-footer {
@@ -1851,10 +1901,32 @@ body {
   color: var(--text-sub);
 }
 
-.tkpi-stat-item strong {
-  color: var(--text-h);
+.tkpi-target-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.tkpi-drilldown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 2px;
+}
+
+.target-kpi-card:hover .tkpi-drilldown-row .drill-arrow {
+  transform: translateX(4px);
+}
+
+.drill-arrow {
+  transition: transform 0.2s ease;
+  font-size: 14px;
 }
 
 /* ==========================================================================
