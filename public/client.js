@@ -1174,27 +1174,18 @@
         card.className = `target-kpi-card target-kpi-${rag}`;
         card.setAttribute('tabindex', '0');
         card.setAttribute('role', 'button');
-        card.setAttribute('aria-label', `${cleanText(def.label)}: actual ${actualFmt}, target ${targetFmt}, status ${ragLabel(rag)}`);
+        card.setAttribute('aria-label', `${cleanText(def.label)}: actual ${actualFmt}, target ${targetFmt}, status ${rag.toUpperCase()}`);
 
         card.innerHTML = `
-          <div class="tkpi-header-top">
-            <div class="tkpi-header-left">
-              ${sectionName ? `<span class="tkpi-domain-tag">${sectionName}</span>` : ''}
-              <span class="target-dir-badge">${dirArrow} ${dirLabel}</span>
-            </div>
-            <span class="rag-badge ${badgeCls}" style="font-size:10px;padding:2px 8px">&#9679;&nbsp;${ragLabel(rag)}</span>
+          <div class="tkpi-header">
+            <div class="tkpi-name">${cleanText(def.label)}</div>
+            <div class="tkpi-status-sub">&#9679; ${rag.toUpperCase()}</div>
           </div>
 
-          <div class="tkpi-name">${cleanText(def.label)}</div>
-
-          <div class="tkpi-main-row">
-            <div class="tkpi-actual-col">
-              <span class="tkpi-actual-val">${actualFmt}</span>
-              <span class="tkpi-actual-lbl">Current Actual</span>
-            </div>
-            <div class="tkpi-gauge-wrap" title="Attainment: ${displayPctText}">
-              <svg width="56" height="56" viewBox="0 0 60 60" style="transform:rotate(-90deg)" aria-hidden="true">
-                <circle cx="30" cy="30" r="22" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+          <div class="tkpi-gauge-center-block">
+            <div class="tkpi-gauge-wrap" title="Achievement: ${displayPctText}">
+              <svg width="60" height="60" viewBox="0 0 60 60" style="transform:rotate(-90deg)" aria-hidden="true">
+                <circle cx="30" cy="30" r="22" fill="none" stroke="#f1f5f9" stroke-width="6"/>
                 <circle cx="30" cy="30" r="22" fill="none" stroke="${gaugeColor}" stroke-width="6"
                   stroke-dasharray="${circumference.toFixed(2)}"
                   stroke-dashoffset="${circumference.toFixed(2)}"
@@ -1202,41 +1193,32 @@
                   class="tkpi-gauge-ring"
                   style="transition:stroke-dashoffset 0.8s cubic-bezier(0.22,1,0.36,1)"/>
               </svg>
-              <div class="tkpi-gauge-center">
-                <span class="tkpi-gauge-pct">${displayPctText}</span>
-              </div>
+              <div class="tkpi-gauge-val-inner">${displayPctText}</div>
             </div>
+            <div class="tkpi-gauge-lbl">Achievement</div>
           </div>
 
-          <div class="tkpi-meter-block">
-            <div class="tkpi-meter-track">
-              <div class="tkpi-meter-fill ${meterColorCls}" style="width:0%" data-pct="${attainmentPct.toFixed(1)}"></div>
+          <div class="tkpi-meta-box">
+            <div class="tkpi-meta-row">
+              <span class="tkpi-meta-lbl">Actual</span>
+              <span class="tkpi-meta-val"><strong>${actualFmt}</strong></span>
             </div>
-            <div class="tkpi-meter-legend">
-              <span>0</span>
-              <span>Target SLA: <strong>${targetFmt}</strong></span>
+            <div class="tkpi-meta-row">
+              <span class="tkpi-meta-lbl">Target</span>
+              <span class="tkpi-meta-val">${targetFmt}</span>
             </div>
-          </div>
-
-          <div class="tkpi-stats-footer">
-            <div class="tkpi-target-label">
-              <span style="opacity:0.7">&#127919;</span> SLA: <strong>${targetFmt}</strong>
+            <div class="tkpi-meta-row">
+              <span class="tkpi-meta-lbl">Gap</span>
+              <span class="tkpi-meta-val ${gapVal !== null && gapVal < 0 ? 'gap-negative' : 'gap-positive'}">${gapFmt}</span>
             </div>
-            <span class="readout-gap ${gapPillCls}" style="font-size:11px">${gapPrefix}${gapFmt}</span>
-          </div>
-
-          <div class="tkpi-drilldown-row">
-            <span>Inspect in Tier 3 Telemetry</span>
-            <span class="drill-arrow">&#8250;</span>
+            ${dirLabel ? `<div class="tkpi-dir-row">${dirArrow} ${dirLabel}</div>` : ''}
           </div>
         `;
 
-        // Animate meter & gauge
+        // Animate gauge ring
         setTimeout(() => {
           const ring = card.querySelector('.tkpi-gauge-ring');
           if (ring) ring.style.strokeDashoffset = dashOffset.toFixed(2);
-          const fill = card.querySelector('.tkpi-meter-fill');
-          if (fill) fill.style.width = fill.getAttribute('data-pct') + '%';
         }, 50 + idx * 30);
 
         // Click / keyboard drill to Tier 3
@@ -1307,16 +1289,16 @@
       if (dR > 0) pillsHtml += `<span class="telemetry-mini-pill pill-red">&#9679; ${dR} Critical</span>`;
 
       const block = document.createElement('div');
-      block.className = 'telemetry-domain-block';
+      block.className = 'telemetry-domain-block is-collapsed';
       block.id = 'telemetry-section-' + section.id;
 
       // Interactive Collapsible Toggle Header Button
       const headerBtn = document.createElement('button');
       headerBtn.type = 'button';
       headerBtn.className = 'telemetry-domain-header telemetry-domain-toggle';
-      headerBtn.setAttribute('aria-expanded', 'true');
+      headerBtn.setAttribute('aria-expanded', 'false');
       headerBtn.setAttribute('aria-controls', 'telemetry-table-wrap-' + section.id);
-      headerBtn.setAttribute('title', `Click to collapse or expand ${cleanText(section.name)} telemetry`);
+      headerBtn.setAttribute('title', `Click to expand ${cleanText(section.name)} telemetry`);
       headerBtn.innerHTML = `
         <div class="telemetry-domain-header-left">
           <span class="telemetry-toggle-chevron" aria-hidden="true">
@@ -1402,28 +1384,6 @@
     const totalMetricEl = document.getElementById('telemetry-metric-total');
     if (totalDomainEl) totalDomainEl.textContent = `${domainCount} Security Domains`;
     if (totalMetricEl) totalMetricEl.textContent = `${totalEvaluatedMetrics} Evaluated Metrics`;
-
-    // Wire Toolbar Expand All / Collapse All buttons
-    const expandAllBtn = document.getElementById('telemetry-expand-all');
-    const collapseAllBtn = document.getElementById('telemetry-collapse-all');
-    if (expandAllBtn) {
-      expandAllBtn.onclick = () => {
-        container.querySelectorAll('.telemetry-domain-block').forEach(b => {
-          b.classList.remove('is-collapsed');
-          const hdr = b.querySelector('.telemetry-domain-toggle');
-          if (hdr) hdr.setAttribute('aria-expanded', 'true');
-        });
-      };
-    }
-    if (collapseAllBtn) {
-      collapseAllBtn.onclick = () => {
-        container.querySelectorAll('.telemetry-domain-block').forEach(b => {
-          b.classList.add('is-collapsed');
-          const hdr = b.querySelector('.telemetry-domain-toggle');
-          if (hdr) hdr.setAttribute('aria-expanded', 'false');
-        });
-      };
-    }
 
     if (domainCount === 0) {
       container.innerHTML = '<p class="no-data-notice">No telemetry catalog metrics available for this period.</p>';
