@@ -572,69 +572,91 @@
       });
     }
 
-    // Build domain row cards
+    // Build modern domain grid cards
     function buildCards() {
       container.innerHTML = '';
+      container.className = 'domain-posture-grid';
+
       domainStats.forEach(d => {
         const iconSvg = DOMAIN_ICONS[d.id] || DOMAIN_ICONS[d.icon] || DOMAIN_ICONS.default;
-        const gPct = ((d.g / d.tot) * 100).toFixed(1);
-        const aPct = ((d.a / d.tot) * 100).toFixed(1);
-        const rPct = ((d.r / d.tot) * 100).toFixed(1);
 
         const badgeHtml = d.status === 'critical'
           ? `<span class="domain-badge badge-critical">&#9679; ${d.r} Critical</span>`
           : d.status === 'attention'
           ? `<span class="domain-badge badge-attention">&#9679; ${d.a} Attention</span>`
-          : `<span class="domain-badge badge-optimal">&#10003; 100% Target Met</span>`;
+          : `<span class="domain-badge badge-optimal">&#10003; 100% Met</span>`;
 
-        const row = document.createElement('div');
-        row.className = 'domain-row-card';
-        row.setAttribute('data-sec-id', d.id);
-        row.setAttribute('data-status', d.status);
-        row.setAttribute('role', 'button');
-        row.setAttribute('tabindex', '0');
-        row.setAttribute('title', `Click to jump to ${d.name} telemetry in Tier 3`);
+        // Circular radial gauge calculations (r = 28, C = 175.929)
+        const C = 175.929;
+        const gLen = d.tot > 0 ? ((d.g / d.tot) * C).toFixed(2) : '0';
+        const aLen = d.tot > 0 ? ((d.a / d.tot) * C).toFixed(2) : '0';
+        const rLen = d.tot > 0 ? ((d.r / d.tot) * C).toFixed(2) : '0';
+        const aOffset = (-Number(gLen)).toFixed(2);
+        const rOffset = (-(Number(gLen) + Number(aLen))).toFixed(2);
 
-        row.innerHTML = `
-          <div class="domain-row-left">
-            <div class="domain-row-icon domain-icon-${d.status}" aria-hidden="true">
+        const card = document.createElement('div');
+        card.className = `domain-grid-card status-${d.status}`;
+        card.setAttribute('data-sec-id', d.id);
+        card.setAttribute('data-status', d.status);
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('title', `Click to inspect ${d.name} operational telemetry in Tier 3`);
+
+        card.innerHTML = `
+          <!-- Top Row: Icon + Status Badge -->
+          <div class="dcard-top-row">
+            <div class="dcard-icon-box domain-icon-${d.status}" aria-hidden="true">
               ${iconSvg}
             </div>
-            <div class="domain-row-meta">
-              <div class="domain-row-name">${d.name}</div>
-              <div class="domain-row-sub">${d.tot} metric${d.tot !== 1 ? 's' : ''} &middot; ${d.pct}% on target</div>
-            </div>
-          </div>
-
-          <div class="domain-row-bar-wrap">
-            <div class="domain-bar-track">
-              ${d.g > 0 ? `<div class="domain-bar-seg seg-green" style="width:${gPct}%" data-tooltip="<strong>${d.name}</strong><br/>🟢 ${d.g} Within Target (${gPct}%)"></div>` : ''}
-              ${d.a > 0 ? `<div class="domain-bar-seg seg-amber" style="width:${aPct}%" data-tooltip="<strong>${d.name}</strong><br/>🟡 ${d.a} Attention Required (${aPct}%)"></div>` : ''}
-              ${d.r > 0 ? `<div class="domain-bar-seg seg-red" style="width:${rPct}%" data-tooltip="<strong>${d.name}</strong><br/>🔴 ${d.r} Critical Remediation (${rPct}%)"></div>` : ''}
-            </div>
-          </div>
-
-          <div class="domain-row-right">
             ${badgeHtml}
-            <div class="domain-ratio">${d.g}/${d.tot}</div>
-            <span class="domain-arrow-action" aria-hidden="true">&rarr;</span>
+          </div>
+
+          <!-- Domain Title & Subtitle -->
+          <div class="dcard-meta-block">
+            <div class="dcard-name">${cleanText(d.name)}</div>
+            <div class="dcard-subtitle">${d.tot} evaluated metric${d.tot !== 1 ? 's' : ''}</div>
+          </div>
+
+          <!-- Gauge + Health Breakdown Section -->
+          <div class="dcard-gauge-section">
+            <div class="dcard-radial-wrap" title="${d.pct}% Target Attainment">
+              <svg class="dcard-radial-svg" viewBox="0 0 76 76" width="72" height="72">
+                <circle cx="38" cy="38" r="28" fill="none" stroke="#f1f5f9" stroke-width="5" />
+                ${d.g > 0 ? `<circle cx="38" cy="38" r="28" fill="none" stroke="#10b981" stroke-width="5" stroke-dasharray="${gLen} ${C}" stroke-dashoffset="0" transform="rotate(-90 38 38)" class="dcard-radial-seg" />` : ''}
+                ${d.a > 0 ? `<circle cx="38" cy="38" r="28" fill="none" stroke="#f59e0b" stroke-width="5" stroke-dasharray="${aLen} ${C}" stroke-dashoffset="${aOffset}" transform="rotate(-90 38 38)" class="dcard-radial-seg" />` : ''}
+                ${d.r > 0 ? `<circle cx="38" cy="38" r="28" fill="none" stroke="#ef4444" stroke-width="5" stroke-dasharray="${rLen} ${C}" stroke-dashoffset="${rOffset}" transform="rotate(-90 38 38)" class="dcard-radial-seg" />` : ''}
+              </svg>
+              <div class="dcard-gauge-center">
+                <span class="dcard-gauge-val">${d.pct}%</span>
+                <span class="dcard-gauge-sub">MET</span>
+              </div>
+            </div>
+
+            <div class="dcard-breakdown-list">
+              <div class="dcard-b-item b-green">
+                <span class="dcard-b-dot"></span>
+                <span class="dcard-b-txt">Within Target: <strong>${d.g}</strong></span>
+              </div>
+              <div class="dcard-b-item b-amber ${d.a === 0 ? 'is-zero' : ''}">
+                <span class="dcard-b-dot"></span>
+                <span class="dcard-b-txt">Attention: <strong>${d.a}</strong></span>
+              </div>
+              <div class="dcard-b-item b-red ${d.r === 0 ? 'is-zero' : ''}">
+                <span class="dcard-b-dot"></span>
+                <span class="dcard-b-txt">Critical: <strong>${d.r}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Row: Ratio & Inspect Action -->
+          <div class="dcard-footer-row">
+            <span class="dcard-ratio-badge">${d.g}/${d.tot} on target</span>
+            <span class="dcard-action-link">
+              <span>Inspect</span>
+              <span class="dcard-action-arrow">&rarr;</span>
+            </span>
           </div>
         `;
-
-        // Segment hover tooltips
-        row.querySelectorAll('.domain-bar-seg').forEach(seg => {
-          seg.addEventListener('mouseenter', e => {
-            const html = seg.getAttribute('data-tooltip');
-            if (html) showDomainTooltip(html, e.clientX, e.clientY);
-          });
-          seg.addEventListener('mousemove', e => {
-            const html = seg.getAttribute('data-tooltip');
-            if (html) showDomainTooltip(html, e.clientX, e.clientY);
-          });
-          seg.addEventListener('mouseleave', () => {
-            hideDomainTooltip();
-          });
-        });
 
         // Click to jump to Tier 3 section (auto-expands if collapsed)
         function jumpToTier3() {
@@ -649,26 +671,26 @@
           }
         }
 
-        row.addEventListener('click', jumpToTier3);
-        row.addEventListener('keydown', e => {
+        card.addEventListener('click', jumpToTier3);
+        card.addEventListener('keydown', e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             jumpToTier3();
           }
         });
 
-        container.appendChild(row);
+        container.appendChild(card);
       });
     }
 
     function applyFilter() {
-      const rows = container.querySelectorAll('.domain-row-card');
-      rows.forEach(r => {
-        const s = r.getAttribute('data-status');
+      const cards = container.querySelectorAll('.domain-grid-card');
+      cards.forEach(c => {
+        const s = c.getAttribute('data-status');
         if (activeFilter === 'all' || s === activeFilter) {
-          r.style.display = 'grid';
+          c.style.display = 'flex';
         } else {
-          r.style.display = 'none';
+          c.style.display = 'none';
         }
       });
     }
