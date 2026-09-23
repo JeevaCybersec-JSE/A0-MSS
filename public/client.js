@@ -901,12 +901,14 @@
 
       execEl.innerHTML = `
         <div class="exec-card exec-card-status status-${overallRAG}">
-          <div class="exec-card-header">
-            <span class="exec-card-icon" aria-hidden="true">&#9711;</span>
-            <span class="exec-card-title">Overall RAG Status</span>
+          <div class="exec-hero-header">
+            <div class="exec-card-header">
+              <span class="exec-card-icon" aria-hidden="true">&#9711;</span>
+              <span class="exec-card-title">Overall RAG Status</span>
+            </div>
+            <div class="exec-rag-badge ${badgeCls}" role="status">&#9679; ${overallLbl}</div>
           </div>
-          <div class="exec-rag-badge ${badgeCls}" role="status">&#9679; ${overallLbl}</div>
-          <p class="exec-card-body">${overallText}</p>
+          <p class="exec-card-body exec-hero-body">${overallText}</p>
         </div>
         <div class="exec-card">
           <div class="exec-card-header">
