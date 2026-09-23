@@ -731,8 +731,9 @@
   }
 
   /**
-   * Build and inject interactive bullet-bar rows into the list container.
-   * Each row animates its fill bar in with a staggered entrance.
+   * Build and inject interactive divergence chart rows into the list container.
+   * Each row visualizes SLA contract target baseline (0% center axis) with
+   * deficit extending left (red/amber) and surplus extending right (green).
    */
   function buildBulletBarRows(listEl, items, sectionMap) {
     listEl.innerHTML = '';
@@ -753,17 +754,24 @@
       const gapVal    = computeGap(actual, target, dir);
       const gapFmt    = formatGap(gapVal, unit);
 
-      // Fill fraction capped at 100% for the visual bar
-      let fillPct = 0;
-      if (actual !== null && target !== null && target !== 0) {
-        if (dir === 'higher') fillPct = Math.min((actual / target) * 100, 100);
-        else if (dir === 'lower') fillPct = actual > 0 ? Math.min((target / actual) * 100, 100) : 100;
-      } else if (actual !== null && target === 0 && dir === 'lower') {
-        fillPct = 100;
+      // Determine deficit vs surplus
+      const isDeficit = gapVal !== null && gapVal < 0;
+      const isSurplus = gapVal !== null && gapVal >= 0;
+
+      // Calculate visual divergence width (normalized 0% to 100% of half-track)
+      let barWidthPct = 0;
+      if (gapVal !== null && gapVal !== 0) {
+        let rawPct = 0;
+        if (target !== null && target !== 0) {
+          rawPct = (Math.abs(gapVal) / Math.abs(target)) * 100;
+        } else {
+          rawPct = Math.min(Math.abs(gapVal) * 5, 100);
+        }
+        // Scaled visually so subtle gaps are visible (min 12%) and capped at 100%
+        barWidthPct = Math.min(Math.max(rawPct, 12), 100);
       }
 
-      const fillCls    = rag === 'green' ? 'fill-green' : rag === 'amber' ? 'fill-amber' : 'fill-red';
-      const gapPillCls = gapVal === null ? 'gap-pill-neutral' : gapVal >= 0 ? 'gap-pill-positive' : 'gap-pill-negative';
+      const gapPillCls = gapVal === null ? 'gap-pill-neutral' : isSurplus ? 'gap-pill-positive' : 'gap-pill-negative';
       const dirArrow   = dir === 'higher' ? '\u2191' : dir === 'lower' ? '\u2193' : '\u2014';
       const dirLabel   = dir === 'higher' ? 'Higher is better' : dir === 'lower' ? 'Lower is better' : 'Trend';
       const badgeCls   = `rag-badge-${['green','amber','red'].includes(rag) ? rag : 'neutral'}`;
@@ -772,32 +780,42 @@
       const sectionName = sectionMap && def.section ? (sectionMap[def.section] || '') : '';
 
       const row = document.createElement('div');
-      row.className = 'target-bullet-row';
+      row.className = 'divergence-row target-bullet-row';
       row.setAttribute('data-rag', rag);
       row.setAttribute('tabindex', '0');
       row.setAttribute('role', 'button');
-      row.setAttribute('aria-label', `${cleanText(def.label)}: actual ${actualFmt}, target ${targetFmt}`);
+      row.setAttribute('aria-label', `${cleanText(def.label)}: actual ${actualFmt}, target ${targetFmt}, variance ${gapFmt}`);
 
       row.innerHTML = `
-        <div class="target-row-info">
-          <div class="target-metric-name">${cleanText(def.label)}</div>
-          <div class="target-metric-sub">
+        <div class="divergence-row-info target-row-info">
+          <div class="divergence-metric-name target-metric-name">${cleanText(def.label)}</div>
+          <div class="divergence-metric-sub target-metric-sub">
             ${sectionName ? `<span>${sectionName}</span><span style="color:#cbd5e1">\u2022</span>` : ''}
             <span class="target-dir-badge">${dirArrow} ${dirLabel}</span>
             <span class="rag-badge ${badgeCls}" style="font-size:10px;padding:1px 7px">&#9679;&nbsp;${ragLabel(rag)}</span>
           </div>
         </div>
-        <div class="target-bar-cell">
-          <div class="target-bullet-track">
-            <div class="target-bullet-fill ${fillCls}" style="width:0%" data-pct="${fillPct.toFixed(2)}"></div>
-            <div class="target-threshold-pin" style="left:100%"></div>
+        <div class="divergence-axis-cell target-bar-cell">
+          <div class="divergence-scale-labels">
+            <span>&larr; Deficit (SLA Breach)</span>
+            <span class="scale-zero-marker">&#127919; 0% Target SLA Baseline</span>
+            <span>Surplus (Target Met) &rarr;</span>
           </div>
-          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:#94a3b8;font-weight:500">
-            <span>0</span>
-            <span>Target: ${targetFmt}</span>
+          <div class="divergence-track">
+            <div class="divergence-half divergence-left-zone">
+              ${isDeficit ? `<div class="divergence-bar bar-deficit ${rag === 'amber' ? 'fill-amber' : ''}" style="width:0%" data-width="${barWidthPct.toFixed(1)}%"><span class="divergence-bar-val">${gapFmt}</span></div>` : ''}
+            </div>
+            <div class="divergence-center-line" title="Target SLA Baseline (0% Gap)"></div>
+            <div class="divergence-half divergence-right-zone">
+              ${isSurplus ? `<div class="divergence-bar bar-surplus" style="width:0%" data-width="${barWidthPct.toFixed(1)}%"><span class="divergence-bar-val">${gapFmt}</span></div>` : ''}
+            </div>
+          </div>
+          <div class="divergence-subtrack-note">
+            <span>Actual: <strong>${actualFmt}</strong></span>
+            <span>Target: <strong>${targetFmt}</strong></span>
           </div>
         </div>
-        <div class="target-row-readout">
+        <div class="divergence-readout-col target-row-readout">
           <div class="readout-actual-block">
             <div class="readout-actual">${actualFmt}</div>
             <div class="readout-target">Target: ${targetFmt}</div>
@@ -807,23 +825,28 @@
         </div>
       `;
 
-      // Animate bar in with stagger
-      const fillEl = row.querySelector('.target-bullet-fill');
-      setTimeout(() => {
-        if (fillEl) fillEl.style.width = fillPct.toFixed(2) + '%';
-      }, 60 + idx * 40);
+      // Animate divergence bar in with stagger
+      const barEl = row.querySelector('.divergence-bar');
+      if (barEl) {
+        const targetW = barEl.getAttribute('data-width') || '0%';
+        setTimeout(() => {
+          barEl.style.width = targetW;
+        }, 60 + idx * 35);
+      }
 
-      // Hover tooltip on the bar cell
-      const barCell = row.querySelector('.target-bar-cell');
-      barCell.addEventListener('pointermove', e => {
-        showT2Tip(
-          `<strong>${cleanText(def.label)}</strong><br>` +
-          `Actual: <b>${actualFmt}</b> &nbsp;|&nbsp; Target: <b>${targetFmt}</b><br>` +
-          `Gap: <b>${gapFmt}</b> &nbsp;&bull;&nbsp; ${dirLabel}`,
-          e.clientX, e.clientY
-        );
-      }, { passive: true });
-      barCell.addEventListener('pointerleave', hideT2Tip, { passive: true });
+      // Hover tooltip on the divergence axis cell
+      const axisCell = row.querySelector('.divergence-axis-cell');
+      if (axisCell) {
+        axisCell.addEventListener('pointermove', e => {
+          showT2Tip(
+            `<strong>${cleanText(def.label)}</strong><br>` +
+            `Contract Target: <b>${targetFmt}</b> &nbsp;|&nbsp; Actual: <b>${actualFmt}</b><br>` +
+            `SLA Variance: <b>${gapFmt}</b> (${isSurplus ? 'Target Met / Surplus' : 'Deficit / SLA Breach'}) &bull; ${dirLabel}`,
+            e.clientX, e.clientY
+          );
+        }, { passive: true });
+        axisCell.addEventListener('pointerleave', hideT2Tip, { passive: true });
+      }
 
       // Click / keyboard: scroll to Tier 3 section for this metric's domain (auto-expands)
       function drillToTier3() {

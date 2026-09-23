@@ -203,8 +203,8 @@
         <div class="section-block" id="target-comparison-block">
           <div class="section-block-header-wrap">
             <div>
-              <div class="section-block-title">Actual vs Target Comparison</div>
-              <div class="section-block-desc">Interactive KPI achievement breakdown &mdash; filter, search, and compare performance against contract targets</div>
+              <div class="section-block-title">SLA Variance &amp; Target Divergence Analysis</div>
+              <div class="section-block-desc">Bidirectional performance deviation relative to SLA contract targets (Center Axis = 0% Target Baseline)</div>
             </div>
             <div class="target-controls-bar" id="target-controls-bar">
               <!-- Filter pills and search injected by JS -->
@@ -213,26 +213,23 @@
           <div class="target-chart-card">
             <div class="target-chart-header">
               <div class="target-chart-header-left">
-                <div class="target-chart-title">All Target-Defined KPIs — Actual vs Target Performance</div>
-                <div class="target-chart-desc">Normalized achievement tracks with target line indicator and directional gap readout</div>
+                <div class="target-chart-title">SLA Variance Delta Distribution</div>
+                <div class="target-chart-desc">Left = Deficit / Below Target SLA &bull; Center = 0% Target Baseline &bull; Right = Surplus / Target Met</div>
               </div>
               <div class="target-chart-legend">
                 <div class="target-chart-legend-item">
-                  <span class="legend-line"></span> Target Threshold
+                  <span class="legend-bar" style="background:var(--red);border-radius:2px"></span> Deficit / SLA Breach (Left)
                 </div>
                 <div class="target-chart-legend-item">
-                  <span class="legend-bar" style="background:var(--green)"></span> Within Target (Met)
+                  <span style="display:inline-block;width:3px;height:12px;background:#0f172a;border-radius:1px"></span> 0% Target Baseline (Center)
                 </div>
                 <div class="target-chart-legend-item">
-                  <span class="legend-bar" style="background:var(--amber)"></span> Attention Required
-                </div>
-                <div class="target-chart-legend-item">
-                  <span class="legend-bar" style="background:var(--red)"></span> Critical Remediation
+                  <span class="legend-bar" style="background:var(--green);border-radius:2px"></span> Surplus / Target Met (Right)
                 </div>
               </div>
             </div>
-            <div class="target-bullet-list" id="target-chart-container" role="region" aria-label="Actual vs target comparison chart">
-              <!-- Rich interactive bullet-bar rows injected by JS -->
+            <div class="target-bullet-list divergence-chart-list" id="target-chart-container" role="region" aria-label="SLA Variance & Target Divergence Chart">
+              <!-- Rich interactive divergence rows injected by JS -->
             </div>
           </div>
         </div>

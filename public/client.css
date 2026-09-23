@@ -1465,20 +1465,25 @@ body {
   border-radius: 3px;
 }
 
-/* Bullet-Bar List and Rows */
+/* ==========================================================================
+   SLA Variance / Delta Divergence Chart (Tornado / Butterfly Style)
+   ========================================================================== */
+
+.divergence-chart-list,
 .target-bullet-list {
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 12px;
   margin-top: var(--gap-md);
   position: relative;
 }
 
+.divergence-row,
 .target-bullet-row {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 14px 18px;
+  padding: 13px 18px;
   display: grid;
   grid-template-columns: 280px 1fr 220px;
   align-items: center;
@@ -1489,6 +1494,7 @@ body {
   position: relative;
 }
 
+.divergence-row:hover,
 .target-bullet-row:hover {
   transform: translateY(-2px);
   border-color: #93c5fd;
@@ -1496,14 +1502,18 @@ body {
   background: #fafcff;
 }
 
+.divergence-chart-list:hover .divergence-row:not(:hover),
 .target-bullet-list:hover .target-bullet-row:not(:hover) {
   opacity: 0.72;
 }
 
+/* Left Column: Metric Info */
+.divergence-row-info,
 .target-row-info {
   min-width: 0;
 }
 
+.divergence-metric-name,
 .target-metric-name {
   font-size: 13.5px;
   font-weight: 700;
@@ -1513,6 +1523,7 @@ body {
   word-break: break-word;
 }
 
+.divergence-metric-sub,
 .target-metric-sub {
   display: flex;
   align-items: center;
@@ -1534,81 +1545,142 @@ body {
   color: #475569;
 }
 
+/* Center Column: Bidirectional Divergence Axis */
+.divergence-axis-cell,
 .target-bar-cell {
   position: relative;
   width: 100%;
 }
 
-.target-bullet-track {
-  height: 16px;
+.divergence-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 4px;
+  padding: 0 4px;
+  letter-spacing: 0.02em;
+}
+
+.scale-zero-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 10.5px;
   background: #f1f5f9;
-  border-radius: 999px;
-  position: relative;
-  overflow: visible;
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #cbd5e1;
+  padding: 1px 6px;
+  border-radius: 4px;
 }
 
-.target-bullet-fill {
+.divergence-track {
+  height: 22px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Left Half: Negative Deficit Zone */
+.divergence-half.divergence-left-zone {
+  flex: 1;
   height: 100%;
-  border-radius: 999px;
-  transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
   position: relative;
-  cursor: pointer;
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.02) 0%, rgba(239, 68, 68, 0.06) 100%);
 }
 
-.target-bullet-fill:hover {
-  filter: brightness(1.15);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+/* Center Benchmark Line (0% Baseline) */
+.divergence-center-line {
+  width: 3px;
+  height: 100%;
+  background: #0f172a;
+  z-index: 5;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 0 4px rgba(15, 23, 42, 0.3);
 }
 
-.fill-green {
+/* Right Half: Positive Surplus Zone */
+.divergence-half.divergence-right-zone {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.06) 0%, rgba(16, 185, 129, 0.02) 100%);
+}
+
+/* The Animated Divergence Bars */
+.divergence-bar {
+  height: 100%;
+  transition: width 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* Deficit bar grows right-to-left */
+.divergence-bar.bar-deficit {
+  background: linear-gradient(270deg, #ef4444, #dc2626);
+  border-radius: 5px 0 0 5px;
+  justify-content: flex-start;
+  padding-left: 6px;
+}
+.divergence-bar.bar-deficit.fill-amber {
+  background: linear-gradient(270deg, #f59e0b, #d97706);
+}
+
+/* Surplus bar grows left-to-right */
+.divergence-bar.bar-surplus {
   background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 0 5px 5px 0;
+  justify-content: flex-end;
+  padding-right: 6px;
 }
 
-.fill-amber {
-  background: linear-gradient(90deg, #f59e0b, #d97706);
+.divergence-bar:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
 }
 
-.fill-red {
-  background: linear-gradient(90deg, #ef4444, #dc2626);
+.divergence-bar-val {
+  font-size: 10px;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: var(--mono);
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
 }
 
-.target-threshold-pin {
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  width: 2.5px;
-  background: #0f172a;
-  border-radius: 1px;
-  z-index: 3;
-  pointer-events: none;
+/* Subtrack notes below the track */
+.divergence-subtrack-note {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 10.5px;
+  color: #64748b;
+  font-weight: 500;
+  padding: 0 2px;
+}
+.divergence-subtrack-note strong {
+  color: var(--text-h);
 }
 
-.target-threshold-pin::before {
-  content: '';
-  position: absolute;
-  top: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 7px;
-  height: 5px;
-  background: #0f172a;
-  clip-path: polygon(50% 100%, 0 0, 100% 0);
-}
-
-.target-threshold-pin::after {
-  content: '';
-  position: absolute;
-  bottom: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 7px;
-  height: 5px;
-  background: #0f172a;
-  clip-path: polygon(50% 0, 0 100%, 100% 100%);
-}
-
+/* Right Column: Readout */
+.divergence-readout-col,
 .target-row-readout {
   display: flex;
   align-items: center;
@@ -1669,6 +1741,7 @@ body {
   transition: transform 0.2s ease, color 0.2s ease;
 }
 
+.divergence-row:hover .target-row-arrow,
 .target-bullet-row:hover .target-row-arrow {
   transform: translateX(4px);
   color: var(--accent);
