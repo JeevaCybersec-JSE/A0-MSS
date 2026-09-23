@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSS Intelligence — Client Security Report</title>
+  <meta name="description" content="Executive client security report — MSS Intelligence. Tier 1 posture overview, Tier 2 target achievement, Tier 3 operational telemetry.">
+  <link rel="stylesheet" href="/client.css?v=7.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ================================================
+       LOADING STATE
+       =============================================== -->
+  <div id="loading-state" class="state-container">
+    <div class="state-card">
+      <div class="brand-badge">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>MSS Intelligence</span>
+      </div>
+      <div class="spinner-circle"></div>
+      <h2 class="state-title">Preparing your security report…</h2>
+      <p class="state-desc">Loading verified security intelligence data</p>
+    </div>
+  </div>
+
+  <!-- ================================================
+       ERROR STATE
+       =============================================== -->
+  <div id="error-state" class="state-container" hidden>
+    <div class="state-card error-card">
+      <div class="error-icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <h2 id="error-title" class="state-title">Report Unavailable</h2>
+      <p id="error-message" class="state-desc">
+        This secure report link is invalid, expired, or has been revoked.<br>
+        Please contact your MSS administrator for a new report link.
+      </p>
+    </div>
+  </div>
+
+  <!-- ================================================
+       MAIN CLIENT PORTAL
+       =============================================== -->
+  <div id="portal-app" class="portal-wrapper" hidden>
+
+    <!-- ---- HEADER ---- -->
+    <header class="portal-header">
+      <div class="header-inner">
+        <div class="header-brand-group">
+          <div class="header-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="header-title">MSS Intelligence</div>
+            <div class="header-subtitle" id="client-name-display">Client: —</div>
+          </div>
+        </div>
+
+        <div class="header-meta-group">
+          <div class="month-pill" id="report-month-display">—</div>
+          <div class="expiry-box">
+            <span class="expiry-label">Valid until:</span>
+            <span class="expiry-val" id="report-expiry-val">—</span>
+          </div>
+          <span class="readonly-badge">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            READ-ONLY
+          </span>
+          <button type="button" class="print-btn" id="print-report-btn" aria-label="Print report">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            Print
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ---- MAIN CONTENT ---- -->
+    <main class="portal-main">
+
+      <!-- ============================================================
+           TIER 1 — EXECUTIVE OVERVIEW
+           ============================================================ -->
+      <section class="tier-section" id="tier1-section" aria-label="Tier 1: Executive Overview">
+        <div class="tier-header">
+          <div class="tier-label-row">
+            <span class="tier-badge">Tier 1</span>
+            <div class="tier-number-line"></div>
+          </div>
+          <h1 class="tier-title">Executive Overview</h1>
+          <p class="tier-subtitle">High-level security posture — how are we doing overall?</p>
+        </div>
+
+        <!-- RAG Posture: Donut + Summary Cards -->
+        <div class="section-block">
+          <div class="section-block-title-row">
+            <div class="section-block-title">Overall RAG Summary</div>
+            <span class="rag-live-indicator"><span class="rag-orbit-dot"></span>LIVE EVALUATION</span>
+          </div>
+          <div class="t1-posture-row">
+            <!-- Donut chart -->
+            <div class="donut-wrap rag-distribution-card" id="donut-distribution-card">
+              <div class="donut-chart-area" id="donut-chart-container" aria-label="Overall RAG interactive donut chart" role="img">
+                <!-- Interactive SVG injected by JS -->
+              </div>
+              <div class="donut-legend">
+                <div class="donut-legend-item"><span class="donut-legend-dot dot-green"></span> Within Target</div>
+                <div class="donut-legend-item"><span class="donut-legend-dot dot-amber"></span> Attention</div>
+                <div class="donut-legend-item"><span class="donut-legend-dot dot-red"></span> Critical</div>
+              </div>
+            </div>
+            <!-- RAG Cards -->
+            <div class="rag-summary-col" id="rag-summary-cards" aria-label="RAG status counts">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Domain-wise RAG chart -->
+        <div class="section-block" id="domain-posture-block">
+          <div class="section-block-header-wrap">
+            <div>
+              <div class="section-block-title">Domain Security Posture</div>
+              <div class="section-block-desc">Security posture across all operational domains &mdash; click any domain to inspect telemetry in Tier 3</div>
+            </div>
+            <div class="domain-controls-bar" id="domain-posture-controls">
+              <!-- Filter pills & sort injected by JS -->
+            </div>
+          </div>
+          <div class="domain-chart-card">
+            <div class="domain-chart-header">
+              <div class="domain-chart-header-left">
+                <div class="domain-chart-title">RAG Distribution by Security Domain</div>
+                <div class="domain-chart-desc">Detailed metric attainment per security operational area</div>
+              </div>
+              <div class="domain-chart-legend">
+                <div class="domain-chart-legend-item">
+                  <span class="domain-chart-legend-dot" style="background:var(--green)"></span> Within Target
+                </div>
+                <div class="domain-chart-legend-item">
+                  <span class="domain-chart-legend-dot" style="background:var(--amber)"></span> Attention Required
+                </div>
+                <div class="domain-chart-legend-item">
+                  <span class="domain-chart-legend-dot" style="background:var(--red)"></span> Critical Remediation
+                </div>
+              </div>
+            </div>
+            <div class="domain-posture-list" id="domain-rag-chart-container" role="region" aria-label="Domain Security Posture Breakdown">
+              <!-- Rich interactive domain rows injected by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Executive Summary Cards -->
+        <div class="section-block">
+          <div class="section-block-title">Executive Summary</div>
+          <div class="exec-summary-grid" id="exec-summary-container" aria-label="Executive summary">
+            <!-- 4 cards injected by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TIER 2 — CLIENT TARGET ACHIEVEMENT
+           ============================================================ -->
+      <section class="tier-section" id="tier2-section" aria-label="Tier 2: Client Target Achievement">
+        <div class="tier-header">
+          <div class="tier-label-row">
+            <span class="tier-badge">Tier 2</span>
+            <div class="tier-number-line"></div>
+          </div>
+          <h2 class="tier-title">Client Target Achievement</h2>
+          <p class="tier-subtitle">Are we meeting the targets defined in the service agreement?</p>
+        </div>
+
+        <!-- Target KPI summary row -->
+        <div class="section-block">
+          <div class="section-block-title">Target KPI Summary</div>
+          <div class="target-summary-row" id="target-summary-row" aria-label="Target achievement summary">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Actual vs Target comparison chart -->
+        <div class="section-block" id="target-comparison-block">
+          <div class="section-block-header-wrap">
+            <div>
+              <div class="section-block-title">Actual vs Target Comparison</div>
+              <div class="section-block-desc">Interactive KPI achievement breakdown &mdash; filter, search, and compare performance against contract targets</div>
+            </div>
+            <div class="target-controls-bar" id="target-controls-bar">
+              <!-- Filter pills and search injected by JS -->
+            </div>
+          </div>
+          <div class="target-chart-card">
+            <div class="target-chart-header">
+              <div class="target-chart-header-left">
+                <div class="target-chart-title">All Target-Defined KPIs — Actual vs Target Performance</div>
+                <div class="target-chart-desc">Normalized achievement tracks with target line indicator and directional gap readout</div>
+              </div>
+              <div class="target-chart-legend">
+                <div class="target-chart-legend-item">
+                  <span class="legend-line"></span> Target Threshold
+                </div>
+                <div class="target-chart-legend-item">
+                  <span class="legend-bar" style="background:var(--green)"></span> Within Target (Met)
+                </div>
+                <div class="target-chart-legend-item">
+                  <span class="legend-bar" style="background:var(--amber)"></span> Attention Required
+                </div>
+                <div class="target-chart-legend-item">
+                  <span class="legend-bar" style="background:var(--red)"></span> Critical Remediation
+                </div>
+              </div>
+            </div>
+            <div class="target-bullet-list" id="target-chart-container" role="region" aria-label="Actual vs target comparison chart">
+              <!-- Rich interactive bullet-bar rows injected by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Target KPI detail cards -->
+        <div class="section-block">
+          <div class="section-block-header-wrap">
+            <div>
+              <div class="section-block-title">Target KPI Details</div>
+              <div class="section-block-desc">In-depth scorecard for every target-defined metric with achievement gauges</div>
+            </div>
+          </div>
+          <div class="target-kpi-grid" id="target-kpi-cards" aria-label="Target KPI detail cards">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TIER 3 — TELEMETRY CATALOG
+           ============================================================ -->
+      <section class="tier-section" id="tier3-section" aria-label="Tier 3: Telemetry Catalog">
+        <div class="tier-header">
+          <div class="tier-label-row">
+            <span class="tier-badge">Tier 3</span>
+            <div class="tier-number-line"></div>
+          </div>
+          <h2 class="tier-title">Telemetry Catalog</h2>
+          <p class="tier-subtitle">Operational telemetry organized by security domain.</p>
+        </div>
+
+        <div id="telemetry-catalog-container">
+          <!-- Domain blocks injected by JS -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ---- FOOTER ---- -->
+    <footer class="portal-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <strong>MSS Intelligence Portal</strong>
+          <span>Confidential Client Deliverable &bull; Authorized for: <span id="footer-client-name">—</span></span>
+        </div>
+        <div class="footer-right">
+          <span>Reporting Period: <span id="footer-month">—</span></span>
+          <span class="footer-dot">•</span>
+          <span>Verified Read-Only View</span>
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- /portal-app -->
+
+  <script src="/client.js?v=7.0"></script>
+</body>
+</html>

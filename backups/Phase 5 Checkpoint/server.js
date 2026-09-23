@@ -13,24 +13,14 @@ const url = require('url');
 
 const { SECTIONS, METRICS } = require('./lib/metrics');
 const { computeMonth, computeOverallRAG } = require('./lib/calc');
-const {
-  createShare,
-  revokeShare,
-  listShares,
-  isValidMonth,
-  isValidExpiryDays,
-  EXPIRY_OPTIONS,
-  resolveShareToken,
-} = require('./lib/shares');
 
 const PORT = process.env.PORT || 4321;
 const DB_PATH = path.join(__dirname, 'data', 'db.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 // ---- Storage Paths ----
-const USERS_PATH  = path.join(__dirname, 'data', 'users.json');
-const AUDIT_PATH  = path.join(__dirname, 'data', 'audit.json');
-const SHARES_PATH = path.join(__dirname, 'data', 'shares.json'); // share-token store (referenced by lib/shares.js)
+const USERS_PATH = path.join(__dirname, 'data', 'users.json');
+const AUDIT_PATH = path.join(__dirname, 'data', 'audit.json');
 
 // ---- Role-Based Access Control (RBAC) Definitions ----
 const ROLES = {
@@ -271,7 +261,7 @@ function recomputeForward(db, fromMonth) {
 
 // ---- Production Security Headers ----
 const SECURITY_HEADERS = {
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' http://localhost:4321 http://127.0.0.1:4321 ws: wss:; frame-ancestors 'none';",
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none';",
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'X-Frame-Options': 'DENY',
@@ -329,7 +319,6 @@ function sendJSON(res, status, obj) {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Private-Network': 'true',
     ...SECURITY_HEADERS,
   });
   res.end(body);
@@ -400,18 +389,8 @@ const MIME = {
 };
 
 function serveStatic(req, res, pathname) {
-  let filePath;
-  if (pathname === '/' || pathname === '/index.html') {
-    filePath = path.join(PUBLIC_DIR, 'index.html');
-  } else if (pathname === '/client.css' || pathname === '/client/client.css' || pathname.endsWith('/client.css')) {
-    filePath = path.join(PUBLIC_DIR, 'client.css');
-  } else if (pathname === '/client.js' || pathname === '/client/client.js' || pathname.endsWith('/client.js')) {
-    filePath = path.join(PUBLIC_DIR, 'client.js');
-  } else if (pathname === '/client' || pathname === '/client/' || pathname.startsWith('/client/')) {
-    filePath = path.join(PUBLIC_DIR, 'client.html');
-  } else {
-    filePath = path.join(PUBLIC_DIR, pathname);
-  }
+  let filePath = pathname === '/' ? '/index.html' : pathname;
+  filePath = path.join(PUBLIC_DIR, filePath);
   if (!filePath.startsWith(PUBLIC_DIR)) { res.writeHead(403); return res.end('Forbidden'); }
   const ext = path.extname(filePath).toLowerCase();
   fs.readFile(filePath, (err, data) => {
@@ -441,8 +420,7 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Allow-Private-Network': 'true',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',
       ...SECURITY_HEADERS,
     });
@@ -1048,229 +1026,6 @@ const server = http.createServer(async (req, res) => {
       return sendJSON(res, 200, { months: out });
     }
 
-    // ================================================================
-    // SHARE LINK API  — Phase 2 secure client share-token backend
-    // Only superadmin and admin roles may create / revoke share links.
-    // Viewers and editors are explicitly rejected.
-    // ================================================================
-
-    // ---- Helper: check if session role is admin or superadmin ----
-    function isAdminOrAbove(session) {
-      return session && (session.role === 'superadmin' || session.role === 'admin');
-    }
-
-    // ---- POST /api/shares — Create a new secure share link ----
-    if (pathname === '/api/shares' && req.method === 'POST') {
-      const session = requireAuth(req, res);
-      if (!session) return;
-
-      if (!isAdminOrAbove(session)) {
-        return sendJSON(res, 403, { error: 'You do not have permission to create client share links.' });
-      }
-
-      const body = await readBody(req);
-
-      // Validate month
-      const month = (body.month || '').trim();
-      if (!isValidMonth(month)) {
-        return sendJSON(res, 400, { error: 'Invalid reporting month. Expected YYYY-MM format (e.g. 2026-09).' });
-      }
-
-      // Validate expiry
-      const expiresInDays = Number(body.expiresInDays);
-      if (!isValidExpiryDays(expiresInDays)) {
-        return sendJSON(res, 400, {
-          error: `Invalid expiry duration. Allowed values: ${EXPIRY_OPTIONS.join(', ')} days.`,
-        });
-      }
-
-      // Client name: use the provided value or fall back to application default
-      const clientName = (body.clientName && String(body.clientName).trim()) || 'A0 MSS Dashboard';
-      if (clientName.length > 120) {
-        return sendJSON(res, 400, { error: 'Client name is too long (max 120 characters).' });
-      }
-
-      let rawToken, record;
-      try {
-        ({ rawToken, record } = createShare({
-          month,
-          expiresInDays,
-          clientName,
-          createdBy: session.displayName || session.username,
-        }));
-      } catch (shareErr) {
-        return sendJSON(res, 400, { error: shareErr.message || 'Failed to create share link.' });
-      }
-
-      // Build the share URL using the Host header so it works on any port/hostname
-      const host = req.headers.host || 'localhost:' + PORT;
-      const protocol = (req.headers['x-forwarded-proto'] || 'http').split(',')[0].trim();
-      const shareUrl = `${protocol}://${host}/client/${rawToken}`;
-
-      // Audit the action — but NEVER log rawToken or the full URL
-      recordAudit(
-        session.username,
-        'SHARE_CREATED',
-        `share:${record.id}`,
-        'SUCCESS',
-        { month, expiresInDays, clientName, shareId: record.id }
-      );
-
-      // rawToken is returned ONCE in the response body only.
-      // It is NOT written to shares.json, audit.json, or console.
-      return sendJSON(res, 201, {
-        success: true,
-        share: {
-          id:         record.id,
-          clientName: record.clientName,
-          month:      record.month,
-          expiresAt:  record.expiresAt,
-          createdAt:  record.createdAt,
-          createdBy:  record.createdBy,
-          status:     'active',
-        },
-        url: shareUrl,   // contains rawToken — returned once; never stored
-      });
-    }
-
-    // ---- GET /api/shares — List all share records (safe metadata only) ----
-    if (pathname === '/api/shares' && req.method === 'GET') {
-      const session = requireAuth(req, res);
-      if (!session) return;
-
-      if (!isAdminOrAbove(session)) {
-        return sendJSON(res, 403, { error: 'You do not have permission to view share links.' });
-      }
-
-      // Optional ?status= filter (active | expired | revoked)
-      const statusFilter = parsed.query.status || null;
-      const allowedFilters = ['active', 'expired', 'revoked'];
-      if (statusFilter && !allowedFilters.includes(statusFilter)) {
-        return sendJSON(res, 400, { error: 'Invalid status filter. Use: active, expired, or revoked.' });
-      }
-
-      const shares = listShares({ statusFilter: statusFilter || undefined });
-      // listShares() already strips tokenHash before returning
-      return sendJSON(res, 200, { shares, allowedExpiryDays: EXPIRY_OPTIONS });
-    }
-
-    // ---- POST /api/shares/:id/revoke — Revoke a share by internal ID ----
-    if (pathname.startsWith('/api/shares/') && pathname.endsWith('/revoke') && req.method === 'POST') {
-      const session = requireAuth(req, res);
-      if (!session) return;
-
-      if (!isAdminOrAbove(session)) {
-        return sendJSON(res, 403, { error: 'You do not have permission to revoke share links.' });
-      }
-
-      // Extract the share ID between /api/shares/ and /revoke
-      const shareId = pathname.slice('/api/shares/'.length, -'/revoke'.length).trim();
-      if (!shareId || !/^shr_[0-9a-f]+$/.test(shareId)) {
-        return sendJSON(res, 400, { error: 'Invalid share ID format.' });
-      }
-
-      const result = revokeShare(shareId);
-      if (!result.ok) {
-        const status = result.error === 'Share not found.' ? 404 : 400;
-        return sendJSON(res, status, { error: result.error });
-      }
-
-      recordAudit(
-        session.username,
-        'SHARE_REVOKED',
-        `share:${shareId}`,
-        'SUCCESS',
-        { shareId }
-      );
-
-      return sendJSON(res, 200, { success: true, message: 'Share link has been revoked.' });
-    }
-
-    // ================================================================
-    // PUBLIC CLIENT PORTAL API — Phase 3 Secure Client Intelligence Portal
-    // Public endpoint for authorized clients via Phase 2 share token.
-    // Does NOT require Bearer auth.
-    // Strictly read-only, isolated to the authorized month only.
-    // ================================================================
-    if (pathname.startsWith('/api/public/portal/')) {
-      if (req.method !== 'GET') {
-        return sendJSON(res, 405, { error: 'Method not allowed. Public portal is strictly read-only.' });
-      }
-
-      const rawToken = pathname.slice('/api/public/portal/'.length).trim();
-
-      // Resolve and validate token (checks format, HMAC hash match, active status, expiry)
-      const share = resolveShareToken(rawToken);
-      if (!share) {
-        // Generic 401 error: does not reveal whether token never existed, expired, or was revoked
-        return sendJSON(res, 401, { error: 'Invalid or expired share link' });
-      }
-
-      // Authoritative month from validated share record — any client-supplied ?month= is ignored
-      const month = share.month;
-      const db = loadDB();
-      const monthObj = db.months[month] || { metrics: {}, narrative: {} };
-
-      // Previous month for delta/trend comparison (if applicable)
-      const prevKey = prevMonthKey(db, month);
-      const prevComputed = prevKey && db.months[prevKey] && db.months[prevKey].metrics
-        ? db.months[prevKey].metrics
-        : null;
-
-      // Calculate the month's metrics using the existing calc engine
-      const rawMetrics = monthObj.metrics || {};
-      const computed = computeMonth(rawMetrics, prevComputed);
-
-      // Build sanitized metrics dictionary (strictly strip operator edit history)
-      const sanitizedMetrics = {};
-      Object.keys(computed).forEach(mId => {
-        const item = computed[mId];
-        sanitizedMetrics[mId] = {
-          computed: item.computed,
-          rag: item.rag,
-          inputs: item.inputs || {},
-        };
-      });
-
-      // Compute summary RAG counts
-      let green = 0, amber = 0, red = 0, total = 0;
-      Object.values(computed).forEach(m => {
-        if (m && m.rag) {
-          total++;
-          if (m.rag === 'green') green++;
-          else if (m.rag === 'amber') amber++;
-          else if (m.rag === 'red') red++;
-        }
-      });
-
-      const overallRAG = computeOverallRAG(computed);
-
-      return sendJSON(res, 200, {
-        success: true,
-        portal: {
-          clientName: share.clientName,
-          month,
-          expiresAt: share.expiresAt,
-          overallRAG,
-          summary: {
-            overallRAG,
-            green,
-            amber,
-            red,
-            total,
-          },
-          narrative: {
-            topRisks: (monthObj.narrative && monthObj.narrative.topRisks) || '',
-            improvements: (monthObj.narrative && monthObj.narrative.improvements) || '',
-            plannedActions: (monthObj.narrative && monthObj.narrative.plannedActions) || '',
-          },
-          sections: SECTIONS,
-          metricDefinitions: METRICS,
-          metrics: sanitizedMetrics,
-        },
-      });
-    }
-
     // ---- static frontend files ----
     if (req.method === 'GET' || req.method === 'HEAD') {
       return serveStatic(req, res, pathname);
@@ -1280,18 +1035,6 @@ const server = http.createServer(async (req, res) => {
   } catch (err) {
     console.error(err);
     sendJSON(res, 500, { error: 'Server error', detail: String(err && err.message || err) });
-  }
-});
-
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error('');
-    console.error(`  [ERROR] Port ${PORT} is already in use by another process.`);
-    console.error(`  Please close existing instances or run start.bat to automatically free port ${PORT}.`);
-    console.error('');
-    process.exit(1);
-  } else {
-    console.error('  [SERVER ERROR]', err);
   }
 });
 

@@ -1,0 +1,96 @@
+{
+  "events": [
+    {
+      "id": "aud_1789972427978_o6uk6",
+      "timestamp": "2026-09-21T06:33:47.978Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789972427995_eubll",
+      "timestamp": "2026-09-21T06:33:47.995Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789972428009_4pjaz",
+      "timestamp": "2026-09-21T06:33:48.009Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789972428027_vcih3",
+      "timestamp": "2026-09-21T06:33:48.027Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789972428047_3gzmv",
+      "timestamp": "2026-09-21T06:33:48.047Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {
+        "oldRole": "editor",
+        "newRole": "admin"
+      }
+    },
+    {
+      "id": "aud_1789972428051_ejgdh",
+      "timestamp": "2026-09-21T06:33:48.051Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789972428055_0ha9k",
+      "timestamp": "2026-09-21T06:33:48.055Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789972428057_ny43q",
+      "timestamp": "2026-09-21T06:33:48.057Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789972428059_t9ss2",
+      "timestamp": "2026-09-21T06:33:48.059Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    }
+  ]
+}

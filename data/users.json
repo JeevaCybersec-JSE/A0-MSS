@@ -1,0 +1,59 @@
+{
+  "users": [
+    {
+      "id": "u_superadmin_01",
+      "username": "Jeeva",
+      "displayName": "Jeeva",
+      "role": "superadmin",
+      "hash": "8f57931fb28f284b7d80777efeed5ddcb9127499cc21304ad7dc7d1bb282d09827bd0fd0682e5cebbd265f9ff600f698c60c5b79bda2ec388be3cd2ab69f5bc8",
+      "salt": "de15423dd4938af567b783093c9233a0",
+      "createdAt": "2026-09-21T05:00:00.000Z",
+      "lastLogin": "2026-09-23T06:02:35.427Z",
+      "status": "active"
+    },
+    {
+      "id": "u_admin_01",
+      "username": "admin",
+      "displayName": "Admin",
+      "role": "admin",
+      "hash": "6f6c1bd99b6904bc2b33ea21095a256726d73779113d70a4872f666c57ae5739af3b27359d30adf7a4da885f89ff955d0e0f021d0c726a7e0705218d5690e3ea",
+      "salt": "1858ece1cf616c63e18a90b33911bce3",
+      "createdAt": "2026-09-21T05:00:00.000Z",
+      "lastLogin": "2026-09-22T13:30:43.693Z",
+      "status": "active"
+    },
+    {
+      "id": "u_editor_01",
+      "username": "editor",
+      "displayName": "Editor",
+      "role": "editor",
+      "hash": "998105b3e2d2de2a8799fb0dac68c5a630d3fbf58acf770bfd7b6fdd5b703c7f9fac13a0621ea8bc2b7f386d67d2f4a7f0dcfc337328b09ede70840289174298",
+      "salt": "80a3abcd0c62ccbebcd120bb49ff6acc",
+      "createdAt": "2026-09-21T05:00:00.000Z",
+      "lastLogin": "2026-09-22T13:30:43.708Z",
+      "status": "active"
+    },
+    {
+      "id": "u_viewer_01",
+      "username": "viewer",
+      "displayName": "Client / Viewer",
+      "role": "viewer",
+      "hash": "3d49f9b7e727c59343f3f2e3e4e959820d567a70b1646c1b8eaaeb5426b7164875b67bd3da6aa4820d722c081056c139252ac935b8eccca0525089090e87ede9",
+      "salt": "03776ba063acf40ba9b15272cb8c613b",
+      "createdAt": "2026-09-21T05:00:00.000Z",
+      "lastLogin": "2026-09-22T13:30:43.991Z",
+      "status": "active"
+    },
+    {
+      "id": "u_1789979035615_ynhl",
+      "username": "Judy",
+      "displayName": "Nick",
+      "role": "viewer",
+      "status": "active",
+      "hash": "3769f2ec0c51a481ef719f29250693789ae7a0b91128a8a80015590e830c413f502ce1985ce36a745af8489e2cc8ff67ce1fc675a68a6dd5250cf1f5c42280c2",
+      "salt": "ffaaff7659a9394fce85ea690ba4ee43",
+      "createdAt": "2026-09-21T08:23:55.616Z",
+      "lastLogin": "2026-09-21T10:04:15.041Z"
+    }
+  ]
+}

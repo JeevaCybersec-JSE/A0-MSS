@@ -12,13 +12,7 @@ echo   Viewer      : viewer / viewer123
 echo ============================================
 echo   [NOTE] Do NOT close this window while using the app!
 echo ============================================
-
-REM Free port 4321 if an orphaned node instance is holding it
-powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 4321 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
-
-REM Open browser after short delay so server has time to start listening
-start "" cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:4321"
-
+start "" "http://localhost:4321"
 if exist "node.exe" (
   node.exe server.js
 ) else (

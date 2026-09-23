@@ -1,0 +1,44 @@
+{
+  "users": [
+    {
+      "id": "u_superadmin_01",
+      "username": "Jeeva",
+      "displayName": "Jeeva",
+      "role": "superadmin",
+      "hash": "8f57931fb28f284b7d80777efeed5ddcb9127499cc21304ad7dc7d1bb282d09827bd0fd0682e5cebbd265f9ff600f698c60c5b79bda2ec388be3cd2ab69f5bc8",
+      "salt": "de15423dd4938af567b783093c9233a0",
+      "createdAt": "2026-09-21T05:00:00.000Z",
+      "lastLogin": "2026-09-21T06:19:29.168Z"
+    },
+    {
+      "id": "u_admin_01",
+      "username": "admin",
+      "displayName": "Admin",
+      "role": "admin",
+      "hash": "cb86bfdea464e0d43c29b0d6f9783ab923b961e626e357800564428c8c068aec99449b8c11b3a0e4100af78f00fec9783ccb901eede976f6d9807b6ff2b8677d",
+      "salt": "5138dbdbda219c0c59f58696bfdb8f8d",
+      "createdAt": "2026-09-21T05:00:00.000Z",
+      "lastLogin": "2026-09-21T06:19:29.185Z"
+    },
+    {
+      "id": "u_editor_01",
+      "username": "editor",
+      "displayName": "Editor",
+      "role": "editor",
+      "hash": "5eb8aed9e322621ad223d282355309117f974cb70c419e0a7fdd5f6b8cb08a36e9593645a420633904b4e80705332d50cec00300557e8c02fd62346ab72cbdef",
+      "salt": "e0e7f643f191b97599ff8ec55d3b845c",
+      "createdAt": "2026-09-21T05:00:00.000Z",
+      "lastLogin": "2026-09-21T06:19:29.196Z"
+    },
+    {
+      "id": "u_viewer_01",
+      "username": "viewer",
+      "displayName": "Client / Viewer",
+      "role": "viewer",
+      "hash": "03bf3019a3d2d88a4b085bd94e330a5b8a759db64898ea371ed711bba0735305fabe2435c12ec5ff176153175da948be3a0f2fef34397dcc83695e5de4ed5834",
+      "salt": "496777c5b50b307ceb957c8e8ef1ab5c",
+      "createdAt": "2026-09-21T05:00:00.000Z",
+      "lastLogin": "2026-09-21T06:19:29.211Z"
+    }
+  ]
+}

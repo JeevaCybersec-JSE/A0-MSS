@@ -4,41 +4,11 @@
       "metrics": {
         "managed_endpoints": {
           "inputs": {
-            "value": 37
+            "value": 36
           },
-          "computed": 37,
+          "computed": 36,
           "rag": null,
           "history": [
-            {
-              "timestamp": "2026-09-23T05:20:21.723Z",
-              "action": "update",
-              "user": "Jeeva",
-              "inputs": {
-                "value": 37
-              },
-              "computed": 37,
-              "rag": null
-            },
-            {
-              "timestamp": "2026-09-23T05:20:14.436Z",
-              "action": "update",
-              "user": "Jeeva",
-              "inputs": {
-                "value": 35
-              },
-              "computed": 35,
-              "rag": null
-            },
-            {
-              "timestamp": "2026-09-22T09:08:23.329Z",
-              "action": "update",
-              "user": "Jeeva",
-              "inputs": {
-                "value": 36
-              },
-              "computed": 36,
-              "rag": null
-            },
             {
               "timestamp": "2026-09-19T05:58:58.514Z",
               "action": "update",
@@ -941,7 +911,7 @@
         "topRisks": "test",
         "improvements": "test",
         "plannedActions": "test",
-        "updatedAt": "2026-09-22T13:30:41.899Z",
+        "updatedAt": "2026-09-21T08:03:04.039Z",
         "updatedBy": "editor"
       }
     },
@@ -1886,11 +1856,11 @@
         }
       },
       "narrative": {
-        "topRisks": "QA Passed",
+        "topRisks": "P4 ok",
         "improvements": "",
         "plannedActions": "",
-        "updatedAt": "2026-09-22T13:30:43.281Z",
-        "updatedBy": "Jeeva"
+        "updatedAt": "2026-09-21T08:03:19.204Z",
+        "updatedBy": "admin"
       }
     }
   }

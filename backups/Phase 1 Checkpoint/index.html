@@ -6,8 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A0 MSS KPI Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=6.7">
+  <link rel="stylesheet" href="style.css?v=5.3">
 </head>
 
 <body>
@@ -19,23 +20,39 @@
 
   <!-- ===================== LOGIN SCREEN ===================== -->
   <div id="login-screen" class="login-screen">
-    <!-- Monochrome Dynamic Network Background Canvas -->
     <canvas id="login-canvas" class="login-canvas"></canvas>
+    <div class="login-scanlines"></div>
+    <div class="login-radar-sweep"></div>
+    <div class="login-glow-orb orb-1"></div>
+    <div class="login-glow-orb orb-2"></div>
+    <div class="login-glow-orb orb-3"></div>
+    <div class="login-glow-orb orb-4"></div>
+    <div class="login-grid"></div>
 
-    <!-- Subtle Enterprise Status Edge Markers (Matching Welcome Page) -->
-    <div class="login-status-corner login-corner-tl" aria-hidden="true">
-      <span class="login-status-indicator"></span>
-      <span class="login-status-mono">SYSTEM ONLINE</span>
+    <!-- Futuristic Ambient SOC Telemetry HUD in Viewport Corners -->
+    <div class="login-hud-corner hud-tl">
+      <div class="hud-line"><span class="hud-dot"></span> SYSTEM: <span class="hud-val">ONLINE [NODE #A0]</span></div>
+      <div class="hud-line sub">PROTO: <span class="hud-val">TLS 1.3 / AES-256 GCM</span></div>
     </div>
-    <div class="login-status-corner login-corner-tr" aria-hidden="true">
-      <span class="login-status-mono">SECURE AUTHENTICATION GATEWAY</span>
+    <div class="hud-corner-bracket bracket-tl"></div>
+
+    <div class="login-hud-corner hud-tr">
+      <div class="hud-line">DEFENSE: <span class="hud-val live">LEVEL-5 SHIELD</span></div>
+      <div class="hud-line sub">LATENCY: <span id="login-hud-latency" class="hud-val">12ms</span> // SOC-MSS</div>
     </div>
-    <div class="login-status-corner login-corner-bl" aria-hidden="true">
-      <span class="login-status-mono">MSS PLATFORM</span>
+    <div class="hud-corner-bracket bracket-tr"></div>
+
+    <div class="login-hud-corner hud-bl">
+      <div class="hud-line">SECURITY OPS: <span class="hud-val">SURVEILLANCE ACTIVE</span></div>
+      <div class="hud-line sub">HASH VERIFY: <span class="hud-val">SHA-512 SECURE</span></div>
     </div>
-    <div class="login-status-corner login-corner-br" aria-hidden="true">
-      <span id="login-status-time" class="login-status-mono">A0-CORE // ENCRYPTED</span>
+    <div class="hud-corner-bracket bracket-bl"></div>
+
+    <div class="login-hud-corner hud-br">
+      <div class="hud-line">MSS NODE: <span class="hud-val">#A0-OPS-9942</span></div>
+      <div class="hud-line sub">TERMINAL: <span class="hud-val">CYBER CONSOLE V3.6</span></div>
     </div>
+    <div class="hud-corner-bracket bracket-br"></div>
 
     <form id="login-form" class="login-card" autocomplete="off">
       <div class="card-glow-border"></div>
@@ -83,7 +100,7 @@
             <rect x="4" y="9" width="12" height="8.5" rx="2" />
             <path d="M7 9V6a3 3 0 016 0v3" stroke-linecap="round" />
           </svg>
-          <input id="login-password" class="text-input with-icon has-action-btn" type="password" autocomplete="new-password"
+          <input id="login-password" class="text-input with-icon" type="password" autocomplete="new-password"
             placeholder="Enter password" required>
           <button type="button" id="toggle-password-btn" class="btn-input-action" title="Toggle password visibility">
             <svg id="eye-icon" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -122,68 +139,49 @@
   <!-- ===================== WELCOME TRANSITION ===================== -->
   <div id="welcome-transition" class="wt-screen" aria-hidden="true" hidden>
 
-    <!-- Monochrome Dynamic Network Background Canvas -->
+    <!-- Canvas for particle interaction -->
     <canvas id="wt-canvas" class="wt-canvas" aria-hidden="true"></canvas>
 
-    <!-- Technical Status Indicators (Subtle Edge Markers) -->
-    <div class="wt-status-corner wt-corner-tl" aria-hidden="true">
-      <span class="wt-status-indicator"></span>
-      <span class="wt-status-mono">SYSTEM ONLINE</span>
-    </div>
-    <div class="wt-status-corner wt-corner-tr" aria-hidden="true">
-      <span class="wt-status-mono">SECURE SESSION</span>
-    </div>
-    <div class="wt-status-corner wt-corner-bl" aria-hidden="true">
-      <span class="wt-status-mono">MSS PLATFORM</span>
-    </div>
-    <div class="wt-status-corner wt-corner-br" aria-hidden="true">
-      <span class="wt-status-mono">A0-CORE // ENCRYPTED</span>
-    </div>
+    <!-- Radial glow -->
+    <div class="wt-radial-glow" aria-hidden="true"></div>
 
-    <!-- Central Welcome Stage -->
-    <div class="wt-stage" id="wt-stage">
-
-      <!-- Central MSS Logo with Precision Orbital Rings -->
-      <div class="wt-orbital-system" aria-label="MSS Security System Core">
-        <div class="wt-orbit-ring wt-ring-outer" aria-hidden="true">
-          <span class="wt-orbit-node"></span>
-        </div>
-        <div class="wt-orbit-ring wt-ring-inner" aria-hidden="true">
-          <span class="wt-orbit-node"></span>
-        </div>
-
-        <!-- Center MSS Shield + Wordmark Core -->
-        <div class="wt-logo-shield-container">
-          <svg class="wt-shield-svg" viewBox="0 0 68 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M34 4 L58 14 L58 34 C58 50 47 62 34 68 C21 62 10 50 10 34 L10 14 Z"
-                  stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" fill="none"/>
-            <path d="M34 10 L52 18.5 L52 34 C52 47 43 57 34 62 C25 57 16 47 16 34 L16 18.5 Z"
-                  stroke="#0f172a" stroke-width="0.8" stroke-linejoin="round" stroke-opacity="0.35" fill="none"/>
-            <path d="M26 35 L31 41 L43 28" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span class="wt-logo-wordmark">MSS</span>
-        </div>
+    <!-- Orbit rings (A0 design language, large scale) -->
+    <div class="wt-orbits" aria-hidden="true">
+      <div class="wt-orbit wt-orbit-1">
+        <div class="wt-orbit-ellipse wt-ellipse-1"></div>
+        <div class="wt-orbit-sat wt-sat-cw-1"><span class="wt-particle wt-p-cyan"></span></div>
       </div>
-
-      <!-- Welcome Typography Hierarchy -->
-      <div class="wt-text-group">
-        <!-- 1–2 sec: Welcome Headline with Dynamic Username -->
-        <h1 class="wt-headline" id="wt-headline">
-          Welcome, <span id="wt-username" class="wt-username-highlight"></span>
-        </h1>
-
-        <!-- 2–3 sec: Subheading -->
-        <p class="wt-subheadline" id="wt-subheadline">
-          Security Operations Dashboard
-        </p>
-
-        <!-- 3–4 sec: Initialization Status with Gentle Pulse -->
-        <div class="wt-init-status" id="wt-init-status">
-          <span class="wt-init-pulse" aria-hidden="true"></span>
-          <span class="wt-init-caption">Initializing your secure workspace...</span>
-        </div>
+      <div class="wt-orbit wt-orbit-2">
+        <div class="wt-orbit-ellipse wt-ellipse-2"></div>
+        <div class="wt-orbit-sat wt-sat-ccw-2"><span class="wt-particle wt-p-violet"></span></div>
       </div>
+      <div class="wt-orbit wt-orbit-3">
+        <div class="wt-orbit-ellipse wt-ellipse-3"></div>
+        <div class="wt-orbit-sat wt-sat-cw-3"><span class="wt-particle wt-p-sky"></span></div>
+      </div>
+    </div>
 
+    <!-- MSS Brand Mark — top left -->
+    <div class="wt-brand" aria-label="MSS brand">
+      <!-- Shield SVG + wordmark — pure SVG, inline, no images needed -->
+      <svg class="wt-brand-svg" viewBox="0 0 68 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Shield outline -->
+        <path d="M34 4 L58 14 L58 34 C58 50 47 62 34 68 C21 62 10 50 10 34 L10 14 Z"
+              stroke="#111827" stroke-width="2.2" stroke-linejoin="round" fill="none"/>
+        <!-- Inner shield line (subtle double-line premium look) -->
+        <path d="M34 10 L52 18.5 L52 34 C52 47 43 57 34 62 C25 57 16 47 16 34 L16 18.5 Z"
+              stroke="#111827" stroke-width="0.8" stroke-linejoin="round" stroke-opacity="0.35" fill="none"/>
+        <!-- Tiny check mark inside shield -->
+        <path d="M26 35 L31 41 L43 28" stroke="#111827" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="wt-brand-wordmark">MSS</span>
+    </div>
+
+    <!-- Central welcome content -->
+    <div class="wt-center" id="wt-center">
+      <div class="wt-welcome-text" id="wt-welcome-text">
+        Welcome, <span id="wt-username" class="wt-username-span"></span>
+      </div>
     </div>
 
   </div>
@@ -259,25 +257,10 @@
           </button>
         </nav>
 
-        <!-- Administration: visible only to Super Admin (controlled by app.js updateUserBadge) -->
-        <nav id="nav-admin" class="nav-group" style="display:none;">
+        <nav id="nav-admin" class="nav-group" style="display: none;">
           <div class="nav-label">Administration</div>
           <button class="nav-item" data-view="users">
-            <span class="nav-icon">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M10 3a4 4 0 100 8 4 4 0 000-8z" stroke-linecap="round"/>
-                <path d="M4 17a6 6 0 0112 0" stroke-linecap="round"/>
-              </svg>
-            </span>
-            <span>User Management</span>
-          </button>
-          <button class="nav-item" data-view="audit">
-            <span class="nav-icon">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-            <span>Audit Logs</span>
+            <span class="nav-icon" data-icon="key"></span><span>User Management</span>
           </button>
         </nav>
       </div>
@@ -373,17 +356,6 @@
             </button>
           </div>
 
-          <!-- Share Client Report Button (SuperAdmin / Admin only) -->
-          <button id="share-btn" class="btn btn-share-topbar" title="Share Client Report" style="display: none;" onclick="window.openShareModal && window.openShareModal()">
-            <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8">
-              <circle cx="15" cy="5" r="3"/>
-              <circle cx="5" cy="10" r="3"/>
-              <circle cx="15" cy="15" r="3"/>
-              <path d="M7.6 8.7l4.8-2.4M7.6 11.3l4.8 2.4" stroke-linecap="round"/>
-            </svg>
-            <span>Share</span>
-          </button>
-
           <button id="export-csv-btn" class="btn btn-export-topbar" title="Export current month metrics to CSV">
             <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M4 16v1a1 1 0 001 1h10a1 1 0 001-1v-1M10 3v10M6 9l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -407,114 +379,9 @@
     </div>
   </div>
 
-  <!-- ===================== SHARE MODAL ===================== -->
-  <div id="share-modal-overlay" class="modal-overlay" hidden aria-hidden="true">
-    <div class="modal-card share-modal-card" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <div class="modal-title-row">
-            <svg class="modal-title-icon" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
-              <circle cx="15" cy="5" r="3"/>
-              <circle cx="5" cy="10" r="3"/>
-              <circle cx="15" cy="15" r="3"/>
-              <path d="M7.6 8.7l4.8-2.4M7.6 11.3l4.8 2.4" stroke-linecap="round"/>
-            </svg>
-            <h2 id="share-modal-title" class="modal-title">Share Client Report</h2>
-          </div>
-          <p class="modal-subtitle">Generate a secure read-only link for this reporting period.</p>
-        </div>
-        <button type="button" id="share-modal-close" class="modal-close-btn" title="Close modal" aria-label="Close modal" onclick="window.closeShareModal && window.closeShareModal()">
-          <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 5l10 10M15 5L5 15" stroke-linecap="round" />
-          </svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <!-- Initial Form State -->
-        <div id="share-form-section">
-          <div class="modal-field-group">
-            <label class="modal-field-label">Reporting Month</label>
-            <div class="modal-field-value readonly-highlight" id="share-month-display">
-              <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8">
-                <rect x="3" y="4" width="14" height="13" rx="1.5"/>
-                <path d="M3 8h14M7 2.3v3M13 2.3v3" stroke-linecap="round"/>
-              </svg>
-              <span id="share-month-text">September 2026</span>
-            </div>
-          </div>
-
-          <div class="modal-field-group">
-            <label class="modal-field-label" for="share-client-name">Client Name</label>
-            <input id="share-client-name" class="modal-text-input" type="text" value="A0 MSS Dashboard" placeholder="Enter client/account name">
-          </div>
-
-          <div class="modal-field-group">
-            <label class="modal-field-label" for="share-expiry-select">Link Expiry</label>
-            <div class="select-wrap">
-              <select id="share-expiry-select" class="modal-select">
-                <option value="7" selected>7 Days (Standard)</option>
-                <option value="30">30 Days (Extended)</option>
-                <option value="90">90 Days (Quarterly)</option>
-              </select>
-            </div>
-            <div class="modal-field-hint">Links expire automatically after this duration and can be revoked anytime.</div>
-          </div>
-
-          <div id="share-error-box" class="modal-error-box" hidden></div>
-
-          <div class="modal-actions">
-            <button type="button" id="share-cancel-btn" class="btn btn-secondary" onclick="window.closeShareModal && window.closeShareModal()">Cancel</button>
-            <button type="button" id="share-generate-btn" class="btn btn-primary" onclick="window.onGenerateShareLink && window.onGenerateShareLink()">
-              <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M10 3v10M6 9l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>Generate Secure Link</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Success State -->
-        <div id="share-success-section" hidden>
-          <div class="share-success-badge">
-            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="#059669" stroke-width="2">
-              <path d="M5 10l3.5 3.5L15 6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span>Secure link created</span>
-          </div>
-
-          <p class="share-success-desc">The client can use this read-only link to view the report.</p>
-
-          <div class="share-url-copy-box">
-            <input id="share-generated-url" class="share-url-input" type="text" readonly spellcheck="false">
-            <button type="button" id="share-copy-btn" class="btn btn-primary btn-copy-share" onclick="window.onCopyShareLink && window.onCopyShareLink()">
-              <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
-                <rect x="7" y="7" width="10" height="10" rx="1.5"/>
-                <path d="M4 13V4a1 1 0 011-1h9" stroke-linecap="round"/>
-              </svg>
-              <span id="share-copy-btn-text">Copy Link</span>
-            </button>
-          </div>
-
-          <div class="share-security-notice">
-            <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8">
-              <circle cx="10" cy="10" r="8"/>
-              <path d="M10 9v5M10 6.5h.01" stroke-linecap="round"/>
-            </svg>
-            <span>Anyone with this link can view the shared report until the link expires or is revoked.</span>
-          </div>
-
-          <div class="modal-actions modal-actions-right">
-            <button type="button" id="share-done-btn" class="btn btn-secondary" onclick="window.closeShareModal && window.closeShareModal()">Done</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div id="toast" class="toast" hidden></div>
 
-  <script src="app.js?v=6.7"></script>
+  <script src="app.js?v=5.4"></script>
 </body>
 
 </html>

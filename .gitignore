@@ -14,3 +14,9 @@ Thumbs.db
 
 # Scratch images
 scratch_img/
+
+# Scratch test files / temp diagnostics
+scratch/
+
+# Node modules
+node_modules/

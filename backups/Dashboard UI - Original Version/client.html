@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSS Intelligence — Client Security Report</title>
+  <meta name="description" content="Read-only executive client intelligence security report for MSS Management.">
+  <link rel="stylesheet" href="/client.css?v=6.8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- LOADING STATE -->
+  <div id="loading-state" class="state-container">
+    <div class="state-card">
+      <div class="brand-badge">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>MSS Intelligence</span>
+      </div>
+      <div class="spinner-circle"></div>
+      <h2 class="state-title">Preparing your security report…</h2>
+      <p class="state-desc">Loading verified security intelligence data</p>
+    </div>
+  </div>
+
+  <!-- ERROR / UNAVAILABLE STATE -->
+  <div id="error-state" class="state-container" hidden>
+    <div class="state-card error-card">
+      <div class="error-icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <h2 id="error-title" class="state-title">Report Unavailable</h2>
+      <p id="error-message" class="state-desc">
+        This secure report link is invalid, expired, or has been revoked.<br>
+        Please contact your MSS administrator for a new report link.
+      </p>
+    </div>
+  </div>
+
+  <!-- MAIN CLIENT PORTAL -->
+  <div id="portal-app" class="portal-wrapper" hidden>
+    
+    <!-- TOP HEADER -->
+    <header class="portal-header">
+      <div class="header-inner">
+        <div class="header-brand-group">
+          <div class="header-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="header-title">MSS Intelligence</div>
+            <div class="header-subtitle" id="client-name-display">Client: —</div>
+          </div>
+        </div>
+
+        <div class="header-meta-group">
+          <div class="month-pill" id="report-month-display">—</div>
+          <span class="readonly-badge">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            READ-ONLY REPORT
+          </span>
+          <button type="button" class="print-btn" id="print-report-btn" aria-label="Print report">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            <span>Print Report</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="portal-main">
+
+      <!-- SECTION 1: OVERALL STATUS & EXECUTIVE POSTURE -->
+      <section class="portal-section" id="section-overall-status">
+        <div class="section-header-compact">
+          <span class="section-tag">Executive Summary</span>
+          <h1 class="section-title">Overall Security Posture</h1>
+        </div>
+
+        <div class="executive-banner" id="overall-rag-banner">
+          <div class="banner-rag-pill" id="overall-rag-pill">
+            <span class="rag-dot"></span>
+            <span id="overall-rag-label">EVALUATING</span>
+          </div>
+          <div class="banner-text">
+            <h2 id="overall-posture-title" class="posture-headline">Security posture evaluated against agreed target thresholds.</h2>
+            <p id="overall-posture-desc" class="posture-subline">All metric calculations have been certified by the MSS operational telemetry engine.</p>
+          </div>
+          <div class="banner-expiry" id="expiry-notice-box">
+            <span class="expiry-label">Report Validity</span>
+            <span class="expiry-val" id="report-expiry-val">—</span>
+          </div>
+        </div>
+
+        <!-- KPI SUMMARY COUNTS -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Total Evaluated</div>
+            <div class="kpi-value" id="count-total">—</div>
+            <div class="kpi-sub">Operational metrics</div>
+          </div>
+          <div class="kpi-card kpi-card-green">
+            <div class="kpi-label">Within Target</div>
+            <div class="kpi-value val-green" id="count-green">—</div>
+            <div class="kpi-sub">Optimal posture</div>
+          </div>
+          <div class="kpi-card kpi-card-amber">
+            <div class="kpi-label">Attention Required</div>
+            <div class="kpi-value val-amber" id="count-amber">—</div>
+            <div class="kpi-sub">Approaching threshold</div>
+          </div>
+          <div class="kpi-card kpi-card-red">
+            <div class="kpi-label">Critical Remediation</div>
+            <div class="kpi-value val-red" id="count-red">—</div>
+            <div class="kpi-sub">Action required</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EXECUTIVE MESSAGE / MANAGEMENT NARRATIVE -->
+      <section class="portal-section" id="section-narrative" hidden>
+        <div class="section-header-compact">
+          <span class="section-tag">Operational Narrative</span>
+          <h2 class="section-title">Executive Management Review</h2>
+        </div>
+        <div class="narrative-grid">
+          <div class="narrative-card narrative-risks" id="card-narrative-risks" hidden>
+            <div class="narrative-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 2 22 22 22 12 2"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              <span>Top Security Risks</span>
+            </div>
+            <div class="narrative-body" id="text-narrative-risks"></div>
+          </div>
+          <div class="narrative-card narrative-improvements" id="card-narrative-improvements" hidden>
+            <div class="narrative-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                <polyline points="17 6 23 6 23 12"/>
+              </svg>
+              <span>Key Improvements & Deliveries</span>
+            </div>
+            <div class="narrative-body" id="text-narrative-improvements"></div>
+          </div>
+          <div class="narrative-card narrative-actions" id="card-narrative-actions" hidden>
+            <div class="narrative-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+              <span>Planned Remediation Actions</span>
+            </div>
+            <div class="narrative-body" id="text-narrative-actions"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: RISK & ATTENTION -->
+      <section class="portal-section" id="section-risk-attention">
+        <div class="section-header-compact">
+          <span class="section-tag">Priority Items</span>
+          <h2 class="section-title">Risk & Attention</h2>
+          <p class="section-subtitle">Metrics requiring remediation or active operational tracking.</p>
+        </div>
+        <div id="risk-attention-container" class="risk-attention-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- SECTION 6: POSTURE DISTRIBUTION TREND -->
+      <section class="portal-section" id="section-posture-distribution">
+        <div class="section-header-compact">
+          <span class="section-tag">Distribution Analysis</span>
+          <h2 class="section-title">Security Posture Breakdown</h2>
+        </div>
+        <div class="distribution-card">
+          <div class="distribution-header">
+            <div>
+              <span class="dist-title">Evaluated Metrics Distribution</span>
+              <span class="dist-desc">Proportion of security measures meeting target SLAs</span>
+            </div>
+            <div class="distribution-legend">
+              <span class="legend-item"><span class="legend-dot dot-green"></span> Green (<span id="pct-green">0%</span>)</span>
+              <span class="legend-item"><span class="legend-dot dot-amber"></span> Amber (<span id="pct-amber">0%</span>)</span>
+              <span class="legend-item"><span class="legend-dot dot-red"></span> Red (<span id="pct-red">0%</span>)</span>
+            </div>
+          </div>
+          <div class="distribution-bar-track">
+            <div id="dist-bar-green" class="bar-fill fill-green" style="width: 0%"></div>
+            <div id="dist-bar-amber" class="bar-fill fill-amber" style="width: 0%"></div>
+            <div id="dist-bar-red" class="bar-fill fill-red" style="width: 0%"></div>
+          </div>
+          <div class="section-health-breakdown" id="section-health-breakdown">
+            <!-- Populated dynamically with section health pills -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3 & 4: MONTH COMPARISON & WHAT CHANGED -->
+      <section class="portal-section" id="section-comparison">
+        <div class="section-header-compact">
+          <span class="section-tag">Period Performance</span>
+          <h2 class="section-title">Month Comparison & Changes</h2>
+        </div>
+
+        <div id="comparison-content">
+          <!-- Populated dynamically: either actual changes or clean standard unavailability note -->
+          <div class="empty-comparison-card" id="empty-comparison-notice">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <div class="empty-text">
+              <strong>Previous month comparison is not available.</strong>
+              <p>This report is scoped to a single monthly snapshot. Month-over-month change analysis requires contiguous telemetry across consecutive periods.</p>
+            </div>
+          </div>
+
+          <div id="active-comparison-container" class="change-groups-grid" hidden>
+            <div class="change-column change-improved">
+              <div class="change-col-title">
+                <span class="badge-tag tag-green">Improved</span>
+                <span class="change-count" id="count-improved">0</span>
+              </div>
+              <div class="change-list" id="list-improved"></div>
+            </div>
+            <div class="change-column change-stable">
+              <div class="change-col-title">
+                <span class="badge-tag tag-neutral">Stable</span>
+                <span class="change-count" id="count-stable">0</span>
+              </div>
+              <div class="change-list" id="list-stable"></div>
+            </div>
+            <div class="change-column change-declined">
+              <div class="change-col-title">
+                <span class="badge-tag tag-red">Declined</span>
+                <span class="change-count" id="count-declined">0</span>
+              </div>
+              <div class="change-list" id="list-declined"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: KEY METRICS GROUPED BY OPERATIONAL SECTION -->
+      <section class="portal-section" id="section-metrics-catalog">
+        <div class="section-header-compact">
+          <span class="section-tag">Telemetry Catalog</span>
+          <h2 class="section-title">Key Security Metrics</h2>
+          <p class="section-subtitle">Operational telemetry organized by security domain.</p>
+        </div>
+
+        <div id="metrics-sections-container" class="metrics-sections-container">
+          <!-- Populated dynamically per operational section -->
+        </div>
+      </section>
+
+      <!-- SECTION 7: MANAGEMENT INSIGHT -->
+      <section class="portal-section" id="section-management-insight">
+        <div class="section-header-compact">
+          <span class="section-tag">Synthesis</span>
+          <h2 class="section-title">Management Insight & Operational Governance</h2>
+        </div>
+        <div class="insight-card">
+          <div class="insight-row">
+            <div class="insight-col">
+              <h3 class="insight-heading">Reporting Integrity</h3>
+              <p class="insight-paragraph">
+                All metric data presented in this intelligence portal is read directly from MSS security sensors, telemetry pipelines, and audited management logs. Values reflect the finalized position for the stated reporting month.
+              </p>
+            </div>
+            <div class="insight-col">
+              <h3 class="insight-heading">Target Compliance Model</h3>
+              <p class="insight-paragraph">
+                Threshold evaluations adhere to defined service level benchmarks: Green represents full compliance with agreed parameters, Amber indicates warning tolerance thresholds, and Red identifies variance requiring prioritized intervention.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="portal-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <strong>MSS Intelligence Portal</strong>
+          <span>Confidential Client Deliverable • Authorized for: <span id="footer-client-name">—</span></span>
+        </div>
+        <div class="footer-right">
+          <span>Reporting Period: <span id="footer-month">—</span></span>
+          <span class="footer-dot">•</span>
+          <span>Verified Read-Only View</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/client.js?v=6.8"></script>
+</body>
+</html>

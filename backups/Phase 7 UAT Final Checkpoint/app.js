@@ -3,26 +3,10 @@
 // Security Operations Console & Executive Reporting Engine
 // ============================================================
 
-let API = (
+const API = (
   window.location.protocol === 'file:' ||
-  (window.location.port !== '4321' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.port))
+  (window.location.port !== '4321' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
 ) ? 'http://localhost:4321' : '';
-
-async function fetchWithFallback(urlPath, options) {
-  const fullUrl = API + urlPath;
-  try {
-    return await fetch(fullUrl, options);
-  } catch (err) {
-    if (API === 'http://localhost:4321') {
-      API = 'http://127.0.0.1:4321';
-      return await fetch(API + urlPath, options);
-    } else if (API === 'http://127.0.0.1:4321') {
-      API = 'http://localhost:4321';
-      return await fetch(API + urlPath, options);
-    }
-    throw err;
-  }
-}
 
 // ---------- Icons (inline SVG, 20x20, stroke-based) ----------
 const ICONS = {
@@ -110,7 +94,7 @@ async function api(path, opts = {}) {
   if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
   let res;
   try {
-    res = await fetchWithFallback(path, Object.assign({}, opts, { headers }));
+    res = await fetch(API + path, Object.assign({}, opts, { headers }));
   } catch (err) {
     throw new Error('Server not reachable. Please make sure the backend is running at http://localhost:4321');
   }
@@ -133,6 +117,8 @@ document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
   btn.addEventListener('click', () => setView(btn.dataset.view));
 });
 
+boot();
+
 async function boot() {
   document.getElementById('month-input').value = state.month;
   initLoginCanvas();
@@ -141,7 +127,6 @@ async function boot() {
   initSidebarToggle();
   initSidebarBrandAtom();
   initLoginControls();
-  initShareModal();
 
   if (state.token) {
     try { await initApp(); return; } catch (e) { /* fall through to login */ }
@@ -307,7 +292,7 @@ async function onLoginSubmit(e) {
   const errBox = document.getElementById('login-error');
   errBox.hidden = true;
   try {
-    const res = await fetchWithFallback('/api/login', {
+    const res = await fetch(API + '/api/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     });
@@ -371,10 +356,6 @@ function updateUserBadge() {
   const adminNav = document.getElementById('nav-admin');
   if (adminNav) {
     adminNav.style.display = hasPermission('users:manage') ? 'block' : 'none';
-  }
-  const shareBtn = document.getElementById('share-btn');
-  if (shareBtn) {
-    shareBtn.style.display = (state.role === 'superadmin' || state.role === 'admin') ? 'inline-flex' : 'none';
   }
 }
 
@@ -772,472 +753,419 @@ function renderView() {
 }
 
 // =========================================================================
-// ORGANIC JELLYFISH PARTICLE FIELD ENGINE
-// Premium, minimal, futuristic aquatic organism particle system.
-// - Soft circular/ring-shaped particles with a visible soft center hole (torus / ring)
-// - Subtle organic harmonic deformation (breathing, undulating boundaries)
-// - Jellyfish locomotion (contraction pulse, forward boost, smooth glide relaxation)
-// - Ambient fluid wave currents (buoyant, non-linear underwater drift)
-// - Fluid cursor disturbance & wake (push away, tangential swirl wake, smooth relaxation)
-// - Delicate trailing tendril filaments waving with underwater physics
-// - Pure monochrome / slate neutral tones on clean white background
-// - High-DPI support, zero dependencies, auto-pause on hidden tab
+// OVERVIEW OPERATIONAL INTELLIGENCE BACKGROUND ENGINE
+// Live network/infrastructure field + moving nodes + subtle data flow
 // =========================================================================
-class OrganicJellyfishField {
-  constructor(canvas, options = {}) {
-    this.canvas = canvas;
-    this.ctx = canvas ? canvas.getContext('2d') : null;
-    this.options = Object.assign({
-      particleCount: null,
-      densityDivisor: 20000,
-      minParticles: 35,
-      maxParticles: 70,
-      baseColor: '30, 41, 59',      // Slate-800
-      strokeColor: '51, 65, 85',    // Slate-700
-      tendrilColor: '71, 85, 105',  // Slate-600
-      speedMultiplier: 1.0,
-      enableTendrils: true,
-      container: null
-    }, options);
+let overviewAnimId = null;
+let overviewResizeObserver = null;
+let overviewMouseMoveHandler = null;
+let overviewMouseLeaveHandler = null;
 
-    this.particles = [];
-    this.animId = null;
-    this.running = false;
-    this.time = 0;
-    this.lastTimestamp = 0;
-    this.width = 0;
-    this.height = 0;
+let overviewMouse = {
+  x: -9999,
+  y: -9999,
+  targetPx: 0,
+  targetPy: 0,
+  px: 0,
+  py: 0,
+  speed: 0,
+  lastX: -9999,
+  lastY: -9999,
+  lastTime: 0
+};
 
-    // Mouse state for fluid disturbance
-    this.mouseX = -9999;
-    this.mouseY = -9999;
-    this.prevMouseX = -9999;
-    this.prevMouseY = -9999;
-    this.mouseVx = 0;
-    this.mouseVy = 0;
+let overviewWaypoints = [];
+let overviewPaths = [];
+let overviewNodes = [];
+let overviewDataPulses = [];
+let lastPulseSpawnTime = 0;
 
-    this._onMouseMove = this._onMouseMove.bind(this);
-    this._onMouseLeave = this._onMouseLeave.bind(this);
-    this._onVisibilityChange = this._onVisibilityChange.bind(this);
-    this._onResize = this._onResize.bind(this);
-    this._loop = this._loop.bind(this);
-
-    this.resizeObserver = null;
+function stopOverviewBgAnimation() {
+  if (overviewAnimId) {
+    cancelAnimationFrame(overviewAnimId);
+    overviewAnimId = null;
   }
-
-  init() {
-    this.resize();
-    this._bindEvents();
+  if (overviewResizeObserver) {
+    overviewResizeObserver.disconnect();
+    overviewResizeObserver = null;
   }
-
-  resize() {
-    if (!this.canvas) return;
-    let w, h;
-    if (this.options.container) {
-      const rect = this.options.container.getBoundingClientRect();
-      w = Math.max(this.options.container.scrollWidth, rect.width, window.innerWidth - 100);
-      h = Math.max(this.options.container.scrollHeight, rect.height, 900);
-    } else {
-      w = window.innerWidth;
-      h = window.innerHeight;
-    }
-
-    if (w <= 0 || h <= 0) return;
-
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    this.canvas.width = Math.floor(w * dpr);
-    this.canvas.height = Math.floor(h * dpr);
-    this.canvas.style.width = w + 'px';
-    this.canvas.style.height = h + 'px';
-    if (this.ctx) {
-      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-      this.ctx.scale(dpr, dpr);
-    }
-
-    this.width = w;
-    this.height = h;
-
-    if (this.particles.length === 0) {
-      this._generateParticles(w, h);
-    } else {
-      for (let i = 0; i < this.particles.length; i++) {
-        const p = this.particles[i];
-        if (p.x > w + 60) p.x = Math.random() * w;
-        if (p.y > h + 60) p.y = Math.random() * h;
-      }
-    }
+  if (overviewMouseMoveHandler) {
+    window.removeEventListener('mousemove', overviewMouseMoveHandler);
+    overviewMouseMoveHandler = null;
   }
-
-  _generateParticles(w, h) {
-    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
-      this.particles = [];
-      return;
-    }
-
-    const count = this.options.particleCount || Math.min(
-      Math.max(Math.floor((w * h) / this.options.densityDivisor), this.options.minParticles),
-      this.options.maxParticles
-    );
-
-    this.particles = [];
-    for (let i = 0; i < count; i++) {
-      const depth = 0.35 + Math.random() * 0.65; // depth illusion (0.35 to 1.0)
-      const baseR = (6.5 + Math.random() * 11.5) * (0.65 + 0.35 * depth);
-      const holeRatio = 0.40 + Math.random() * 0.14; // soft distinct center hole
-
-      const tendrils = [];
-      if (this.options.enableTendrils && depth > 0.42) {
-        const tCount = Math.random() > 0.45 ? 3 : 2;
-        for (let t = 0; t < tCount; t++) {
-          tendrils.push([
-            { x: 0, y: 0 },
-            { x: 0, y: 0 },
-            { x: 0, y: 0 }
-          ]);
-        }
-      }
-
-      this.particles.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        depth: depth,
-        baseR: baseR,
-        holeRatio: holeRatio,
-        heading: Math.random() * Math.PI * 2,
-        turnSpeed: (Math.random() - 0.5) * 0.003,
-        speed: (0.16 + Math.random() * 0.20) * (0.65 + 0.35 * depth) * this.options.speedMultiplier,
-        pulsePhase: Math.random() * Math.PI * 2,
-        pulseSpeed: 0.016 + Math.random() * 0.016,
-        deformPhase1: Math.random() * Math.PI * 2,
-        deformPhase2: Math.random() * Math.PI * 2,
-        deformSpeed1: 0.02 + Math.random() * 0.02,
-        deformSpeed2: 0.015 + Math.random() * 0.015,
-        deformLobes: Math.random() > 0.5 ? 3 : 4,
-        deformAmp: 0.07 + Math.random() * 0.04,
-        baseAlpha: 0.09 + depth * 0.11,
-        wakeX: 0,
-        wakeY: 0,
-        targetWakeX: 0,
-        targetWakeY: 0,
-        followAffinity: Math.random(),
-        tendrils: tendrils
-      });
-    }
+  if (overviewMouseLeaveHandler) {
+    window.removeEventListener('mouseleave', overviewMouseLeaveHandler);
+    overviewMouseLeaveHandler = null;
   }
-
-  _bindEvents() {
-    window.addEventListener('mousemove', this._onMouseMove);
-    window.addEventListener('mouseleave', this._onMouseLeave);
-    document.addEventListener('visibilitychange', this._onVisibilityChange);
-    window.addEventListener('resize', this._onResize);
-
-    if (this.options.container && window.ResizeObserver) {
-      this.resizeObserver = new ResizeObserver(() => this.resize());
-      this.resizeObserver.observe(this.options.container);
-    }
-  }
-
-  _unbindEvents() {
-    window.removeEventListener('mousemove', this._onMouseMove);
-    window.removeEventListener('mouseleave', this._onMouseLeave);
-    document.removeEventListener('visibilitychange', this._onVisibilityChange);
-    window.removeEventListener('resize', this._onResize);
-
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-      this.resizeObserver = null;
-    }
-  }
-
-  _onMouseMove(e) {
-    if (this.canvas) {
-      const rect = this.canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      if (this.prevMouseX !== -9999) {
-        this.mouseVx = (x - this.prevMouseX) * 0.4 + this.mouseVx * 0.6;
-        this.mouseVy = (y - this.prevMouseY) * 0.4 + this.mouseVy * 0.6;
-      }
-      this.prevMouseX = this.mouseX;
-      this.prevMouseY = this.mouseY;
-      this.mouseX = x;
-      this.mouseY = y;
-    }
-  }
-
-  _onMouseLeave() {
-    this.mouseX = -9999;
-    this.mouseY = -9999;
-    this.prevMouseX = -9999;
-    this.prevMouseY = -9999;
-    this.mouseVx = 0;
-    this.mouseVy = 0;
-  }
-
-  _onVisibilityChange() {
-    if (document.hidden) {
-      if (this.animId) {
-        cancelAnimationFrame(this.animId);
-        this.animId = null;
-      }
-    } else {
-      if (this.running && !this.animId) {
-        this.lastTimestamp = performance.now();
-        this.animId = requestAnimationFrame(this._loop);
-      }
-    }
-  }
-
-  _onResize() {
-    this.resize();
-  }
-
-  start() {
-    if (this.running) return;
-    this.running = true;
-    this.init();
-    this.lastTimestamp = performance.now();
-    this.animId = requestAnimationFrame(this._loop);
-  }
-
-  stop() {
-    this.running = false;
-    if (this.animId) {
-      cancelAnimationFrame(this.animId);
-      this.animId = null;
-    }
-    this._unbindEvents();
-    if (this.ctx && this.width && this.height) {
-      this.ctx.clearRect(0, 0, this.width, this.height);
-    }
-  }
-
-  _loop(timestamp) {
-    if (!this.running) return;
-
-    const dt = Math.min((timestamp - (this.lastTimestamp || timestamp)) / 1000, 0.05);
-    this.lastTimestamp = timestamp;
-    this.time += dt;
-
-    this._update(dt);
-    this._draw();
-
-    this.animId = requestAnimationFrame(this._loop);
-  }
-
-  _update(dt) {
-    const w = this.width || window.innerWidth;
-    const h = this.height || window.innerHeight;
-    const margin = 50;
-
-    this.mouseVx *= 0.90;
-    this.mouseVy *= 0.90;
-    const cursorSpeed = Math.hypot(this.mouseVx, this.mouseVy);
-
-    for (let i = 0; i < this.particles.length; i++) {
-      const p = this.particles[i];
-
-      // 1. Locomotion & organic pulse
-      p.pulsePhase += p.pulseSpeed;
-      p.deformPhase1 += p.deformSpeed1;
-      p.deformPhase2 += p.deformSpeed2;
-
-      const rawSin = Math.sin(p.pulsePhase);
-      let pulseBoost = 0;
-      let contraction = 1.0;
-      if (rawSin > 0.25) {
-        const progress = (rawSin - 0.25) / 0.75;
-        contraction = 1.0 - progress * progress * 0.16;
-        pulseBoost = progress * 0.38 * p.speed;
-      }
-
-      p.heading += p.turnSpeed + Math.sin(this.time * 0.4 + p.pulsePhase) * 0.0025;
-
-      const currentX = Math.sin(p.y * 0.0022 + this.time * 0.25) * 0.14;
-      const currentY = Math.cos(p.x * 0.0022 + this.time * 0.20) * 0.10 - 0.07;
-
-      const moveX = Math.cos(p.heading) * (p.speed + pulseBoost) + currentX;
-      const moveY = Math.sin(p.heading) * (p.speed + pulseBoost) + currentY;
-
-      // 2. Cursor disturbance & fluid wake
-      p.wakeX += (p.targetWakeX - p.wakeX) * 0.08;
-      p.wakeY += (p.targetWakeY - p.wakeY) * 0.08;
-      p.targetWakeX *= 0.92;
-      p.targetWakeY *= 0.92;
-
-      if (this.mouseX > -500) {
-        const dx = p.x - this.mouseX;
-        const dy = p.y - this.mouseY;
-        const dist = Math.hypot(dx, dy);
-        const radius = 190;
-        if (dist < radius && dist > 1) {
-          const factor = Math.pow(1 - dist / radius, 1.8);
-          const push = factor * 2.8;
-          p.targetWakeX += (dx / dist) * push;
-          p.targetWakeY += (dy / dist) * push;
-
-          if (cursorSpeed > 0.3) {
-            const swirl = factor * Math.min(cursorSpeed * 0.18, 1.6);
-            if (p.followAffinity > 0.55) {
-              p.targetWakeX += (this.mouseVx * 0.12) * factor;
-              p.targetWakeY += (this.mouseVy * 0.12) * factor;
-            } else {
-              p.targetWakeX += (-dy / dist) * swirl * 0.5;
-              p.targetWakeY += (dx / dist) * swirl * 0.5;
-            }
-          }
-        }
-      }
-
-      p.x += moveX + p.wakeX;
-      p.y += moveY + p.wakeY;
-
-      if (p.x < -margin) p.x = w + margin;
-      if (p.x > w + margin) p.x = -margin;
-      if (p.y < -margin) p.y = h + margin;
-      if (p.y > h + margin) p.y = -margin;
-
-      // 3. Tendril trailing wave physics
-      if (p.tendrils && p.tendrils.length > 0) {
-        const outerR = p.baseR * contraction;
-        const originX = p.x - Math.cos(p.heading) * (outerR * 0.7);
-        const originY = p.y - Math.sin(p.heading) * (outerR * 0.7);
-
-        for (let t = 0; t < p.tendrils.length; t++) {
-          const tendril = p.tendrils[t];
-          const tOffset = (t - (p.tendrils.length - 1) / 2) * (outerR * 0.45);
-          let prevX = originX + Math.sin(p.heading) * tOffset;
-          let prevY = originY - Math.cos(p.heading) * tOffset;
-
-          for (let seg = 0; seg < tendril.length; seg++) {
-            const node = tendril[seg];
-            const segDist = 4.5 + seg * 2.2;
-            const wave = Math.sin(this.time * 2.4 + p.pulsePhase + seg * 0.9 + t * 0.7) * (1.1 + seg * 0.5);
-            const targetX = prevX - Math.cos(p.heading) * segDist + Math.sin(p.heading) * wave;
-            const targetY = prevY - Math.sin(p.heading) * segDist - Math.cos(p.heading) * wave;
-
-            node.x += (targetX - node.x) * 0.28;
-            node.y += (targetY - node.y) * 0.28;
-            prevX = node.x;
-            prevY = node.y;
-          }
-        }
-      }
-
-      p._currentContraction = contraction;
-    }
-  }
-
-  _draw() {
-    const ctx = this.ctx;
-    if (!ctx) return;
-    const w = this.width;
-    const h = this.height;
-
-    ctx.clearRect(0, 0, w, h);
-
-    const steps = 24;
-
-    for (let i = 0; i < this.particles.length; i++) {
-      const p = this.particles[i];
-      const contraction = p._currentContraction || 1.0;
-      const outerR = p.baseR * contraction;
-      const innerR = outerR * p.holeRatio;
-
-      ctx.save();
-
-      // ── Trailing micro-tendril filaments ──
-      if (p.tendrils && p.tendrils.length > 0) {
-        ctx.beginPath();
-        for (let t = 0; t < p.tendrils.length; t++) {
-          const tendril = p.tendrils[t];
-          const tOffset = (t - (p.tendrils.length - 1) / 2) * (outerR * 0.45);
-          const startX = p.x - Math.cos(p.heading) * (outerR * 0.6) + Math.sin(p.heading) * tOffset;
-          const startY = p.y - Math.sin(p.heading) * (outerR * 0.6) - Math.cos(p.heading) * tOffset;
-
-          ctx.moveTo(startX, startY);
-          for (let seg = 0; seg < tendril.length; seg++) {
-            ctx.lineTo(tendril[seg].x, tendril[seg].y);
-          }
-        }
-        ctx.strokeStyle = `rgba(${this.options.tendrilColor}, ${(p.baseAlpha * 0.42).toFixed(3)})`;
-        ctx.lineWidth = 0.55;
-        ctx.stroke();
-      }
-
-      // ── Organic Ring Body with Soft Center Hole (evenodd rule) ──
-      ctx.beginPath();
-
-      // Outer boundary (clockwise)
-      for (let s = 0; s <= steps; s++) {
-        const theta = (s / steps) * Math.PI * 2;
-        const deform = 1 + p.deformAmp * Math.sin(p.deformLobes * theta + p.deformPhase1)
-                         + (p.deformAmp * 0.45) * Math.cos(2 * theta + p.deformPhase2);
-        const r = outerR * deform;
-        const px = p.x + Math.cos(theta) * r;
-        const py = p.y + Math.sin(theta) * r;
-        if (s === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-
-      // Inner hole boundary (counter-clockwise)
-      for (let s = steps; s >= 0; s--) {
-        const theta = (s / steps) * Math.PI * 2;
-        const deform = 1 + (p.deformAmp * 0.75) * Math.sin(p.deformLobes * theta + p.deformPhase1 + 0.5)
-                         + (p.deformAmp * 0.35) * Math.cos(2 * theta + p.deformPhase2);
-        const r = innerR * deform;
-        const px = p.x + Math.cos(theta) * r;
-        const py = p.y + Math.sin(theta) * r;
-        if (s === steps) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-
-      let alpha = p.baseAlpha;
-      if (this.mouseX > -500) {
-        const dCursor = Math.hypot(p.x - this.mouseX, p.y - this.mouseY);
-        if (dCursor < 180) {
-          alpha += (1 - dCursor / 180) * 0.12;
-        }
-      }
-
-      ctx.fillStyle = `rgba(${this.options.baseColor}, ${alpha.toFixed(3)})`;
-      ctx.fill('evenodd');
-
-      ctx.strokeStyle = `rgba(${this.options.strokeColor}, ${(alpha * 0.75).toFixed(3)})`;
-      ctx.lineWidth = 0.65;
-      ctx.stroke();
-
-      ctx.restore();
-    }
-  }
+  overviewWaypoints = [];
+  overviewPaths = [];
+  overviewNodes = [];
+  overviewDataPulses = [];
 }
 
-let overviewJellyfishField = null;
+function sampleBezier(t, path, ox, oy) {
+  const mt = 1 - t;
+  const mt2 = mt * mt;
+  const mt3 = mt2 * mt;
+  const t2 = t * t;
+  const t3 = t2 * t;
+
+  const p0x = path.p0.x + ox, p0y = path.p0.y + oy;
+  const c1x = path.c1.x + ox, c1y = path.c1.y + oy;
+  const c2x = path.c2.x + ox, c2y = path.c2.y + oy;
+  const p1x = path.p1.x + ox, p1y = path.p1.y + oy;
+
+  return {
+    x: mt3 * p0x + 3 * mt2 * t * c1x + 3 * mt * t2 * c2x + t3 * p1x,
+    y: mt3 * p0y + 3 * mt2 * t * c1y + 3 * mt * t2 * c2y + t3 * p1y
+  };
+}
+
+function buildOverviewTopology(w, h) {
+  const normWPs = [
+    { x: 0.03, y: 0.05, label: 'INGEST::01' },
+    { x: 0.26, y: 0.03, label: 'BUS::NORTH' },
+    { x: 0.54, y: 0.04, label: 'CORE::HUB' },
+    { x: 0.80, y: 0.03, label: 'GATEWAY::02' },
+    { x: 0.96, y: 0.07, label: 'EDGE::EAST' },
+
+    { x: 0.04, y: 0.22, label: 'ZONE::EP-A' },
+    { x: 0.96, y: 0.24, label: 'ZONE::EP-B' },
+
+    { x: 0.03, y: 0.42, label: 'SEC-OPS::L' },
+    { x: 0.50, y: 0.40, label: 'CORRELATION' },
+    { x: 0.97, y: 0.44, label: 'SEC-OPS::R' },
+
+    { x: 0.05, y: 0.66, label: 'PATCH::BUS' },
+    { x: 0.95, y: 0.68, label: 'TELEMETRY' },
+
+    { x: 0.04, y: 0.88, label: 'STORE::A0' },
+    { x: 0.52, y: 0.92, label: 'COMPLIANCE' },
+    { x: 0.96, y: 0.90, label: 'VAULT::SOC' }
+  ];
+
+  overviewWaypoints = normWPs.map(n => ({
+    x: Math.round(n.x * w),
+    y: Math.round(n.y * h),
+    label: n.label
+  }));
+
+  const pathPairs = [
+    // Top routing
+    { from: 0, to: 1, c1: [0.12, 0.01], c2: [0.18, 0.07], accent: true },
+    { from: 1, to: 2, c1: [0.36, 0.07], c2: [0.44, 0.01], accent: false },
+    { from: 2, to: 3, c1: [0.65, 0.01], c2: [0.72, 0.06], accent: true },
+    { from: 3, to: 4, c1: [0.88, 0.01], c2: [0.92, 0.11], accent: false },
+
+    // Left border flow down
+    { from: 0, to: 5, c1: [0.01, 0.13], c2: [0.06, 0.17], accent: true },
+    { from: 5, to: 7, c1: [0.06, 0.31], c2: [0.01, 0.37], accent: false },
+    { from: 7, to: 10, c1: [0.01, 0.51], c2: [0.06, 0.59], accent: true },
+    { from: 10, to: 12, c1: [0.06, 0.77], c2: [0.02, 0.83], accent: false },
+
+    // Right border flow down
+    { from: 4, to: 6, c1: [0.98, 0.15], c2: [0.93, 0.19], accent: false },
+    { from: 6, to: 9, c1: [0.93, 0.33], c2: [0.99, 0.39], accent: true },
+    { from: 9, to: 11, c1: [0.99, 0.53], c2: [0.92, 0.61], accent: false },
+    { from: 11, to: 14, c1: [0.92, 0.77], c2: [0.98, 0.83], accent: true },
+
+    // Cross-channel horizontal routes across inter-card gaps
+    { from: 5, to: 8, c1: [0.20, 0.25], c2: [0.35, 0.43], accent: false },
+    { from: 8, to: 6, c1: [0.65, 0.39], c2: [0.80, 0.23], accent: true },
+    { from: 7, to: 8, c1: [0.22, 0.45], c2: [0.36, 0.39], accent: true },
+    { from: 8, to: 9, c1: [0.64, 0.43], c2: [0.78, 0.47], accent: false },
+
+    // Bottom routing
+    { from: 12, to: 13, c1: [0.24, 0.93], c2: [0.38, 0.87], accent: false },
+    { from: 13, to: 14, c1: [0.66, 0.95], c2: [0.82, 0.85], accent: true }
+  ];
+
+  overviewPaths = pathPairs.map(pp => {
+    const p0 = overviewWaypoints[pp.from];
+    const p1 = overviewWaypoints[pp.to];
+    return {
+      p0: p0,
+      p1: p1,
+      c1: { x: Math.round(pp.c1[0] * w), y: Math.round(pp.c1[1] * h) },
+      c2: { x: Math.round(pp.c2[0] * w), y: Math.round(pp.c2[1] * h) },
+      isAccent: pp.accent,
+      flowSpeed: 0.6 + Math.random() * 0.5
+    };
+  });
+
+  // Moving telemetry & security infrastructure nodes
+  overviewNodes = [];
+  const nodeCount = 22;
+  for (let i = 0; i < nodeCount; i++) {
+    const pIdx = i % overviewPaths.length;
+    const isAccent = overviewPaths[pIdx].isAccent;
+    overviewNodes.push({
+      pathIdx: pIdx,
+      t: Math.random(),
+      speed: 0.0006 + Math.random() * 0.0008, // Slow, calm, professional operational speed
+      radius: Math.random() * 0.9 + 2.1, // 2.1 to 3.0px
+      accentColor: isAccent ? '#2563EB' : (Math.random() > 0.5 ? '#0284C7' : '#64748B'),
+      baseAlpha: Math.random() * 0.22 + 0.36,
+      phase: Math.random() * Math.PI * 2,
+      pulseSpeed: Math.random() * 0.025 + 0.012,
+      deflectX: 0,
+      deflectY: 0,
+      excitement: 0
+    });
+  }
+}
 
 function initOverviewBgAnimation(container, canvas) {
   stopOverviewBgAnimation();
   if (!container || !canvas) return;
-  overviewJellyfishField = new OrganicJellyfishField(canvas, {
-    densityDivisor: 22000,
-    minParticles: 36,
-    maxParticles: 70,
-    speedMultiplier: 0.85,
-    baseColor: '51, 65, 85',
-    strokeColor: '71, 85, 105',
-    tendrilColor: '100, 116, 139',
-    container: container
-  });
-  overviewJellyfishField.start();
-}
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
 
-function stopOverviewBgAnimation() {
-  if (overviewJellyfishField) {
-    overviewJellyfishField.stop();
-    overviewJellyfishField = null;
+  function resize() {
+    const rect = container.getBoundingClientRect();
+    const w = Math.max(container.scrollWidth, rect.width, window.innerWidth - 300);
+    const h = Math.max(container.scrollHeight, rect.height, 900);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    buildOverviewTopology(w, h);
   }
+
+  overviewResizeObserver = new ResizeObserver(() => {
+    resize();
+  });
+  overviewResizeObserver.observe(container);
+  resize();
+
+  overviewMouseMoveHandler = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const now = performance.now();
+    const dt = Math.max(1, now - (overviewMouse.lastTime || now));
+    const vx = ((mx - (overviewMouse.lastX || mx)) / dt) * 16.67;
+    const vy = ((my - (overviewMouse.lastY || my)) / dt) * 16.67;
+    overviewMouse.speed = Math.sqrt(vx * vx + vy * vy);
+    overviewMouse.lastX = mx;
+    overviewMouse.lastY = my;
+    overviewMouse.lastTime = now;
+
+    overviewMouse.x = mx;
+    overviewMouse.y = my;
+
+    // Gentle parallax target: max +/- 16px
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    overviewMouse.targetPx = Math.max(-18, Math.min(18, (mx - cx) * 0.015));
+    overviewMouse.targetPy = Math.max(-18, Math.min(18, (my - cy) * 0.015));
+  };
+
+  overviewMouseLeaveHandler = () => {
+    overviewMouse.x = -9999;
+    overviewMouse.y = -9999;
+    overviewMouse.targetPx = 0;
+    overviewMouse.targetPy = 0;
+    overviewMouse.speed = 0;
+  };
+
+  window.addEventListener('mousemove', overviewMouseMoveHandler);
+  window.addEventListener('mouseleave', overviewMouseLeaveHandler);
+
+  let flowStep = 0;
+
+  function draw() {
+    flowStep += 0.35;
+    const w = parseFloat(canvas.style.width) || canvas.width;
+    const h = parseFloat(canvas.style.height) || canvas.height;
+
+    // Smooth inertia on parallax
+    overviewMouse.px += (overviewMouse.targetPx - overviewMouse.px) * 0.04;
+    overviewMouse.py += (overviewMouse.targetPy - overviewMouse.py) * 0.04;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // 1. Technical Grid / Dot Field (layer 0: parallax 0.3x)
+    const gpx = overviewMouse.px * 0.3;
+    const gpy = overviewMouse.py * 0.3;
+    ctx.save();
+    ctx.fillStyle = 'rgba(100, 116, 139, 0.28)'; // Phase7: boosted from 0.13 → 0.28
+    const pitch = 54;
+    const startX = ((gpx % pitch) + pitch) % pitch;
+    const startY = ((gpy % pitch) + pitch) % pitch;
+    for (let x = startX; x < w; x += pitch) {
+      for (let y = startY; y < h; y += pitch) {
+        ctx.fillRect(x - 0.75, y - 0.75, 1.5, 1.5);
+      }
+    }
+    ctx.restore();
+
+    // 2. Waypoints / Network Stations (layer 1: parallax 0.6x)
+    const wpx = overviewMouse.px * 0.6;
+    const wpy = overviewMouse.py * 0.6;
+    ctx.save();
+    ctx.font = '500 8.5px "JetBrains Mono", Consolas, monospace';
+    for (let i = 0; i < overviewWaypoints.length; i++) {
+      const wp = overviewWaypoints[i];
+      const wx = wp.x + wpx;
+      const wy = wp.y + wpy;
+
+      // Small crosshair
+      ctx.strokeStyle = 'rgba(71, 85, 105, 0.52)'; // Phase7: boosted from 0.26 → 0.52
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(wx - 4, wy); ctx.lineTo(wx + 4, wy);
+      ctx.moveTo(wx, wy - 4); ctx.lineTo(wx, wy + 4);
+      ctx.stroke();
+
+      // Station ID label
+      ctx.fillStyle = 'rgba(71, 85, 105, 0.52)'; // Phase7: boosted from 0.26 → 0.52
+      ctx.fillText(wp.label, wx + 6, wy - 4);
+    }
+    ctx.restore();
+
+    // 3. Curved Connection Paths (layer 2: parallax 0.75x)
+    const ppx = overviewMouse.px * 0.75;
+    const ppy = overviewMouse.py * 0.75;
+    ctx.save();
+    for (let i = 0; i < overviewPaths.length; i++) {
+      const p = overviewPaths[i];
+      const p0x = p.p0.x + ppx, p0y = p.p0.y + ppy;
+      const c1x = p.c1.x + ppx, c1y = p.c1.y + ppy;
+      const c2x = p.c2.x + ppx, c2y = p.c2.y + ppy;
+      const p1x = p.p1.x + ppx, p1y = p.p1.y + ppy;
+
+      // Static thin base curve
+      ctx.beginPath();
+      ctx.moveTo(p0x, p0y);
+      ctx.bezierCurveTo(c1x, c1y, c2x, c2y, p1x, p1y);
+      ctx.strokeStyle = 'rgba(100, 116, 139, 0.34)'; // Phase7: boosted from 0.16 → 0.34
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Subtle flowing pulse dashes
+      ctx.beginPath();
+      ctx.moveTo(p0x, p0y);
+      ctx.bezierCurveTo(c1x, c1y, c2x, c2y, p1x, p1y);
+      ctx.setLineDash([5, 20]);
+      ctx.lineDashOffset = -(flowStep * (p.flowSpeed || 0.8));
+      ctx.strokeStyle = p.isAccent ? 'rgba(37, 99, 235, 0.28)' : 'rgba(14, 165, 233, 0.22)'; // Phase7: boosted
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+
+    // 4. Traveling Data Pulses (occasional packets)
+    const now = performance.now();
+    if (now - lastPulseSpawnTime > 2800 && overviewPaths.length > 0) {
+      const randomPathIdx = Math.floor(Math.random() * overviewPaths.length);
+      overviewDataPulses.push({
+        pathIdx: randomPathIdx,
+        t: 0,
+        speed: 0.007 + Math.random() * 0.004,
+        color: Math.random() > 0.4 ? 'rgba(37, 99, 235, 0.32)' : 'rgba(14, 165, 233, 0.28)'
+      });
+      lastPulseSpawnTime = now;
+    }
+
+    ctx.save();
+    for (let i = overviewDataPulses.length - 1; i >= 0; i--) {
+      const pulse = overviewDataPulses[i];
+      pulse.t += pulse.speed;
+      if (pulse.t >= 1) {
+        overviewDataPulses.splice(i, 1);
+        continue;
+      }
+      const path = overviewPaths[pulse.pathIdx];
+      if (!path) continue;
+
+      const ptHead = sampleBezier(pulse.t, path, ppx, ppy);
+      const ptTail = sampleBezier(Math.max(0, pulse.t - 0.06), path, ppx, ppy);
+
+      const grad = ctx.createLinearGradient(ptTail.x, ptTail.y, ptHead.x, ptHead.y);
+      grad.addColorStop(0, 'rgba(37, 99, 235, 0)');
+      grad.addColorStop(1, pulse.color);
+      ctx.beginPath();
+      ctx.moveTo(ptTail.x, ptTail.y);
+      ctx.lineTo(ptHead.x, ptHead.y);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 5. Moving Infrastructure & Security Nodes (layer 3: parallax 1.0x + cursor proximity reaction)
+    const npx = overviewMouse.px;
+    const npy = overviewMouse.py;
+
+    for (let i = 0; i < overviewNodes.length; i++) {
+      const node = overviewNodes[i];
+      node.t += node.speed;
+      if (node.t >= 1) node.t = 0;
+      node.phase += node.pulseSpeed;
+
+      const path = overviewPaths[node.pathIdx];
+      if (!path) continue;
+
+      const basePt = sampleBezier(node.t, path, npx, npy);
+
+      // Mouse proximity interaction with smooth inertia & deflection
+      const dx = overviewMouse.x - basePt.x;
+      const dy = overviewMouse.y - basePt.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      let targetDeflectX = 0;
+      let targetDeflectY = 0;
+      let targetExcitement = 0;
+
+      if (dist < 180 && dist > 1) {
+        const prox = 1 - dist / 180;
+        targetExcitement = prox;
+        targetDeflectX = (dx / dist) * prox * 8.5;
+        targetDeflectY = (dy / dist) * prox * 8.5;
+      }
+
+      // Smooth inertia on node deflection
+      node.deflectX += (targetDeflectX - node.deflectX) * 0.08;
+      node.deflectY += (targetDeflectY - node.deflectY) * 0.08;
+      node.excitement += (targetExcitement - node.excitement) * 0.08;
+
+      const finalX = basePt.x + node.deflectX;
+      const finalY = basePt.y + node.deflectY;
+
+      // Subtle brightness and scale variation
+      const breathing = Math.sin(node.phase) * 0.12;
+      const currentAlpha = Math.min(0.85, node.baseAlpha + breathing + node.excitement * 0.35);
+      const currentRadius = node.radius * (1 + node.excitement * 0.28);
+
+      ctx.save();
+      // Outer subtle ring
+      ctx.beginPath();
+      ctx.arc(finalX, finalY, currentRadius + 2, 0, Math.PI * 2);
+      ctx.strokeStyle = node.accentColor;
+      ctx.lineWidth = 0.8;
+      ctx.globalAlpha = currentAlpha * 0.35;
+      ctx.stroke();
+
+      // Node core
+      ctx.beginPath();
+      ctx.arc(finalX, finalY, currentRadius, 0, Math.PI * 2);
+      ctx.fillStyle = node.accentColor;
+      ctx.globalAlpha = currentAlpha;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    overviewAnimId = requestAnimationFrame(draw);
+  }
+
+  draw();
 }
 
 // ---------- Overview ----------
@@ -3264,403 +3192,367 @@ function showToast(msg, kind) {
   toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
 }
 
-// =========================================================================
-// ORGANIC DIGITAL FLOW FIELD ENGINE (Login Background Canvas)
-// Premium enterprise-grade flow field: hundreds of tiny particles stream
-// along invisible, smooth, curved aerodynamic paths driven by a 2D harmonic
-// vector field that slowly evolves over time.
-//
-// Visual language: white/light background, tiny dark-slate particles,
-// ultra-thin trailing streamlines, zero neon, zero glowing blobs.
-// Mouse interaction: aerodynamic cylinder deflection bends flows around cursor.
-// =========================================================================
-class OrganicFlowField {
-  constructor(canvas, options = {}) {
-    this.canvas = canvas;
-    this.ctx = canvas ? canvas.getContext('2d') : null;
-    this.options = Object.assign({
-      particleCount: null,
-      densityDivisor: 3800,
-      minParticles: 480,
-      maxParticles: 700,
-      particleColor: '30, 41, 59',     // Slate-800 base
-      trailColor: '51, 65, 85',        // Slate-700 trails
-      baseSpeed: 0.90,
-      fieldScale: 0.0018,              // spatial frequency of flow field
-      fieldEvolution: 0.00025,         // how fast the field evolves over time
-      trailLength: 5,
-      mouseRadius: 185
-    }, options);
+// ---------- Dynamic Login Canvas Animation (SOC Cyber Grid & Radar Engine) ----------
+let canvasAnimId = null;
+let particles = [];
+let telemetryStreams = [];
+let shockwaves = [];
+let mousePos = { x: -2000, y: -2000 };
+let mouseVel = { x: 0, y: 0 };
+let lastMousePos = { x: -2000, y: -2000 };
+let lastMouseMoveTime = 0;
+let radarAngle = 0;
+let lastShockwaveTime = 0;
 
-    this.particles = [];
-    this.animId = null;
-    this.running = false;
-    this.time = 0;
-    this.lastTimestamp = 0;
-    this.width = 0;
-    this.height = 0;
-
-    this.mouseX = -9999;
-    this.mouseY = -9999;
-    this.prevMouseX = -9999;
-    this.prevMouseY = -9999;
-    this.mouseVx = 0;
-    this.mouseVy = 0;
-    this.mouseStrength = 0; // ramps up/down for smooth interaction
-
-    this._onMouseMove = this._onMouseMove.bind(this);
-    this._onMouseLeave = this._onMouseLeave.bind(this);
-    this._onVisibilityChange = this._onVisibilityChange.bind(this);
-    this._onResize = this._onResize.bind(this);
-    this._loop = this._loop.bind(this);
-  }
-
-  // ── Vector field: returns flow angle at (x, y, t) ─────────────────────
-  _fieldAngle(x, y, t) {
-    const s = this.options.fieldScale;
-    const e = this.options.fieldEvolution;
-    // Three layered harmonics for organic, non-repeating paths
-    const a1 = Math.sin(x * s * 1.0 + y * s * 0.7 + t * e * 1.0) * 1.10;
-    const a2 = Math.cos(x * s * 0.5 - y * s * 1.3 + t * e * 0.7) * 0.80;
-    const a3 = Math.sin(x * s * 0.8 + y * s * 0.4 - t * e * 1.4) * 0.55;
-    // Base drift angle ~10° (general eastward/northeastward tendency)
-    return 0.175 + a1 + a2 + a3;
-  }
-
-  // ── Aerodynamic cursor deflection angle ──────────────────────────────
-  _cursorDeflection(x, y, baseAngle) {
-    if (this.mouseX < -500 || this.mouseStrength < 0.005) return baseAngle;
-    const dx = x - this.mouseX;
-    const dy = y - this.mouseY;
-    const dist = Math.hypot(dx, dy);
-    const R = this.options.mouseRadius;
-    if (dist >= R || dist < 1) return baseAngle;
-
-    // Cylinder-flow aerodynamic deflection: bend around cursor
-    const proximity = 1 - dist / R;
-    const tanAngle = Math.atan2(dy, dx);          // angle from cursor to particle
-    const separation = Math.PI * 0.5;             // perpendicular deflection
-    const deflectedAngle = tanAngle + separation;  // tangential around cursor
-    const blend = Math.pow(proximity, 1.6) * 0.72 * this.mouseStrength;
-
-    return baseAngle * (1 - blend) + deflectedAngle * blend;
-  }
-
-  // ── Spawn a fresh particle ─────────────────────────────────────────────
-  _spawnParticle(w, h, existing) {
-    const depth = 0.3 + Math.random() * 0.7;
-    const speed = (0.55 + Math.random() * 0.95) * this.options.baseSpeed * (0.5 + 0.5 * depth);
-
-    // Bias spawn along left edge and top edge to feed flows across the canvas
-    let x, y;
-    if (existing && Math.random() > 0.12) {
-      // Mostly random positions when filling initially
-      x = Math.random() * w;
-      y = Math.random() * h;
-    } else {
-      // Re-inject along entry edges
-      if (Math.random() < 0.6) {
-        x = Math.random() < 0.5 ? -5 : Math.random() * w;
-        y = Math.random() * h;
-      } else {
-        x = Math.random() * w;
-        y = Math.random() < 0.5 ? -5 : h + 5;
-      }
-    }
-
-    const baseAlpha = (0.10 + depth * 0.16);
-    const maxLife = 240 + Math.floor(Math.random() * 220);
-
-    return {
-      x, y,
-      depth,
-      speed,
-      size: 0.85 + Math.random() * 0.75 * depth,
-      baseAlpha,
-      alpha: 0,
-      life: 0,
-      maxLife,
-      trail: [],                   // {x, y} history
-      angle: this._fieldAngle(x, y, this.time) // initial heading
-    };
-  }
-
-  init() {
-    this.resize();
-    this._bindEvents();
-  }
-
-  resize() {
-    if (!this.canvas) return;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    if (w <= 0 || h <= 0) return;
-
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    this.canvas.width = Math.floor(w * dpr);
-    this.canvas.height = Math.floor(h * dpr);
-    this.canvas.style.width = w + 'px';
-    this.canvas.style.height = h + 'px';
-    if (this.ctx) {
-      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-      this.ctx.scale(dpr, dpr);
-    }
-
-    this.width = w;
-    this.height = h;
-
-    // Re-build particles scaled to new size
-    const count = Math.min(
-      Math.max(Math.floor((w * h) / this.options.densityDivisor), this.options.minParticles),
-      this.options.maxParticles
-    );
-
-    if (this.particles.length === 0) {
-      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReduced) { this.particles = []; return; }
-
-      this.particles = [];
-      for (let i = 0; i < count; i++) {
-        const p = this._spawnParticle(w, h, true);
-        p.life = Math.floor(Math.random() * p.maxLife); // stagger phase-in
-        this.particles.push(p);
-      }
-    }
-  }
-
-  _bindEvents() {
-    window.addEventListener('mousemove', this._onMouseMove);
-    window.addEventListener('mouseleave', this._onMouseLeave);
-    document.addEventListener('visibilitychange', this._onVisibilityChange);
-    window.addEventListener('resize', this._onResize);
-  }
-
-  _unbindEvents() {
-    window.removeEventListener('mousemove', this._onMouseMove);
-    window.removeEventListener('mouseleave', this._onMouseLeave);
-    document.removeEventListener('visibilitychange', this._onVisibilityChange);
-    window.removeEventListener('resize', this._onResize);
-  }
-
-  _onMouseMove(e) {
-    if (this.canvas) {
-      const rect = this.canvas.getBoundingClientRect();
-      this.prevMouseX = this.mouseX;
-      this.prevMouseY = this.mouseY;
-      this.mouseX = e.clientX - rect.left;
-      this.mouseY = e.clientY - rect.top;
-      if (this.prevMouseX !== -9999) {
-        const dvx = (this.mouseX - this.prevMouseX) * 0.4;
-        const dvy = (this.mouseY - this.prevMouseY) * 0.4;
-        this.mouseVx = dvx + this.mouseVx * 0.6;
-        this.mouseVy = dvy + this.mouseVy * 0.6;
-      }
-    }
-  }
-
-  _onMouseLeave() {
-    this.mouseX = -9999;
-    this.mouseY = -9999;
-    this.prevMouseX = -9999;
-    this.prevMouseY = -9999;
-    this.mouseVx = 0;
-    this.mouseVy = 0;
-  }
-
-  _onVisibilityChange() {
-    if (document.hidden) {
-      if (this.animId) { cancelAnimationFrame(this.animId); this.animId = null; }
-    } else {
-      if (this.running && !this.animId) {
-        this.lastTimestamp = performance.now();
-        this.animId = requestAnimationFrame(this._loop);
-      }
-    }
-  }
-
-  _onResize() { this.resize(); }
-
-  start() {
-    if (this.running) return;
-    this.running = true;
-    this.init();
-    this.lastTimestamp = performance.now();
-    this.animId = requestAnimationFrame(this._loop);
-  }
-
-  stop() {
-    this.running = false;
-    if (this.animId) { cancelAnimationFrame(this.animId); this.animId = null; }
-    this._unbindEvents();
-    if (this.ctx && this.width && this.height) this.ctx.clearRect(0, 0, this.width, this.height);
-  }
-
-  _loop(timestamp) {
-    if (!this.running) return;
-    const dt = Math.min((timestamp - (this.lastTimestamp || timestamp)) / 1000, 0.05);
-    this.lastTimestamp = timestamp;
-    this.time += dt * 60; // convert to ~frame units
-
-    this._update(dt);
-    this._draw();
-    this.animId = requestAnimationFrame(this._loop);
-  }
-
-  _update(dt) {
-    const w = this.width || window.innerWidth;
-    const h = this.height || window.innerHeight;
-    const t = this.time;
-    const trailLen = this.options.trailLength;
-
-    // Mouse velocity damping
-    this.mouseVx *= 0.88;
-    this.mouseVy *= 0.88;
-    const cursorMoving = (Math.hypot(this.mouseVx, this.mouseVy) > 0.3) && this.mouseX > -500;
-    // Ramp cursor strength smoothly
-    const targetStrength = (this.mouseX > -500) ? 1.0 : 0.0;
-    this.mouseStrength += (targetStrength - this.mouseStrength) * 0.06;
-
-    for (let i = 0; i < this.particles.length; i++) {
-      const p = this.particles[i];
-      p.life++;
-
-      // Life-cycle opacity envelope (fade in then fade out)
-      const t01 = p.life / p.maxLife;
-      const fadePct = 0.12;
-      let env;
-      if (t01 < fadePct) {
-        env = t01 / fadePct;
-      } else if (t01 > 1 - fadePct) {
-        env = (1 - t01) / fadePct;
-      } else {
-        env = 1.0;
-      }
-      p.alpha = p.baseAlpha * env;
-
-      // Sample flow field at current position
-      const baseAngle = this._fieldAngle(p.x, p.y, t);
-      p.angle = p.angle * 0.82 + this._cursorDeflection(p.x, p.y, baseAngle) * 0.18;
-
-      // Push trail
-      p.trail.push({ x: p.x, y: p.y });
-      if (p.trail.length > trailLen) p.trail.shift();
-
-      // Advance along flow
-      const spd = p.speed;
-      p.x += Math.cos(p.angle) * spd;
-      p.y += Math.sin(p.angle) * spd;
-
-      // Recycle particles: expired or out-of-canvas
-      const margin = 30;
-      if (
-        p.life >= p.maxLife ||
-        p.x < -margin || p.x > w + margin ||
-        p.y < -margin || p.y > h + margin
-      ) {
-        const np = this._spawnParticle(w, h, false);
-        Object.assign(p, np);
-        p.life = 0;
-        p.trail = [];
-      }
-    }
-  }
-
-  _draw() {
-    const ctx = this.ctx;
-    if (!ctx) return;
-    const w = this.width;
-    const h = this.height;
-
-    ctx.clearRect(0, 0, w, h);
-
-    for (let i = 0; i < this.particles.length; i++) {
-      const p = this.particles[i];
-      if (p.alpha < 0.01 || p.trail.length < 2) continue;
-
-      // Depth-based color: deeper = slightly lighter
-      const depthOffset = (1 - p.depth) * 30;
-      const r = Math.floor(30 + depthOffset);
-      const g = Math.floor(41 + depthOffset);
-      const b = Math.floor(59 + depthOffset);
-
-      // ── Draw trail as connected line segments with decaying alpha ──
-      const trail = p.trail;
-      const trailLen = trail.length;
-      for (let j = 0; j < trailLen - 1; j++) {
-        const frac = (j + 1) / trailLen;
-        const segAlpha = p.alpha * frac * 0.55;
-        if (segAlpha < 0.005) continue;
-
-        ctx.beginPath();
-        ctx.moveTo(trail[j].x, trail[j].y);
-        ctx.lineTo(trail[j + 1].x, trail[j + 1].y);
-        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${segAlpha.toFixed(3)})`;
-        ctx.lineWidth = p.size * 0.55;
-        ctx.stroke();
-      }
-
-      // ── Draw particle head ──
-      // Boost alpha near cursor
-      let headAlpha = p.alpha;
-      if (this.mouseX > -500) {
-        const dCursor = Math.hypot(p.x - this.mouseX, p.y - this.mouseY);
-        if (dCursor < 160) {
-          headAlpha += (1 - dCursor / 160) * 0.18;
-        }
-      }
-      headAlpha = Math.min(headAlpha, 0.65);
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${headAlpha.toFixed(3)})`;
-      ctx.fill();
-    }
-  }
-}
-
-// ---------- Login Canvas — Organic Digital Flow Field ----------
-var loginFlowField = null;
+const TELEMETRY_PHRASES = [
+  'NODE#A0::ONLINE',
+  'AES-256::VERIFIED',
+  '0x7F::AUTH_OK',
+  'PORT:443::SECURE',
+  'LATENCY::12ms',
+  'TLS_v1.3::ACTIVE',
+  'KEY_EXCHANGE::PASS',
+  'SOC_MSS::STREAM',
+  'SHA-512::INTEGRITY',
+  'PACKET_TRACE::VALID',
+  'NODE_SYNC::100%'
+];
 
 function initLoginCanvas() {
   const canvas = document.getElementById('login-canvas');
   if (!canvas) return;
 
-  if (!loginFlowField) {
-    loginFlowField = new OrganicFlowField(canvas, {
-      densityDivisor: 3800,
-      minParticles: 480,
-      maxParticles: 700,
-      baseSpeed: 0.90,
-      fieldScale: 0.0018,
-      fieldEvolution: 0.00025,
-      trailLength: 5,
-      mouseRadius: 185
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    createParticles();
+    createTelemetry();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  window.addEventListener('mousemove', (e) => {
+    const now = performance.now();
+    if (lastMouseMoveTime > 0) {
+      const dt = Math.max(1, now - lastMouseMoveTime);
+      const vx = ((e.clientX - lastMousePos.x) / dt) * 16.67;
+      const vy = ((e.clientY - lastMousePos.y) / dt) * 16.67;
+      mouseVel.x = mouseVel.x * 0.35 + vx * 0.65;
+      mouseVel.y = mouseVel.y * 0.35 + vy * 0.65;
+    }
+    lastMousePos.x = e.clientX;
+    lastMousePos.y = e.clientY;
+    lastMouseMoveTime = now;
+    mousePos.x = e.clientX;
+    mousePos.y = e.clientY;
+
+    const timeNow = Date.now();
+    if (timeNow - lastShockwaveTime > 400) {
+      const screen = document.getElementById('login-screen');
+      if (screen && !screen.hidden) {
+        shockwaves.push({
+          x: e.clientX,
+          y: e.clientY,
+          radius: 12,
+          maxRadius: 160,
+          speed: 2.6,
+          alpha: 0.35,
+          color: Math.random() > 0.5 ? '#23d6bb' : '#38bdf8'
+        });
+        lastShockwaveTime = timeNow;
+      }
+    }
+  });
+
+  window.addEventListener('mouseleave', () => {
+    mousePos.x = -2000;
+    mousePos.y = -2000;
+    mouseVel.x = 0;
+    mouseVel.y = 0;
+  });
+
+  const loginScreen = document.getElementById('login-screen');
+  if (loginScreen) {
+    loginScreen.addEventListener('mousedown', (e) => {
+      shockwaves.push({
+        x: e.clientX,
+        y: e.clientY,
+        radius: 8,
+        maxRadius: 320,
+        speed: 4.8,
+        alpha: 0.75,
+        color: '#23d6bb'
+      });
+      shockwaves.push({
+        x: e.clientX,
+        y: e.clientY,
+        radius: 4,
+        maxRadius: 240,
+        speed: 3.6,
+        alpha: 0.55,
+        color: '#38bdf8'
+      });
     });
   }
-  loginFlowField.resize();
 
-  // Live IST clock in bottom-right corner
-  const clockEl = document.getElementById('login-status-time');
-  function updateClock() {
-    if (!clockEl) return;
-    clockEl.textContent = new Date().toLocaleTimeString('en-IN', {
-      timeZone: 'Asia/Kolkata',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    }) + ' IST';
+  // Live HUD Latency variation ticker
+  setInterval(() => {
+    const latEl = document.getElementById('login-hud-latency');
+    if (latEl) {
+      const ms = Math.floor(10 + Math.random() * 5);
+      latEl.textContent = ms + 'ms';
+    }
+  }, 2400);
+}
+
+function createParticles() {
+  const canvas = document.getElementById('login-canvas');
+  if (!canvas) return;
+  const count = Math.min(Math.max(Math.floor((canvas.width * canvas.height) / 11500), 55), 115);
+  particles = [];
+  const palette = ['#23d6bb', '#38bdf8', '#5c8bf5', '#2dd4bf', '#818cf8'];
+
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      baseX: Math.random() * canvas.width,
+      baseY: Math.random() * canvas.height,
+      baseVx: (Math.random() - 0.5) * 0.45,
+      baseVy: (Math.random() - 0.5) * 0.45,
+      orbitRadius: Math.random() * 24 + 8,
+      orbitAngle: Math.random() * Math.PI * 2,
+      orbitSpeed: (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 0.012 + 0.006),
+      baseRadius: Math.random() * 2.8 + 2.4, // Small, elegant ring outer radius
+      lineWidth: Math.random() * 0.55 + 0.95, // Thin circular stroke outline
+      color: palette[Math.floor(Math.random() * palette.length)],
+      baseAlpha: Math.random() * 0.35 + 0.28,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: Math.random() * 0.03 + 0.012,
+      swirlDir: Math.random() > 0.5 ? 1 : -1,
+      followVx: 0,
+      followVy: 0,
+      excitement: 0
+    });
   }
-  updateClock();
-  setInterval(updateClock, 1000);
+}
+
+function createTelemetry() {
+  const canvas = document.getElementById('login-canvas');
+  if (!canvas) return;
+  telemetryStreams = [];
+  const streamCount = Math.min(Math.floor(canvas.width / 140), 12);
+  for (let i = 0; i < streamCount; i++) {
+    telemetryStreams.push({
+      x: (i + 0.5) * (canvas.width / streamCount) + (Math.random() - 0.5) * 40,
+      y: Math.random() * canvas.height,
+      text: TELEMETRY_PHRASES[Math.floor(Math.random() * TELEMETRY_PHRASES.length)],
+      vy: -(Math.random() * 0.4 + 0.2),
+      alpha: Math.random() * 0.28 + 0.1,
+      fontSize: Math.floor(Math.random() * 2) + 10,
+      color: Math.random() > 0.4 ? '#23d6bb' : '#38bdf8'
+    });
+  }
 }
 
 function startLoginCanvasAnimation() {
   const canvas = document.getElementById('login-canvas');
   if (!canvas) return;
-  if (!loginFlowField) { initLoginCanvas(); }
-  if (loginFlowField) { loginFlowField.start(); }
+  const ctx = canvas.getContext('2d');
+  if (canvasAnimId) cancelAnimationFrame(canvasAnimId);
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    // 1. Concentric Holographic Range Rings
+    ctx.save();
+    ctx.strokeStyle = 'rgba(35, 214, 187, 0.045)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 12]);
+    const maxR = Math.max(canvas.width, canvas.height) * 0.65;
+    for (let r = 180; r < maxR; r += 160) {
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    // Crosshair axes
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.03)';
+    ctx.beginPath();
+    ctx.moveTo(0, centerY); ctx.lineTo(canvas.width, centerY);
+    ctx.moveTo(centerX, 0); ctx.lineTo(centerX, canvas.height);
+    ctx.stroke();
+    ctx.restore();
+
+    // 2. Animated Radar Sweep Beam on Canvas
+    radarAngle += 0.009;
+    if (radarAngle > Math.PI * 2) radarAngle = 0;
+    const sweepLen = Math.max(canvas.width, canvas.height);
+    const sweepEndX = centerX + Math.cos(radarAngle) * sweepLen;
+    const sweepEndY = centerY + Math.sin(radarAngle) * sweepLen;
+    
+    ctx.save();
+    const sweepGrad = ctx.createLinearGradient(centerX, centerY, sweepEndX, sweepEndY);
+    sweepGrad.addColorStop(0, 'rgba(35, 214, 187, 0.22)');
+    sweepGrad.addColorStop(0.7, 'rgba(56, 189, 248, 0.10)');
+    sweepGrad.addColorStop(1, 'rgba(35, 214, 187, 0)');
+    ctx.strokeStyle = sweepGrad;
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(sweepEndX, sweepEndY);
+    ctx.stroke();
+    ctx.restore();
+
+    // 3. Floating Telemetry Stream Packets
+    ctx.save();
+    for (let s of telemetryStreams) {
+      s.y += s.vy;
+      if (s.y < -30) {
+        s.y = canvas.height + 20;
+        s.x = Math.random() * canvas.width;
+        s.text = TELEMETRY_PHRASES[Math.floor(Math.random() * TELEMETRY_PHRASES.length)];
+        s.alpha = Math.random() * 0.28 + 0.1;
+      }
+      ctx.font = `600 ${s.fontSize}px 'JetBrains Mono', Consolas, monospace`;
+      ctx.fillStyle = s.color;
+      ctx.globalAlpha = s.alpha;
+      ctx.fillText(s.text, s.x, s.y);
+    }
+    ctx.restore();
+
+    // 4. Interactive Shockwaves (expanding subtle rings)
+    for (let i = shockwaves.length - 1; i >= 0; i--) {
+      const sw = shockwaves[i];
+      sw.radius += sw.speed;
+      sw.alpha -= 0.012;
+      if (sw.radius >= sw.maxRadius || sw.alpha <= 0) {
+        shockwaves.splice(i, 1);
+        continue;
+      }
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = sw.color;
+      ctx.globalAlpha = Math.max(0, sw.alpha);
+      ctx.lineWidth = 1.8;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = sw.color;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Damp mouse velocity naturally for inertia response
+    mouseVel.x *= 0.88;
+    mouseVel.y *= 0.88;
+    if (Math.abs(mouseVel.x) < 0.01) mouseVel.x = 0;
+    if (Math.abs(mouseVel.y) < 0.01) mouseVel.y = 0;
+    const mouseSpeed = Math.sqrt(mouseVel.x * mouseVel.x + mouseVel.y * mouseVel.y);
+
+    // 5. Perfect Circular Donut / Ring Particle System
+    const influenceRadius = 220;
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+
+      // Current spatial position before applying frame forces
+      const curOrbitX = Math.cos(p.orbitAngle) * p.orbitRadius;
+      const curOrbitY = Math.sin(p.orbitAngle) * p.orbitRadius;
+      const curX = p.baseX + curOrbitX;
+      const curY = p.baseY + curOrbitY;
+
+      // Distance to cursor
+      const dx = mousePos.x - curX;
+      const dy = mousePos.y - curY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      let targetExcitement = 0;
+
+      if (dist < influenceRadius && dist > 1) {
+        const prox = 1 - dist / influenceRadius; // 0 to 1
+        targetExcitement = prox;
+
+        const nx = dx / dist;
+        const ny = dy / dist;
+
+        // Flow reaction: cursor movement pulls particles along with natural delay/inertia
+        // Fast movement creates stronger flow, slow movement creates gentle pull
+        const flowFactor = Math.min(mouseSpeed * 0.06, 2.4) * (prox * prox);
+        p.followVx += mouseVel.x * 0.035 * prox + (mouseSpeed > 0.1 ? mouseVel.x * 0.025 * flowFactor : 0);
+        p.followVy += mouseVel.y * 0.035 * prox + (mouseSpeed > 0.1 ? mouseVel.y * 0.025 * flowFactor : 0);
+
+        // Gentle attraction towards cursor
+        const attract = (0.28 + Math.min(mouseSpeed * 0.04, 0.5)) * (prox * prox);
+        p.followVx += nx * attract * 0.65;
+        p.followVy += ny * attract * 0.65;
+
+        // Gentle tangential swirl around cursor so they flow gracefully without bunching up
+        const tx = -ny;
+        const ty = nx;
+        p.followVx += tx * (p.swirlDir * 0.22 * prox);
+        p.followVy += ty * (p.swirlDir * 0.22 * prox);
+      }
+
+      // Smooth inertia decay: particles decelerate and smoothly return to their autonomous paths
+      p.followVx *= 0.91;
+      p.followVy *= 0.91;
+
+      // Smooth excitement interpolation (controls brightness, radius, speed)
+      p.excitement += (targetExcitement - p.excitement) * 0.08;
+
+      // Autonomous motion: drift + orbit, slightly faster when excited by cursor
+      const speedMultiplier = 1 + p.excitement * 1.35;
+      p.orbitAngle += p.orbitSpeed * speedMultiplier;
+      p.pulse += p.pulseSpeed;
+
+      // Update anchor position with autonomous drift + follow velocity
+      p.baseX += p.baseVx * speedMultiplier + p.followVx;
+      p.baseY += p.baseVy * speedMultiplier + p.followVy;
+
+      // Seamless screen boundary wrap
+      const margin = 50;
+      if (p.baseX < -margin) p.baseX = canvas.width + margin;
+      if (p.baseX > canvas.width + margin) p.baseX = -margin;
+      if (p.baseY < -margin) p.baseY = canvas.height + margin;
+      if (p.baseY > canvas.height + margin) p.baseY = -margin;
+
+      // Final coordinates for rendering
+      const drawX = p.baseX + Math.cos(p.orbitAngle) * p.orbitRadius;
+      const drawY = p.baseY + Math.sin(p.orbitAngle) * p.orbitRadius;
+
+      // Donut / Ring geometry: hollow center with thin circular stroke
+      const currentRadius = (p.baseRadius + Math.sin(p.pulse) * 0.35) * (1 + p.excitement * 0.45);
+      const currentLineWidth = p.lineWidth * (1 + p.excitement * 0.35);
+      const currentAlpha = Math.min(0.95, p.baseAlpha + p.excitement * 0.55);
+
+      // Render perfect circular donut/ring (NEVER filled dot or lines)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(drawX, drawY, Math.max(1, currentRadius), 0, Math.PI * 2);
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = currentLineWidth;
+      ctx.globalAlpha = currentAlpha;
+
+      if (p.excitement > 0.08) {
+        ctx.shadowBlur = 9 * p.excitement;
+        ctx.shadowColor = p.color;
+      }
+
+      ctx.stroke(); // Hollow ring with clear outline
+      ctx.restore();
+    }
+
+    canvasAnimId = requestAnimationFrame(draw);
+  }
+
+  draw();
 }
 
 function stopLoginCanvasAnimation() {
-  if (loginFlowField) { loginFlowField.stop(); }
+  if (canvasAnimId) {
+    cancelAnimationFrame(canvasAnimId);
+    canvasAnimId = null;
+  }
 }
 
 // ---------- Dynamic Interactive Cursor Follower ----------
@@ -3864,270 +3756,104 @@ function showWelcomeTransition(username, onRevealDashboard) {
 }
 
 /* ---------------------------------------------------------------
-   Dynamic Enterprise Network Canvas: subtle drifting monochrome nodes
-   with dynamic connecting lines (zero neon, low GPU/CPU footprint)
+   Welcome canvas: subtle floating particles, cursor parallax
 --------------------------------------------------------------- */
 function initWelcomeCanvas() {
   const canvas = document.getElementById('wt-canvas');
   if (!canvas) return null;
-  const field = new OrganicJellyfishField(canvas, {
-    densityDivisor: 20000,
-    minParticles: 30,
-    maxParticles: 52,
-    speedMultiplier: 1.0,
-    baseColor: '15, 23, 42',
-    strokeColor: '51, 65, 85',
-    tendrilColor: '71, 85, 105'
-  });
-  field.start();
+
+  const ctx = canvas.getContext('2d');
+  let W = canvas.width  = window.innerWidth;
+  let H = canvas.height = window.innerHeight;
+  let animId = null;
+  let mouseX = W / 2;
+  let mouseY = H / 2;
+  let running = true;
+
+  // Particle palette — very muted to stay on-brand
+  const PALETTE = [
+    'rgba(37, 99, 235, IDX)',   // blue
+    'rgba(56,189,248, IDX)',    // sky
+    'rgba(139,92,246, IDX)',    // violet
+    'rgba(17,24,39, IDX)',      // near-black
+  ];
+
+  function makeColor(idx, alpha) {
+    return PALETTE[idx % PALETTE.length].replace('IDX', alpha.toFixed(2));
+  }
+
+  // Generate particles
+  const COUNT = Math.min(55, Math.floor(W * H / 22000));
+  const particles = Array.from({ length: COUNT }, (_, i) => ({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    r: 1.5 + Math.random() * 2.5,
+    alpha: 0.06 + Math.random() * 0.12,
+    alphaDir: Math.random() < 0.5 ? 1 : -1,
+    speedX: (Math.random() - 0.5) * 0.25,
+    speedY: (Math.random() - 0.5) * 0.25,
+    colorIdx: Math.floor(Math.random() * PALETTE.length),
+    parallaxStrength: 0.008 + Math.random() * 0.018,
+  }));
+
+  function draw() {
+    if (!running) return;
+    ctx.clearRect(0, 0, W, H);
+
+    const cx = W / 2;
+    const cy = H / 2;
+
+    for (const p of particles) {
+      // Parallax offset from cursor
+      const ox = (mouseX - cx) * p.parallaxStrength;
+      const oy = (mouseY - cy) * p.parallaxStrength;
+
+      // Drift
+      p.x += p.speedX;
+      p.y += p.speedY;
+
+      // Breathe alpha
+      p.alpha += 0.0008 * p.alphaDir;
+      if (p.alpha > 0.18) p.alphaDir = -1;
+      if (p.alpha < 0.04) p.alphaDir = 1;
+
+      // Wrap edges
+      if (p.x < -10) p.x = W + 10;
+      if (p.x > W + 10) p.x = -10;
+      if (p.y < -10) p.y = H + 10;
+      if (p.y > H + 10) p.y = -10;
+
+      const drawX = p.x + ox;
+      const drawY = p.y + oy;
+
+      ctx.beginPath();
+      ctx.arc(drawX, drawY, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = makeColor(p.colorIdx, p.alpha);
+      ctx.fill();
+    }
+
+    animId = requestAnimationFrame(draw);
+  }
+
+  draw();
+
+  // Resize handler
+  const onResize = () => {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  };
+  window.addEventListener('resize', onResize, { passive: true });
+
+  // Mouse parallax
+  const onMouse = (e) => { mouseX = e.clientX; mouseY = e.clientY; };
+  window.addEventListener('mousemove', onMouse, { passive: true });
+
+  // Cleanup function returned to caller
   return function cleanup() {
-    field.stop();
+    running = false;
+    if (animId) cancelAnimationFrame(animId);
+    window.removeEventListener('resize', onResize);
+    window.removeEventListener('mousemove', onMouse);
+    if (ctx) ctx.clearRect(0, 0, W, H);
   };
 }
-
-// ================================================================
-// PHASE 4: SHARE CLIENT REPORT MODAL LOGIC
-// ================================================================
-let isGeneratingShare = false;
-
-function formatMonthHuman(mStr) {
-  if (!mStr || !/^\d{4}-\d{2}$/.test(mStr)) return mStr || '';
-  const parts = mStr.split('-');
-  const y = Number(parts[0]);
-  const m = Number(parts[1]);
-  const d = new Date(y, m - 1, 1);
-  return d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-}
-
-function openShareModal() {
-  if (state.role !== 'superadmin' && state.role !== 'admin') {
-    showToast('You do not have permission to create share links.', 'red');
-    return;
-  }
-
-  const overlay = document.getElementById('share-modal-overlay');
-  if (!overlay) {
-    console.error('[Share] #share-modal-overlay not found in DOM');
-    return;
-  }
-
-  try {
-    const formSection = document.getElementById('share-form-section');
-    const successSection = document.getElementById('share-success-section');
-    const errorBox = document.getElementById('share-error-box');
-    const monthText = document.getElementById('share-month-text');
-    const clientInput = document.getElementById('share-client-name');
-    const expirySelect = document.getElementById('share-expiry-select');
-    const generateBtn = document.getElementById('share-generate-btn');
-    const urlInput = document.getElementById('share-generated-url');
-    const copyBtnText = document.getElementById('share-copy-btn-text');
-
-    // Reset form state
-    if (formSection) formSection.hidden = false;
-    if (successSection) successSection.hidden = true;
-    if (errorBox) { errorBox.hidden = true; errorBox.textContent = ''; }
-
-    // Set current selected month (human-readable)
-    if (monthText) monthText.textContent = formatMonthHuman(state.month);
-
-    // Default values
-    if (clientInput && !clientInput.value) clientInput.value = 'A0 MSS Dashboard';
-    if (expirySelect) expirySelect.value = '7';
-    if (urlInput) urlInput.value = '';
-    if (copyBtnText) copyBtnText.textContent = 'Copy Link';
-    if (generateBtn) {
-      generateBtn.disabled = false;
-      generateBtn.innerHTML = `
-        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M10 3v10M6 9l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>Generate Secure Link</span>
-      `;
-    }
-
-    isGeneratingShare = false;
-
-    // Show the modal
-    overlay.removeAttribute('hidden');
-    overlay.hidden = false;
-    overlay.setAttribute('aria-hidden', 'false');
-
-    setTimeout(() => {
-      if (generateBtn) generateBtn.focus();
-    }, 50);
-  } catch (err) {
-    console.error('[Share] Error opening share modal:', err);
-  }
-}
-
-function closeShareModal() {
-  const overlay = document.getElementById('share-modal-overlay');
-  if (!overlay) return;
-  overlay.hidden = true;
-  overlay.setAttribute('aria-hidden', 'true');
-
-  // Sensitive clean-up: never persist raw generated URL or tokens in DOM
-  const urlInput = document.getElementById('share-generated-url');
-  if (urlInput) urlInput.value = '';
-  isGeneratingShare = false;
-}
-
-async function onGenerateShareLink() {
-  if (isGeneratingShare) return;
-
-  // Strict client-side RBAC guard
-  if (state.role !== 'superadmin' && state.role !== 'admin') {
-    showToast('You do not have permission to create share links.', 'red');
-    closeShareModal();
-    return;
-  }
-
-  const generateBtn = document.getElementById('share-generate-btn');
-  const errorBox = document.getElementById('share-error-box');
-  const clientInput = document.getElementById('share-client-name');
-  const expirySelect = document.getElementById('share-expiry-select');
-  const formSection = document.getElementById('share-form-section');
-  const successSection = document.getElementById('share-success-section');
-  const urlInput = document.getElementById('share-generated-url');
-  const copyBtnText = document.getElementById('share-copy-btn-text');
-
-  errorBox.hidden = true;
-  errorBox.textContent = '';
-
-  // Validate selected month format (YYYY-MM)
-  const month = (state.month || '').trim();
-  if (!month || !/^\d{4}-\d{2}$/.test(month)) {
-    errorBox.textContent = 'Invalid reporting month selected. Please select a valid month on the dashboard.';
-    errorBox.hidden = false;
-    return;
-  }
-
-  const expiresInDays = Number(expirySelect ? expirySelect.value : 7) || 7;
-  const clientName = (clientInput && clientInput.value ? clientInput.value : 'A0 MSS Dashboard').trim();
-
-  // Set loading state & prevent duplicate clicks
-  isGeneratingShare = true;
-  if (generateBtn) {
-    generateBtn.disabled = true;
-    generateBtn.innerHTML = '<span class="spinner-inline"></span><span>Generating...</span>';
-  }
-
-  try {
-    const res = await api('/api/shares', {
-      method: 'POST',
-      body: JSON.stringify({
-        month,
-        expiresInDays,
-        clientName,
-      }),
-    });
-
-    if (!res || !res.url) {
-      throw new Error('Server did not return a valid share URL.');
-    }
-
-    // Switch to success view inside the modal
-    formSection.hidden = true;
-    successSection.hidden = false;
-    if (urlInput) urlInput.value = res.url;
-    if (copyBtnText) copyBtnText.textContent = 'Copy Link';
-
-    showToast('Secure share link created', 'green');
-  } catch (err) {
-    errorBox.textContent = err.message || 'Unable to generate share link. Please try again.';
-    errorBox.hidden = false;
-  } finally {
-    isGeneratingShare = false;
-    if (generateBtn) {
-      generateBtn.disabled = false;
-      generateBtn.innerHTML = `
-        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M10 3v10M6 9l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>Generate Secure Link</span>
-      `;
-    }
-  }
-}
-
-async function onCopyShareLink() {
-  const urlInput = document.getElementById('share-generated-url');
-  const copyBtnText = document.getElementById('share-copy-btn-text');
-  if (!urlInput || !urlInput.value) return;
-
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(urlInput.value);
-    } else {
-      urlInput.select();
-      document.execCommand('copy');
-    }
-    if (copyBtnText) copyBtnText.textContent = 'Copied!';
-    showToast('Secure link copied to clipboard', 'green');
-    setTimeout(() => {
-      if (copyBtnText) copyBtnText.textContent = 'Copy Link';
-    }, 2500);
-  } catch (err) {
-    urlInput.select();
-    showToast('Please press Ctrl+C to copy', 'amber');
-  }
-}
-
-function initShareModal() {
-  // Direct element handlers for resilience
-  const closeBtn = document.getElementById('share-modal-close');
-  if (closeBtn) closeBtn.onclick = closeShareModal;
-
-  const cancelBtn = document.getElementById('share-cancel-btn');
-  if (cancelBtn) cancelBtn.onclick = closeShareModal;
-
-  const doneBtn = document.getElementById('share-done-btn');
-  if (doneBtn) doneBtn.onclick = closeShareModal;
-
-  const generateBtn = document.getElementById('share-generate-btn');
-  if (generateBtn) generateBtn.onclick = onGenerateShareLink;
-
-  const copyBtn = document.getElementById('share-copy-btn');
-  if (copyBtn) copyBtn.onclick = onCopyShareLink;
-
-  // Delegated click listener
-  document.addEventListener('click', (e) => {
-    if (e.target.closest('#share-btn'))          { openShareModal();      return; }
-    if (e.target.closest('#share-modal-close'))  { closeShareModal();     return; }
-    if (e.target.closest('#share-cancel-btn'))   { closeShareModal();     return; }
-    if (e.target.closest('#share-done-btn'))     { closeShareModal();     return; }
-    if (e.target.closest('#share-generate-btn')) { onGenerateShareLink(); return; }
-    if (e.target.closest('#share-copy-btn'))     { onCopyShareLink();     return; }
-    // Backdrop: only when the direct target IS the overlay (not the modal card inside it)
-    if (e.target.id === 'share-modal-overlay')   { closeShareModal();     return; }
-  });
-
-  // Escape key closes modal
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      const modal = document.getElementById('share-modal-overlay');
-      if (modal && !modal.hidden) closeShareModal();
-    }
-  });
-
-  // Expose globally
-  window.openShareModal      = openShareModal;
-  window.closeShareModal     = closeShareModal;
-  window.onGenerateShareLink = onGenerateShareLink;
-  window.onCopyShareLink     = onCopyShareLink;
-}
-
-// Expose globally at file scope as well
-window.openShareModal      = openShareModal;
-window.closeShareModal     = closeShareModal;
-window.onGenerateShareLink = onGenerateShareLink;
-window.onCopyShareLink     = onCopyShareLink;
-
-// Start application once all declarations and DOM elements are ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot);
-} else {
-  boot();
-}
-
-

@@ -1,0 +1,3220 @@
+{
+  "events": [
+    {
+      "id": "aud_1789972427978_o6uk6",
+      "timestamp": "2026-09-21T06:33:47.978Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789972427995_eubll",
+      "timestamp": "2026-09-21T06:33:47.995Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789972428009_4pjaz",
+      "timestamp": "2026-09-21T06:33:48.009Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789972428027_vcih3",
+      "timestamp": "2026-09-21T06:33:48.027Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789972428047_3gzmv",
+      "timestamp": "2026-09-21T06:33:48.047Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {
+        "oldRole": "editor",
+        "newRole": "admin"
+      }
+    },
+    {
+      "id": "aud_1789972428051_ejgdh",
+      "timestamp": "2026-09-21T06:33:48.051Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "temp_operator_1789972427968",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789972428055_0ha9k",
+      "timestamp": "2026-09-21T06:33:48.055Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789972428057_ny43q",
+      "timestamp": "2026-09-21T06:33:48.057Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789972428059_t9ss2",
+      "timestamp": "2026-09-21T06:33:48.059Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789973289677_6035j",
+      "timestamp": "2026-09-21T06:48:09.678Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289693_qe0fz",
+      "timestamp": "2026-09-21T06:48:09.693Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289703_waqm3",
+      "timestamp": "2026-09-21T06:48:09.703Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289713_36gtr",
+      "timestamp": "2026-09-21T06:48:09.713Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289724_9legf",
+      "timestamp": "2026-09-21T06:48:09.724Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289726_awyom",
+      "timestamp": "2026-09-21T06:48:09.726Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "ghost_user_does_not_exist",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289784_2b3it",
+      "timestamp": "2026-09-21T06:48:09.784Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "sec_test_user_1789973289774",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789973289786_mto93",
+      "timestamp": "2026-09-21T06:48:09.786Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789973289789_76wec",
+      "timestamp": "2026-09-21T06:48:09.789Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789973289791_g1vz3",
+      "timestamp": "2026-09-21T06:48:09.791Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789973289808_ubrgk",
+      "timestamp": "2026-09-21T06:48:09.808Z",
+      "actor": "sec_test_user_1789973289774",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789973289774",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289822_cda62",
+      "timestamp": "2026-09-21T06:48:09.822Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "sec_test_user_1789973289774",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973289833_095ko",
+      "timestamp": "2026-09-21T06:48:09.833Z",
+      "actor": "sec_test_user_1789973289774",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789973289774",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289836_x2lta",
+      "timestamp": "2026-09-21T06:48:09.836Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "sec_test_user_1789973289774",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973289848_o68ca",
+      "timestamp": "2026-09-21T06:48:09.848Z",
+      "actor": "sec_test_user_1789973289774",
+      "action": "LOGIN_BLOCKED_DISABLED",
+      "target": "sec_test_user_1789973289774",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289851_aaor1",
+      "timestamp": "2026-09-21T06:48:09.851Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "sec_test_user_1789973289774",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973289862_zs319",
+      "timestamp": "2026-09-21T06:48:09.862Z",
+      "actor": "sec_test_user_1789973289774",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789973289774",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289865_036gl",
+      "timestamp": "2026-09-21T06:48:09.865Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "sec_test_user_1789973289774",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973289877_7nbes",
+      "timestamp": "2026-09-21T06:48:09.877Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289907_7h3wd",
+      "timestamp": "2026-09-21T06:48:09.907Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289910_8u50v",
+      "timestamp": "2026-09-21T06:48:09.910Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289916_tbnj9",
+      "timestamp": "2026-09-21T06:48:09.916Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289920_i6bvc",
+      "timestamp": "2026-09-21T06:48:09.920Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289923_mzts8",
+      "timestamp": "2026-09-21T06:48:09.923Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973289926_zf5bw",
+      "timestamp": "2026-09-21T06:48:09.926Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 300
+      }
+    },
+    {
+      "id": "aud_1789973289942_0ixaq",
+      "timestamp": "2026-09-21T06:48:09.942Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324568_dyhyf",
+      "timestamp": "2026-09-21T06:48:44.568Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324588_uup8o",
+      "timestamp": "2026-09-21T06:48:44.588Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324627_hlinz",
+      "timestamp": "2026-09-21T06:48:44.627Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324644_x7p88",
+      "timestamp": "2026-09-21T06:48:44.644Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324662_tawr1",
+      "timestamp": "2026-09-21T06:48:44.662Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324666_eio49",
+      "timestamp": "2026-09-21T06:48:44.666Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "ghost_user_does_not_exist",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324732_g3x1n",
+      "timestamp": "2026-09-21T06:48:44.732Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "sec_test_user_1789973324718",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789973324736_8897r",
+      "timestamp": "2026-09-21T06:48:44.736Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789973324739_6v00j",
+      "timestamp": "2026-09-21T06:48:44.739Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789973324742_5hk8m",
+      "timestamp": "2026-09-21T06:48:44.742Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789973324768_mnaza",
+      "timestamp": "2026-09-21T06:48:44.768Z",
+      "actor": "sec_test_user_1789973324718",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789973324718",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324798_oa6j8",
+      "timestamp": "2026-09-21T06:48:44.798Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "sec_test_user_1789973324718",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973324810_usezd",
+      "timestamp": "2026-09-21T06:48:44.810Z",
+      "actor": "sec_test_user_1789973324718",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789973324718",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324817_83629",
+      "timestamp": "2026-09-21T06:48:44.817Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "sec_test_user_1789973324718",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973324833_70ngo",
+      "timestamp": "2026-09-21T06:48:44.833Z",
+      "actor": "sec_test_user_1789973324718",
+      "action": "LOGIN_BLOCKED_DISABLED",
+      "target": "sec_test_user_1789973324718",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324839_dev73",
+      "timestamp": "2026-09-21T06:48:44.839Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "sec_test_user_1789973324718",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973324851_sj7mm",
+      "timestamp": "2026-09-21T06:48:44.851Z",
+      "actor": "sec_test_user_1789973324718",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789973324718",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324855_ljflh",
+      "timestamp": "2026-09-21T06:48:44.855Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "sec_test_user_1789973324718",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973324871_tgkw6",
+      "timestamp": "2026-09-21T06:48:44.871Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973324906_k8p2w",
+      "timestamp": "2026-09-21T06:48:44.906Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 266
+      }
+    },
+    {
+      "id": "aud_1789973324909_h89hh",
+      "timestamp": "2026-09-21T06:48:44.909Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 266
+      }
+    },
+    {
+      "id": "aud_1789973324911_fzuon",
+      "timestamp": "2026-09-21T06:48:44.911Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 266
+      }
+    },
+    {
+      "id": "aud_1789973324913_ssbmd",
+      "timestamp": "2026-09-21T06:48:44.913Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 266
+      }
+    },
+    {
+      "id": "aud_1789973324915_k321c",
+      "timestamp": "2026-09-21T06:48:44.915Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 266
+      }
+    },
+    {
+      "id": "aud_1789973324918_wpnhx",
+      "timestamp": "2026-09-21T06:48:44.918Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 266
+      }
+    },
+    {
+      "id": "aud_1789973324934_l8nxb",
+      "timestamp": "2026-09-21T06:48:44.934Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973351250_a5759",
+      "timestamp": "2026-09-21T06:49:11.250Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973351264_yzqw8",
+      "timestamp": "2026-09-21T06:49:11.264Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973351275_yvfhc",
+      "timestamp": "2026-09-21T06:49:11.275Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973351285_oclg2",
+      "timestamp": "2026-09-21T06:49:11.285Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973360107_deq0m",
+      "timestamp": "2026-09-21T06:49:20.107Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973360119_7qioh",
+      "timestamp": "2026-09-21T06:49:20.119Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973360129_pba8f",
+      "timestamp": "2026-09-21T06:49:20.129Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973360140_q61iu",
+      "timestamp": "2026-09-21T06:49:20.140Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973360174_4pc57",
+      "timestamp": "2026-09-21T06:49:20.174Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "temp_operator_1789973360171",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789973360186_ztqbm",
+      "timestamp": "2026-09-21T06:49:20.187Z",
+      "actor": "temp_operator_1789973360171",
+      "action": "LOGIN_SUCCESS",
+      "target": "temp_operator_1789973360171",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973360191_z9abk",
+      "timestamp": "2026-09-21T06:49:20.191Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "temp_operator_1789973360171",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973360204_w4jgx",
+      "timestamp": "2026-09-21T06:49:20.204Z",
+      "actor": "temp_operator_1789973360171",
+      "action": "LOGIN_BLOCKED_DISABLED",
+      "target": "temp_operator_1789973360171",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973360210_s0psu",
+      "timestamp": "2026-09-21T06:49:20.210Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "temp_operator_1789973360171",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973360248_r1sbe",
+      "timestamp": "2026-09-21T06:49:20.248Z",
+      "actor": "temp_operator_1789973360171",
+      "action": "LOGIN_SUCCESS",
+      "target": "temp_operator_1789973360171",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973360265_45u31",
+      "timestamp": "2026-09-21T06:49:20.266Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "temp_operator_1789973360171",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973360282_4hnaf",
+      "timestamp": "2026-09-21T06:49:20.282Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "temp_operator_1789973360171",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973360299_2kj22",
+      "timestamp": "2026-09-21T06:49:20.299Z",
+      "actor": "temp_operator_1789973360171",
+      "action": "LOGIN_SUCCESS",
+      "target": "temp_operator_1789973360171",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973360303_f9yfr",
+      "timestamp": "2026-09-21T06:49:20.303Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "temp_operator_1789973360171",
+      "result": "SUCCESS",
+      "details": {
+        "oldRole": "editor",
+        "newRole": "admin"
+      }
+    },
+    {
+      "id": "aud_1789973360308_4kv19",
+      "timestamp": "2026-09-21T06:49:20.308Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "temp_operator_1789973360171",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973360312_dj9fh",
+      "timestamp": "2026-09-21T06:49:20.312Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789973360315_zeb3f",
+      "timestamp": "2026-09-21T06:49:20.315Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789973360319_vzvv8",
+      "timestamp": "2026-09-21T06:49:20.319Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789973366513_pljue",
+      "timestamp": "2026-09-21T06:49:26.513Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973366527_8cd5x",
+      "timestamp": "2026-09-21T06:49:26.527Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973366537_9u6ya",
+      "timestamp": "2026-09-21T06:49:26.537Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973366546_n89f5",
+      "timestamp": "2026-09-21T06:49:26.546Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973366556_uspuh",
+      "timestamp": "2026-09-21T06:49:26.556Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973366558_ccr75",
+      "timestamp": "2026-09-21T06:49:26.558Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "ghost_user_does_not_exist",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973366605_samht",
+      "timestamp": "2026-09-21T06:49:26.605Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "sec_test_user_1789973366609",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789973366608_3m2mj",
+      "timestamp": "2026-09-21T06:49:26.608Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789973366610_grx5h",
+      "timestamp": "2026-09-21T06:49:26.610Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789973366613_0jzvi",
+      "timestamp": "2026-09-21T06:49:26.613Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789973366630_x45l4",
+      "timestamp": "2026-09-21T06:49:26.630Z",
+      "actor": "sec_test_user_1789973366609",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789973366609",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973366650_oq1lg",
+      "timestamp": "2026-09-21T06:49:26.650Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "sec_test_user_1789973366609",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973366660_yovlu",
+      "timestamp": "2026-09-21T06:49:26.660Z",
+      "actor": "sec_test_user_1789973366609",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789973366609",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973366664_1rcmv",
+      "timestamp": "2026-09-21T06:49:26.664Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "sec_test_user_1789973366609",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973366674_zsalx",
+      "timestamp": "2026-09-21T06:49:26.674Z",
+      "actor": "sec_test_user_1789973366609",
+      "action": "LOGIN_BLOCKED_DISABLED",
+      "target": "sec_test_user_1789973366609",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973366677_ad5ye",
+      "timestamp": "2026-09-21T06:49:26.677Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "sec_test_user_1789973366609",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973366686_k5dqc",
+      "timestamp": "2026-09-21T06:49:26.686Z",
+      "actor": "sec_test_user_1789973366609",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789973366609",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973366689_wjtjb",
+      "timestamp": "2026-09-21T06:49:26.689Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "sec_test_user_1789973366609",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789973366698_gca0q",
+      "timestamp": "2026-09-21T06:49:26.698Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789973366711_e5mnb",
+      "timestamp": "2026-09-21T06:49:26.711Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 224
+      }
+    },
+    {
+      "id": "aud_1789973366713_3yqz9",
+      "timestamp": "2026-09-21T06:49:26.713Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 224
+      }
+    },
+    {
+      "id": "aud_1789973366715_ewhle",
+      "timestamp": "2026-09-21T06:49:26.715Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 224
+      }
+    },
+    {
+      "id": "aud_1789973366718_bb2a1",
+      "timestamp": "2026-09-21T06:49:26.718Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 224
+      }
+    },
+    {
+      "id": "aud_1789973366720_5sotn",
+      "timestamp": "2026-09-21T06:49:26.720Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 224
+      }
+    },
+    {
+      "id": "aud_1789973366722_xvc7g",
+      "timestamp": "2026-09-21T06:49:26.722Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 224
+      }
+    },
+    {
+      "id": "aud_1789973366730_r7dcs",
+      "timestamp": "2026-09-21T06:49:26.730Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776498_o0wi6",
+      "timestamp": "2026-09-21T08:02:56.499Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776524_uiam5",
+      "timestamp": "2026-09-21T08:02:56.524Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776536_efh35",
+      "timestamp": "2026-09-21T08:02:56.536Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776550_5nijs",
+      "timestamp": "2026-09-21T08:02:56.550Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776560_3y84r",
+      "timestamp": "2026-09-21T08:02:56.560Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776565_9lcma",
+      "timestamp": "2026-09-21T08:02:56.565Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "ghost_user_qa",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776567_ndktr",
+      "timestamp": "2026-09-21T08:02:56.567Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776579_59lkh",
+      "timestamp": "2026-09-21T08:02:56.579Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776600_37goq",
+      "timestamp": "2026-09-21T08:02:56.600Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "qa_session_user_1789977776595",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789977776609_djdn4",
+      "timestamp": "2026-09-21T08:02:56.609Z",
+      "actor": "qa_session_user_1789977776595",
+      "action": "LOGIN_SUCCESS",
+      "target": "qa_session_user_1789977776595",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776627_e3qx7",
+      "timestamp": "2026-09-21T08:02:56.627Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "qa_session_user_1789977776595",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977776645_tspid",
+      "timestamp": "2026-09-21T08:02:56.645Z",
+      "actor": "qa_session_user_1789977776595",
+      "action": "LOGIN_SUCCESS",
+      "target": "qa_session_user_1789977776595",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776653_wuo50",
+      "timestamp": "2026-09-21T08:02:56.653Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "qa_session_user_1789977776595",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977776667_3r0y7",
+      "timestamp": "2026-09-21T08:02:56.667Z",
+      "actor": "qa_session_user_1789977776595",
+      "action": "LOGIN_BLOCKED_DISABLED",
+      "target": "qa_session_user_1789977776595",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776670_hxpdr",
+      "timestamp": "2026-09-21T08:02:56.670Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "qa_session_user_1789977776595",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977776682_72u36",
+      "timestamp": "2026-09-21T08:02:56.682Z",
+      "actor": "qa_session_user_1789977776595",
+      "action": "LOGIN_SUCCESS",
+      "target": "qa_session_user_1789977776595",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776686_yym33",
+      "timestamp": "2026-09-21T08:02:56.686Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "qa_session_user_1789977776595",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977776740_7rpvo",
+      "timestamp": "2026-09-21T08:02:56.740Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "u_mgmt_qa_1789977776736",
+      "result": "SUCCESS",
+      "details": {
+        "role": "admin"
+      }
+    },
+    {
+      "id": "aud_1789977776756_lyzwp",
+      "timestamp": "2026-09-21T08:02:56.756Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "u_mgmt_qa_1789977776736",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977776760_a5f9j",
+      "timestamp": "2026-09-21T08:02:56.760Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "u_mgmt_qa_1789977776736",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977776764_eq6lb",
+      "timestamp": "2026-09-21T08:02:56.764Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "u_mgmt_qa_1789977776736",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977776767_4jq7x",
+      "timestamp": "2026-09-21T08:02:56.767Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "u_mgmt_qa_1789977776736",
+      "result": "SUCCESS",
+      "details": {
+        "oldRole": "admin",
+        "newRole": "editor"
+      }
+    },
+    {
+      "id": "aud_1789977776771_a6t15",
+      "timestamp": "2026-09-21T08:02:56.771Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "u_mgmt_qa_1789977776736",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977776774_nsuny",
+      "timestamp": "2026-09-21T08:02:56.774Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789977776776_w33dm",
+      "timestamp": "2026-09-21T08:02:56.776Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789977776781_5036x",
+      "timestamp": "2026-09-21T08:02:56.781Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789977776816_t4p3x",
+      "timestamp": "2026-09-21T08:02:56.816Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776820_7l19o",
+      "timestamp": "2026-09-21T08:02:56.820Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776824_tti30",
+      "timestamp": "2026-09-21T08:02:56.824Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776827_xr6so",
+      "timestamp": "2026-09-21T08:02:56.827Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776830_3cmdc",
+      "timestamp": "2026-09-21T08:02:56.830Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977776832_39eve",
+      "timestamp": "2026-09-21T08:02:56.832Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 300
+      }
+    },
+    {
+      "id": "aud_1789977776844_s4m0x",
+      "timestamp": "2026-09-21T08:02:56.844Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977783932_ccuiy",
+      "timestamp": "2026-09-21T08:03:03.932Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977783945_2y4yn",
+      "timestamp": "2026-09-21T08:03:03.945Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977783956_qh15h",
+      "timestamp": "2026-09-21T08:03:03.956Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977783967_brhum",
+      "timestamp": "2026-09-21T08:03:03.967Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977791902_uwfui",
+      "timestamp": "2026-09-21T08:03:11.902Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977791914_sbifp",
+      "timestamp": "2026-09-21T08:03:11.914Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977791925_10pd2",
+      "timestamp": "2026-09-21T08:03:11.925Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977791936_922gx",
+      "timestamp": "2026-09-21T08:03:11.936Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977791963_vfpr8",
+      "timestamp": "2026-09-21T08:03:11.963Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "temp_operator_1789977791964",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789977791976_ly6xu",
+      "timestamp": "2026-09-21T08:03:11.976Z",
+      "actor": "temp_operator_1789977791964",
+      "action": "LOGIN_SUCCESS",
+      "target": "temp_operator_1789977791964",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977791979_4954b",
+      "timestamp": "2026-09-21T08:03:11.979Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "temp_operator_1789977791964",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977791989_cd4bm",
+      "timestamp": "2026-09-21T08:03:11.989Z",
+      "actor": "temp_operator_1789977791964",
+      "action": "LOGIN_BLOCKED_DISABLED",
+      "target": "temp_operator_1789977791964",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977791992_7dctz",
+      "timestamp": "2026-09-21T08:03:11.992Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "temp_operator_1789977791964",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977792002_8r3bn",
+      "timestamp": "2026-09-21T08:03:12.002Z",
+      "actor": "temp_operator_1789977791964",
+      "action": "LOGIN_SUCCESS",
+      "target": "temp_operator_1789977791964",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977792011_al9td",
+      "timestamp": "2026-09-21T08:03:12.011Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "temp_operator_1789977791964",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977792021_zqpvj",
+      "timestamp": "2026-09-21T08:03:12.021Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "temp_operator_1789977791964",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977792030_gie2l",
+      "timestamp": "2026-09-21T08:03:12.030Z",
+      "actor": "temp_operator_1789977791964",
+      "action": "LOGIN_SUCCESS",
+      "target": "temp_operator_1789977791964",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977792033_achq8",
+      "timestamp": "2026-09-21T08:03:12.033Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "temp_operator_1789977791964",
+      "result": "SUCCESS",
+      "details": {
+        "oldRole": "editor",
+        "newRole": "admin"
+      }
+    },
+    {
+      "id": "aud_1789977792036_n0jjt",
+      "timestamp": "2026-09-21T08:03:12.036Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "temp_operator_1789977791964",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977792039_i8z70",
+      "timestamp": "2026-09-21T08:03:12.039Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789977792041_3a07c",
+      "timestamp": "2026-09-21T08:03:12.042Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789977792044_wwzm1",
+      "timestamp": "2026-09-21T08:03:12.044Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789977798972_g1vrf",
+      "timestamp": "2026-09-21T08:03:18.972Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977798985_yyw5u",
+      "timestamp": "2026-09-21T08:03:18.985Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977798995_objku",
+      "timestamp": "2026-09-21T08:03:18.995Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799004_2kpg6",
+      "timestamp": "2026-09-21T08:03:19.004Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799015_q2mo0",
+      "timestamp": "2026-09-21T08:03:19.015Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799018_pfaaq",
+      "timestamp": "2026-09-21T08:03:19.018Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "ghost_user_does_not_exist",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799061_nw3qw",
+      "timestamp": "2026-09-21T08:03:19.061Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "sec_test_user_1789977799065",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789977799063_17f5n",
+      "timestamp": "2026-09-21T08:03:19.063Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789977799066_i4hcz",
+      "timestamp": "2026-09-21T08:03:19.066Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789977799070_pmlsn",
+      "timestamp": "2026-09-21T08:03:19.070Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789977799089_orosw",
+      "timestamp": "2026-09-21T08:03:19.089Z",
+      "actor": "sec_test_user_1789977799065",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789977799065",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799102_yl5r9",
+      "timestamp": "2026-09-21T08:03:19.102Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "sec_test_user_1789977799065",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977799112_trynu",
+      "timestamp": "2026-09-21T08:03:19.112Z",
+      "actor": "sec_test_user_1789977799065",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789977799065",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799116_a5u1u",
+      "timestamp": "2026-09-21T08:03:19.116Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "sec_test_user_1789977799065",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977799125_yf4h5",
+      "timestamp": "2026-09-21T08:03:19.125Z",
+      "actor": "sec_test_user_1789977799065",
+      "action": "LOGIN_BLOCKED_DISABLED",
+      "target": "sec_test_user_1789977799065",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799129_65rro",
+      "timestamp": "2026-09-21T08:03:19.129Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "sec_test_user_1789977799065",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977799137_j64if",
+      "timestamp": "2026-09-21T08:03:19.137Z",
+      "actor": "sec_test_user_1789977799065",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789977799065",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799141_u5rn6",
+      "timestamp": "2026-09-21T08:03:19.141Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "sec_test_user_1789977799065",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789977799151_e4rwq",
+      "timestamp": "2026-09-21T08:03:19.151Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799166_8pur2",
+      "timestamp": "2026-09-21T08:03:19.166Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799169_xf7tx",
+      "timestamp": "2026-09-21T08:03:19.169Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799171_jr0h6",
+      "timestamp": "2026-09-21T08:03:19.171Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799173_aj8zz",
+      "timestamp": "2026-09-21T08:03:19.173Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799176_zl4kw",
+      "timestamp": "2026-09-21T08:03:19.176Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789977799179_0s2qs",
+      "timestamp": "2026-09-21T08:03:19.179Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 300
+      }
+    },
+    {
+      "id": "aud_1789977799190_ylgu5",
+      "timestamp": "2026-09-21T08:03:19.192Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978041956_5ynoc",
+      "timestamp": "2026-09-21T08:07:21.956Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978041978_3td65",
+      "timestamp": "2026-09-21T08:07:21.978Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978042004_1f79a",
+      "timestamp": "2026-09-21T08:07:22.004Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978042021_avlzv",
+      "timestamp": "2026-09-21T08:07:22.021Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978042033_af7a2",
+      "timestamp": "2026-09-21T08:07:22.033Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978055365_stbb1",
+      "timestamp": "2026-09-21T08:07:35.365Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978055381_b894g",
+      "timestamp": "2026-09-21T08:07:35.381Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978055394_7so3l",
+      "timestamp": "2026-09-21T08:07:35.394Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978055407_a1809",
+      "timestamp": "2026-09-21T08:07:35.407Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978064194_qx1u1",
+      "timestamp": "2026-09-21T08:07:44.194Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978064207_3w9wm",
+      "timestamp": "2026-09-21T08:07:44.207Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978064218_cy1tu",
+      "timestamp": "2026-09-21T08:07:44.218Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978064231_lzore",
+      "timestamp": "2026-09-21T08:07:44.231Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978064264_qaiw6",
+      "timestamp": "2026-09-21T08:07:44.264Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "temp_operator_1789978064254",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789978064279_inzx2",
+      "timestamp": "2026-09-21T08:07:44.279Z",
+      "actor": "temp_operator_1789978064254",
+      "action": "LOGIN_SUCCESS",
+      "target": "temp_operator_1789978064254",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978064284_8mgq0",
+      "timestamp": "2026-09-21T08:07:44.284Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "temp_operator_1789978064254",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978064295_wook9",
+      "timestamp": "2026-09-21T08:07:44.295Z",
+      "actor": "temp_operator_1789978064254",
+      "action": "LOGIN_BLOCKED_DISABLED",
+      "target": "temp_operator_1789978064254",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978064299_yltto",
+      "timestamp": "2026-09-21T08:07:44.299Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "temp_operator_1789978064254",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978064310_kxggu",
+      "timestamp": "2026-09-21T08:07:44.310Z",
+      "actor": "temp_operator_1789978064254",
+      "action": "LOGIN_SUCCESS",
+      "target": "temp_operator_1789978064254",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978064320_wae2t",
+      "timestamp": "2026-09-21T08:07:44.320Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "temp_operator_1789978064254",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978064332_pagjz",
+      "timestamp": "2026-09-21T08:07:44.332Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "temp_operator_1789978064254",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978064342_yby9y",
+      "timestamp": "2026-09-21T08:07:44.342Z",
+      "actor": "temp_operator_1789978064254",
+      "action": "LOGIN_SUCCESS",
+      "target": "temp_operator_1789978064254",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978064345_2ulm1",
+      "timestamp": "2026-09-21T08:07:44.345Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "temp_operator_1789978064254",
+      "result": "SUCCESS",
+      "details": {
+        "oldRole": "editor",
+        "newRole": "admin"
+      }
+    },
+    {
+      "id": "aud_1789978064348_m2r87",
+      "timestamp": "2026-09-21T08:07:44.348Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "temp_operator_1789978064254",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978064351_x7m4j",
+      "timestamp": "2026-09-21T08:07:44.351Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789978064354_5c92v",
+      "timestamp": "2026-09-21T08:07:44.354Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789978064358_ba9p6",
+      "timestamp": "2026-09-21T08:07:44.358Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789978072727_9ak82",
+      "timestamp": "2026-09-21T08:07:52.727Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978072740_zkuou",
+      "timestamp": "2026-09-21T08:07:52.740Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978072752_6xpni",
+      "timestamp": "2026-09-21T08:07:52.752Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978072761_4o8hi",
+      "timestamp": "2026-09-21T08:07:52.761Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978072772_0f0vr",
+      "timestamp": "2026-09-21T08:07:52.772Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978072774_v9bjb",
+      "timestamp": "2026-09-21T08:07:52.774Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "ghost_user_does_not_exist",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978072822_xfhns",
+      "timestamp": "2026-09-21T08:07:52.822Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "sec_test_user_1789978072812",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789978072825_ubytk",
+      "timestamp": "2026-09-21T08:07:52.825Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789978072828_5v5xo",
+      "timestamp": "2026-09-21T08:07:52.828Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789978072833_ptv89",
+      "timestamp": "2026-09-21T08:07:52.833Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789978072852_o5zdi",
+      "timestamp": "2026-09-21T08:07:52.852Z",
+      "actor": "sec_test_user_1789978072812",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789978072812",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978072866_f97l3",
+      "timestamp": "2026-09-21T08:07:52.866Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "sec_test_user_1789978072812",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978072876_709zy",
+      "timestamp": "2026-09-21T08:07:52.876Z",
+      "actor": "sec_test_user_1789978072812",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789978072812",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978072880_420mw",
+      "timestamp": "2026-09-21T08:07:52.880Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "sec_test_user_1789978072812",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978072890_s4aka",
+      "timestamp": "2026-09-21T08:07:52.890Z",
+      "actor": "sec_test_user_1789978072812",
+      "action": "LOGIN_BLOCKED_DISABLED",
+      "target": "sec_test_user_1789978072812",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978072894_7qozk",
+      "timestamp": "2026-09-21T08:07:52.894Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "sec_test_user_1789978072812",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978072903_9o1za",
+      "timestamp": "2026-09-21T08:07:52.903Z",
+      "actor": "sec_test_user_1789978072812",
+      "action": "LOGIN_SUCCESS",
+      "target": "sec_test_user_1789978072812",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978072907_p18fp",
+      "timestamp": "2026-09-21T08:07:52.907Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "sec_test_user_1789978072812",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978072916_070r2",
+      "timestamp": "2026-09-21T08:07:52.916Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978072929_ldvb6",
+      "timestamp": "2026-09-21T08:07:52.929Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 27
+      }
+    },
+    {
+      "id": "aud_1789978072933_5c9ul",
+      "timestamp": "2026-09-21T08:07:52.933Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 27
+      }
+    },
+    {
+      "id": "aud_1789978072936_3w140",
+      "timestamp": "2026-09-21T08:07:52.936Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 27
+      }
+    },
+    {
+      "id": "aud_1789978072938_kyyiv",
+      "timestamp": "2026-09-21T08:07:52.938Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 27
+      }
+    },
+    {
+      "id": "aud_1789978072941_7fo27",
+      "timestamp": "2026-09-21T08:07:52.941Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 27
+      }
+    },
+    {
+      "id": "aud_1789978072944_5n8ve",
+      "timestamp": "2026-09-21T08:07:52.944Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "brute_force_test_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 27
+      }
+    },
+    {
+      "id": "aud_1789978072954_1oshh",
+      "timestamp": "2026-09-21T08:07:52.954Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978100978_hlma8",
+      "timestamp": "2026-09-21T08:08:20.978Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978100991_416ca",
+      "timestamp": "2026-09-21T08:08:20.991Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101002_27npx",
+      "timestamp": "2026-09-21T08:08:21.002Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101012_wc6ca",
+      "timestamp": "2026-09-21T08:08:21.012Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101023_eopab",
+      "timestamp": "2026-09-21T08:08:21.023Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101027_3t15t",
+      "timestamp": "2026-09-21T08:08:21.027Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "ghost_user_qa",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101029_a1x22",
+      "timestamp": "2026-09-21T08:08:21.029Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101038_w6gsp",
+      "timestamp": "2026-09-21T08:08:21.038Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101054_t2bov",
+      "timestamp": "2026-09-21T08:08:21.054Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "qa_session_user_1789978101045",
+      "result": "SUCCESS",
+      "details": {
+        "role": "editor"
+      }
+    },
+    {
+      "id": "aud_1789978101065_3wdpz",
+      "timestamp": "2026-09-21T08:08:21.065Z",
+      "actor": "qa_session_user_1789978101045",
+      "action": "LOGIN_SUCCESS",
+      "target": "qa_session_user_1789978101045",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101080_irkjk",
+      "timestamp": "2026-09-21T08:08:21.080Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "qa_session_user_1789978101045",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978101091_sl1vy",
+      "timestamp": "2026-09-21T08:08:21.091Z",
+      "actor": "qa_session_user_1789978101045",
+      "action": "LOGIN_SUCCESS",
+      "target": "qa_session_user_1789978101045",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101097_rogrm",
+      "timestamp": "2026-09-21T08:08:21.097Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "qa_session_user_1789978101045",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978101108_h0blq",
+      "timestamp": "2026-09-21T08:08:21.108Z",
+      "actor": "qa_session_user_1789978101045",
+      "action": "LOGIN_BLOCKED_DISABLED",
+      "target": "qa_session_user_1789978101045",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101111_zou44",
+      "timestamp": "2026-09-21T08:08:21.111Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "qa_session_user_1789978101045",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978101120_l0g7c",
+      "timestamp": "2026-09-21T08:08:21.120Z",
+      "actor": "qa_session_user_1789978101045",
+      "action": "LOGIN_SUCCESS",
+      "target": "qa_session_user_1789978101045",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101126_6yiqn",
+      "timestamp": "2026-09-21T08:08:21.126Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "qa_session_user_1789978101045",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978101173_1wewx",
+      "timestamp": "2026-09-21T08:08:21.173Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "u_mgmt_qa_1789978101163",
+      "result": "SUCCESS",
+      "details": {
+        "role": "admin"
+      }
+    },
+    {
+      "id": "aud_1789978101185_djm7x",
+      "timestamp": "2026-09-21T08:08:21.185Z",
+      "actor": "Jeeva",
+      "action": "PASSWORD_RESET",
+      "target": "u_mgmt_qa_1789978101163",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978101189_ro7zj",
+      "timestamp": "2026-09-21T08:08:21.189Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "u_mgmt_qa_1789978101163",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978101194_dgvmk",
+      "timestamp": "2026-09-21T08:08:21.194Z",
+      "actor": "Jeeva",
+      "action": "USER_ENABLED",
+      "target": "u_mgmt_qa_1789978101163",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978101197_0smv6",
+      "timestamp": "2026-09-21T08:08:21.197Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "u_mgmt_qa_1789978101163",
+      "result": "SUCCESS",
+      "details": {
+        "oldRole": "admin",
+        "newRole": "editor"
+      }
+    },
+    {
+      "id": "aud_1789978101201_vd8m5",
+      "timestamp": "2026-09-21T08:08:21.201Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "u_mgmt_qa_1789978101163",
+      "result": "SUCCESS",
+      "details": {}
+    },
+    {
+      "id": "aud_1789978101205_a3ij2",
+      "timestamp": "2026-09-21T08:08:21.205Z",
+      "actor": "Jeeva",
+      "action": "USER_DISABLED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot disable last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789978101209_1iafo",
+      "timestamp": "2026-09-21T08:08:21.209Z",
+      "actor": "Jeeva",
+      "action": "USER_DELETED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot delete own account"
+      }
+    },
+    {
+      "id": "aud_1789978101212_b3n0k",
+      "timestamp": "2026-09-21T08:08:21.212Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "reason": "Cannot change role of last active Super Admin"
+      }
+    },
+    {
+      "id": "aud_1789978101246_hl43v",
+      "timestamp": "2026-09-21T08:08:21.246Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101249_qqwke",
+      "timestamp": "2026-09-21T08:08:21.249Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101252_604i3",
+      "timestamp": "2026-09-21T08:08:21.252Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101255_rqdnf",
+      "timestamp": "2026-09-21T08:08:21.255Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101259_96osw",
+      "timestamp": "2026-09-21T08:08:21.259Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978101261_sfxfr",
+      "timestamp": "2026-09-21T08:08:21.261Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_THROTTLED",
+      "target": "rate_limit_victim_user",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1",
+        "remainingSecs": 300
+      }
+    },
+    {
+      "id": "aud_1789978101274_9zvte",
+      "timestamp": "2026-09-21T08:08:21.274Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978108223_unlpf",
+      "timestamp": "2026-09-21T08:08:28.223Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978108239_k9i8y",
+      "timestamp": "2026-09-21T08:08:28.239Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978108264_ityeq",
+      "timestamp": "2026-09-21T08:08:28.264Z",
+      "actor": "admin",
+      "action": "LOGIN_SUCCESS",
+      "target": "admin",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978108277_1z0dt",
+      "timestamp": "2026-09-21T08:08:28.277Z",
+      "actor": "editor",
+      "action": "LOGIN_SUCCESS",
+      "target": "editor",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978108289_ed7fe",
+      "timestamp": "2026-09-21T08:08:28.289Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978312966_0c977",
+      "timestamp": "2026-09-21T08:11:52.966Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978363755_k28ih",
+      "timestamp": "2026-09-21T08:12:43.755Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978571393_15nos",
+      "timestamp": "2026-09-21T08:16:11.393Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "admin",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978580514_2o7f5",
+      "timestamp": "2026-09-21T08:16:20.514Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "admin",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789978961986_sibhd",
+      "timestamp": "2026-09-21T08:22:41.986Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789979035619_cj8o2",
+      "timestamp": "2026-09-21T08:23:55.619Z",
+      "actor": "Jeeva",
+      "action": "USER_CREATED",
+      "target": "Judy",
+      "result": "SUCCESS",
+      "details": {
+        "role": "viewer"
+      }
+    },
+    {
+      "id": "aud_1789979064013_kpf8g",
+      "timestamp": "2026-09-21T08:24:24.013Z",
+      "actor": "Judy",
+      "action": "LOGIN_SUCCESS",
+      "target": "Judy",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789979128201_vwi71",
+      "timestamp": "2026-09-21T08:25:28.201Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789979165822_eqhou",
+      "timestamp": "2026-09-21T08:26:05.822Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "oldRole": "viewer",
+        "newRole": "superadmin"
+      }
+    },
+    {
+      "id": "aud_1789979168771_mk7c1",
+      "timestamp": "2026-09-21T08:26:08.771Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "oldRole": "superadmin",
+        "newRole": "editor"
+      }
+    },
+    {
+      "id": "aud_1789979172134_idsa0",
+      "timestamp": "2026-09-21T08:26:12.134Z",
+      "actor": "Jeeva",
+      "action": "ROLE_CHANGED",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "oldRole": "editor",
+        "newRole": "viewer"
+      }
+    },
+    {
+      "id": "aud_1789981356330_6zp77",
+      "timestamp": "2026-09-21T09:02:36.330Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789981356354_jd3ub",
+      "timestamp": "2026-09-21T09:02:36.354Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789981356367_uysxt",
+      "timestamp": "2026-09-21T09:02:36.367Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789981393893_4ma0j",
+      "timestamp": "2026-09-21T09:03:13.893Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789981453055_bkgia",
+      "timestamp": "2026-09-21T09:04:13.055Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789981453071_fp0bw",
+      "timestamp": "2026-09-21T09:04:13.071Z",
+      "actor": "SYSTEM",
+      "action": "LOGIN_FAILED",
+      "target": "Jeeva",
+      "result": "FAILED",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1789981453083_adfqy",
+      "timestamp": "2026-09-21T09:04:13.083Z",
+      "actor": "viewer",
+      "action": "LOGIN_SUCCESS",
+      "target": "viewer",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    }
+  ]
+}
