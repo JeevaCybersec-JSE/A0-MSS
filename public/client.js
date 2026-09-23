@@ -731,16 +731,35 @@
   }
 
   /**
-   * Build and inject interactive divergence chart rows into the list container.
-   * Each row visualizes SLA contract target baseline (0% center axis) with
-   * deficit extending left (red/amber) and surplus extending right (green).
+   * Build and inject interactive target achievement comparison table.
+   * Clear, intuitive columns: Metric & Domain, Actual Value, Target SLA,
+   * Attainment Progress Meter, SLA Variance, and RAG Status.
    */
   function buildBulletBarRows(listEl, items, sectionMap) {
     listEl.innerHTML = '';
     if (!items || items.length === 0) {
-      listEl.innerHTML = '<p class="no-data-notice">No matching KPIs for the current filter.</p>';
+      listEl.innerHTML = '<div class="table-empty-row">No matching KPIs found for the current filter.</div>';
       return;
     }
+
+    const table = document.createElement('table');
+    table.className = 'target-attainment-table';
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th class="th-metric">Operational KPI &amp; Domain</th>
+          <th class="th-actual">Actual</th>
+          <th class="th-target">Target SLA</th>
+          <th class="th-attainment">Attainment Progress</th>
+          <th class="th-gap">SLA Variance</th>
+          <th class="th-status">Status</th>
+          <th class="th-action" aria-label="Drill down"></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
 
     items.forEach(({ def, data }, idx) => {
       const rag    = (data.rag || 'neutral').toLowerCase();
@@ -754,101 +773,93 @@
       const gapVal    = computeGap(actual, target, dir);
       const gapFmt    = formatGap(gapVal, unit);
 
-      // Determine deficit vs surplus
-      const isDeficit = gapVal !== null && gapVal < 0;
-      const isSurplus = gapVal !== null && gapVal >= 0;
-
-      // Calculate visual divergence width (normalized 0% to 100% of half-track)
-      let barWidthPct = 0;
-      if (gapVal !== null && gapVal !== 0) {
-        let rawPct = 0;
-        if (target !== null && target !== 0) {
-          rawPct = (Math.abs(gapVal) / Math.abs(target)) * 100;
-        } else {
-          rawPct = Math.min(Math.abs(gapVal) * 5, 100);
+      // Attainment Progress percentage (0% to 100%)
+      let progressPct = 0;
+      let displayPctText = '';
+      if (actual !== null && target !== null) {
+        if (dir === 'higher') {
+          if (target > 0) {
+            const rawRatio = (actual / target) * 100;
+            progressPct = Math.min(Math.max(rawRatio, 0), 100);
+            displayPctText = rawRatio >= 100 ? '100%' : `${rawRatio.toFixed(1)}%`;
+          } else {
+            progressPct = 100;
+            displayPctText = '100%';
+          }
+        } else if (dir === 'lower') {
+          if (actual <= target) {
+            progressPct = 100;
+            displayPctText = '100%';
+          } else {
+            const over = actual - target;
+            const denom = target > 0 ? target : actual;
+            const ratio = Math.max(0, 100 - (over / denom) * 50);
+            progressPct = Math.min(Math.max(ratio, 8), 98);
+            displayPctText = `${Math.round(ratio)}%`;
+          }
         }
-        // Scaled visually so subtle gaps are visible (min 12%) and capped at 100%
-        barWidthPct = Math.min(Math.max(rawPct, 12), 100);
+      } else {
+        progressPct = rag === 'green' ? 100 : rag === 'amber' ? 75 : 45;
+        displayPctText = `${progressPct}%`;
       }
 
-      const gapPillCls = gapVal === null ? 'gap-pill-neutral' : isSurplus ? 'gap-pill-positive' : 'gap-pill-negative';
-      const dirArrow   = dir === 'higher' ? '\u2191' : dir === 'lower' ? '\u2193' : '\u2014';
-      const dirLabel   = dir === 'higher' ? 'Higher is better' : dir === 'lower' ? 'Lower is better' : 'Trend';
-      const badgeCls   = `rag-badge-${['green','amber','red'].includes(rag) ? rag : 'neutral'}`;
+      const meterColorCls = rag === 'green' ? 'meter-green' : rag === 'amber' ? 'meter-amber' : 'meter-red';
+      const isSurplus     = gapVal !== null && gapVal >= 0;
+      const gapPillCls    = gapVal === null ? 'gap-pill-neutral' : isSurplus ? 'gap-pill-positive' : 'gap-pill-negative';
+      const gapPrefix     = isSurplus && gapVal > 0 ? '\u2713 ' : '';
+      const dirArrow      = dir === 'higher' ? '\u2191' : dir === 'lower' ? '\u2193' : '\u2014';
+      const dirLabel      = dir === 'higher' ? 'Higher is better' : dir === 'lower' ? 'Lower is better' : 'Trend';
+      const badgeCls      = `rag-badge-${['green','amber','red'].includes(rag) ? rag : 'neutral'}`;
+      const sectionName   = sectionMap && def.section ? (sectionMap[def.section] || '') : '';
 
-      // Section name lookup for sub-label
-      const sectionName = sectionMap && def.section ? (sectionMap[def.section] || '') : '';
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-rag', rag);
+      tr.setAttribute('tabindex', '0');
+      tr.setAttribute('role', 'button');
+      tr.setAttribute('aria-label', `${cleanText(def.label)}: actual ${actualFmt}, target ${targetFmt}, status ${ragLabel(rag)}`);
 
-      const row = document.createElement('div');
-      row.className = 'divergence-row target-bullet-row';
-      row.setAttribute('data-rag', rag);
-      row.setAttribute('tabindex', '0');
-      row.setAttribute('role', 'button');
-      row.setAttribute('aria-label', `${cleanText(def.label)}: actual ${actualFmt}, target ${targetFmt}, variance ${gapFmt}`);
-
-      row.innerHTML = `
-        <div class="divergence-row-info target-row-info">
-          <div class="divergence-metric-name target-metric-name">${cleanText(def.label)}</div>
-          <div class="divergence-metric-sub target-metric-sub">
-            ${sectionName ? `<span>${sectionName}</span><span style="color:#cbd5e1">\u2022</span>` : ''}
+      tr.innerHTML = `
+        <td class="td-metric-cell">
+          <div class="table-metric-title">${cleanText(def.label)}</div>
+          <div class="table-metric-meta">
+            ${sectionName ? `<span class="table-domain-tag">${sectionName}</span><span style="color:#cbd5e1">\u2022</span>` : ''}
             <span class="target-dir-badge">${dirArrow} ${dirLabel}</span>
-            <span class="rag-badge ${badgeCls}" style="font-size:10px;padding:1px 7px">&#9679;&nbsp;${ragLabel(rag)}</span>
           </div>
-        </div>
-        <div class="divergence-axis-cell target-bar-cell">
-          <div class="divergence-scale-labels">
-            <span>&larr; Deficit (SLA Breach)</span>
-            <span class="scale-zero-marker">&#127919; 0% Target SLA Baseline</span>
-            <span>Surplus (Target Met) &rarr;</span>
-          </div>
-          <div class="divergence-track">
-            <div class="divergence-half divergence-left-zone">
-              ${isDeficit ? `<div class="divergence-bar bar-deficit ${rag === 'amber' ? 'fill-amber' : ''}" style="width:0%" data-width="${barWidthPct.toFixed(1)}%"><span class="divergence-bar-val">${gapFmt}</span></div>` : ''}
+        </td>
+        <td class="td-actual-cell">
+          <span class="table-val-actual">${actualFmt}</span>
+        </td>
+        <td class="td-target-cell">
+          <span class="table-val-target"><span style="opacity:0.65;font-size:11px">&#127919;</span> ${targetFmt}</span>
+        </td>
+        <td class="td-attainment-cell">
+          <div class="table-meter-wrap" title="Attainment: ${displayPctText}">
+            <div class="table-meter-track">
+              <div class="table-meter-fill ${meterColorCls}" style="width:0%" data-pct="${progressPct.toFixed(1)}"></div>
             </div>
-            <div class="divergence-center-line" title="Target SLA Baseline (0% Gap)"></div>
-            <div class="divergence-half divergence-right-zone">
-              ${isSurplus ? `<div class="divergence-bar bar-surplus" style="width:0%" data-width="${barWidthPct.toFixed(1)}%"><span class="divergence-bar-val">${gapFmt}</span></div>` : ''}
-            </div>
+            <span class="table-meter-pct">${displayPctText}</span>
           </div>
-          <div class="divergence-subtrack-note">
-            <span>Actual: <strong>${actualFmt}</strong></span>
-            <span>Target: <strong>${targetFmt}</strong></span>
-          </div>
-        </div>
-        <div class="divergence-readout-col target-row-readout">
-          <div class="readout-actual-block">
-            <div class="readout-actual">${actualFmt}</div>
-            <div class="readout-target">Target: ${targetFmt}</div>
-          </div>
-          <span class="readout-gap ${gapPillCls}">${gapFmt}</span>
-          <span class="target-row-arrow">&#8250;</span>
-        </div>
+        </td>
+        <td class="td-gap-cell">
+          <span class="readout-gap ${gapPillCls}">${gapPrefix}${gapFmt}</span>
+        </td>
+        <td class="td-status-cell">
+          <span class="rag-badge ${badgeCls}" style="font-size:10.5px;padding:3px 8px">&#9679;&nbsp;${ragLabel(rag)}</span>
+        </td>
+        <td class="td-action-cell">
+          <span class="table-drill-btn" title="Inspect telemetry in Tier 3">&#8250;</span>
+        </td>
       `;
 
-      // Animate divergence bar in with stagger
-      const barEl = row.querySelector('.divergence-bar');
-      if (barEl) {
-        const targetW = barEl.getAttribute('data-width') || '0%';
+      // Animate progress meter width
+      const fillEl = tr.querySelector('.table-meter-fill');
+      if (fillEl) {
         setTimeout(() => {
-          barEl.style.width = targetW;
-        }, 60 + idx * 35);
+          fillEl.style.width = fillEl.getAttribute('data-pct') + '%';
+        }, 50 + idx * 30);
       }
 
-      // Hover tooltip on the divergence axis cell
-      const axisCell = row.querySelector('.divergence-axis-cell');
-      if (axisCell) {
-        axisCell.addEventListener('pointermove', e => {
-          showT2Tip(
-            `<strong>${cleanText(def.label)}</strong><br>` +
-            `Contract Target: <b>${targetFmt}</b> &nbsp;|&nbsp; Actual: <b>${actualFmt}</b><br>` +
-            `SLA Variance: <b>${gapFmt}</b> (${isSurplus ? 'Target Met / Surplus' : 'Deficit / SLA Breach'}) &bull; ${dirLabel}`,
-            e.clientX, e.clientY
-          );
-        }, { passive: true });
-        axisCell.addEventListener('pointerleave', hideT2Tip, { passive: true });
-      }
-
-      // Click / keyboard: scroll to Tier 3 section for this metric's domain (auto-expands)
+      // Click / keyboard drill to Tier 3
       function drillToTier3() {
         const secId = def.section;
         if (!secId) return;
@@ -862,13 +873,15 @@
           setTimeout(() => t3Block.classList.remove('telemetry-block-focused'), 2400);
         }
       }
-      row.addEventListener('click', drillToTier3);
-      row.addEventListener('keydown', e => {
+      tr.addEventListener('click', drillToTier3);
+      tr.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); drillToTier3(); }
       });
 
-      listEl.appendChild(row);
+      tbody.appendChild(tr);
     });
+
+    listEl.appendChild(table);
   }
 
   // ===========================================================

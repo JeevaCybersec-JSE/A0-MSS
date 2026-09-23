@@ -1469,68 +1469,101 @@ body {
    SLA Variance / Delta Divergence Chart (Tornado / Butterfly Style)
    ========================================================================== */
 
-.divergence-chart-list,
-.target-bullet-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: var(--gap-md);
-  position: relative;
-}
-
-.divergence-row,
-.target-bullet-row {
+.target-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 13px 18px;
-  display: grid;
-  grid-template-columns: 280px 1fr 220px;
-  align-items: center;
-  gap: 20px;
-  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  margin-top: var(--gap-md);
+  -webkit-overflow-scrolling: touch;
+}
+
+.target-attainment-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+  min-width: 900px;
+}
+
+.target-attainment-table thead {
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.target-attainment-table th {
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
   user-select: none;
-  position: relative;
 }
 
-.divergence-row:hover,
-.target-bullet-row:hover {
-  transform: translateY(-2px);
-  border-color: #93c5fd;
-  box-shadow: 0 8px 24px -4px rgba(37, 99, 235, 0.1), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
-  background: #fafcff;
+.target-attainment-table th.th-actual,
+.target-attainment-table th.th-target {
+  text-align: right;
 }
 
-.divergence-chart-list:hover .divergence-row:not(:hover),
-.target-bullet-list:hover .target-bullet-row:not(:hover) {
-  opacity: 0.72;
+.target-attainment-table th.th-gap,
+.target-attainment-table th.th-status,
+.target-attainment-table th.th-action {
+  text-align: center;
 }
 
-/* Left Column: Metric Info */
-.divergence-row-info,
-.target-row-info {
-  min-width: 0;
+.target-attainment-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.18s ease, transform 0.18s ease;
+  cursor: pointer;
 }
 
-.divergence-metric-name,
-.target-metric-name {
+.target-attainment-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.target-attainment-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.target-attainment-table tbody tr:focus-visible {
+  outline: 2px solid var(--accent);
+  background: #f0f7ff;
+}
+
+.target-attainment-table td {
+  padding: 13px 16px;
+  vertical-align: middle;
+}
+
+/* Column 1: KPI & Domain */
+.td-metric-cell {
+  min-width: 250px;
+}
+
+.table-metric-title {
   font-size: 13.5px;
   font-weight: 700;
   color: var(--text-h);
   line-height: 1.35;
-  margin-bottom: 3px;
-  word-break: break-word;
+  margin-bottom: 4px;
 }
 
-.divergence-metric-sub,
-.target-metric-sub {
+.table-metric-meta {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 11px;
   color: var(--text-muted);
   flex-wrap: wrap;
+}
+
+.table-domain-tag {
+  font-weight: 500;
+  color: #475569;
 }
 
 .target-dir-badge {
@@ -1545,174 +1578,91 @@ body {
   color: #475569;
 }
 
-/* Center Column: Bidirectional Divergence Axis */
-.divergence-axis-cell,
-.target-bar-cell {
-  position: relative;
-  width: 100%;
-}
-
-.divergence-scale-labels {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 10px;
-  font-weight: 600;
-  color: #94a3b8;
-  margin-bottom: 4px;
-  padding: 0 4px;
-  letter-spacing: 0.02em;
-}
-
-.scale-zero-marker {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  color: #0f172a;
-  font-weight: 700;
-  font-size: 10.5px;
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  padding: 1px 6px;
-  border-radius: 4px;
-}
-
-.divergence-track {
-  height: 22px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  display: flex;
-  position: relative;
-  overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-/* Left Half: Negative Deficit Zone */
-.divergence-half.divergence-left-zone {
-  flex: 1;
-  height: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  position: relative;
-  background: linear-gradient(90deg, rgba(239, 68, 68, 0.02) 0%, rgba(239, 68, 68, 0.06) 100%);
-}
-
-/* Center Benchmark Line (0% Baseline) */
-.divergence-center-line {
-  width: 3px;
-  height: 100%;
-  background: #0f172a;
-  z-index: 5;
-  flex-shrink: 0;
-  position: relative;
-  box-shadow: 0 0 4px rgba(15, 23, 42, 0.3);
-}
-
-/* Right Half: Positive Surplus Zone */
-.divergence-half.divergence-right-zone {
-  flex: 1;
-  height: 100%;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  position: relative;
-  background: linear-gradient(90deg, rgba(16, 185, 129, 0.06) 0%, rgba(16, 185, 129, 0.02) 100%);
-}
-
-/* The Animated Divergence Bars */
-.divergence-bar {
-  height: 100%;
-  transition: width 0.75s cubic-bezier(0.22, 1, 0.36, 1);
-  position: relative;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-}
-
-/* Deficit bar grows right-to-left */
-.divergence-bar.bar-deficit {
-  background: linear-gradient(270deg, #ef4444, #dc2626);
-  border-radius: 5px 0 0 5px;
-  justify-content: flex-start;
-  padding-left: 6px;
-}
-.divergence-bar.bar-deficit.fill-amber {
-  background: linear-gradient(270deg, #f59e0b, #d97706);
-}
-
-/* Surplus bar grows left-to-right */
-.divergence-bar.bar-surplus {
-  background: linear-gradient(90deg, #10b981, #059669);
-  border-radius: 0 5px 5px 0;
-  justify-content: flex-end;
-  padding-right: 6px;
-}
-
-.divergence-bar:hover {
-  filter: brightness(1.15);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-}
-
-.divergence-bar-val {
-  font-size: 10px;
-  font-weight: 800;
-  color: #ffffff;
-  font-family: var(--mono);
-  letter-spacing: -0.01em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+/* Column 2 & 3: Actual and Target */
+.td-actual-cell,
+.td-target-cell {
+  text-align: right;
   white-space: nowrap;
 }
 
-/* Subtrack notes below the track */
-.divergence-subtrack-note {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 4px;
-  font-size: 10.5px;
-  color: #64748b;
-  font-weight: 500;
-  padding: 0 2px;
-}
-.divergence-subtrack-note strong {
-  color: var(--text-h);
-}
-
-/* Right Column: Readout */
-.divergence-readout-col,
-.target-row-readout {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.readout-actual-block {
-  text-align: right;
-  min-width: 75px;
-}
-
-.readout-actual {
+.table-val-actual {
+  font-family: var(--mono);
   font-size: 14.5px;
   font-weight: 800;
-  font-family: var(--mono);
   color: var(--text-h);
-  line-height: 1;
 }
 
-.readout-target {
-  font-size: 10px;
-  color: var(--text-muted);
-  margin-top: 3px;
-  font-weight: 500;
+.table-val-target {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Column 4: Attainment Progress Meter */
+.td-attainment-cell {
+  min-width: 200px;
+}
+
+.table-meter-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.table-meter-track {
+  flex: 1;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.table-meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.meter-green {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.meter-amber {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.meter-red {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.table-meter-pct {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #334155;
+  width: 48px;
+  text-align: right;
+}
+
+/* Column 5: SLA Variance / Gap */
+.td-gap-cell {
+  text-align: center;
+  white-space: nowrap;
 }
 
 .readout-gap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 11.5px;
   font-weight: 700;
   font-family: var(--mono);
-  padding: 3px 8px;
+  padding: 3px 9px;
   border-radius: 6px;
   white-space: nowrap;
 }
@@ -1735,16 +1685,42 @@ body {
   border: 1px solid #e2e8f0;
 }
 
-.target-row-arrow {
-  color: #94a3b8;
-  font-size: 15px;
-  transition: transform 0.2s ease, color 0.2s ease;
+/* Column 6: Status */
+.td-status-cell {
+  text-align: center;
+  white-space: nowrap;
 }
 
-.divergence-row:hover .target-row-arrow,
-.target-bullet-row:hover .target-row-arrow {
-  transform: translateX(4px);
+/* Column 7: Action Drill */
+.td-action-cell {
+  text-align: center;
+  width: 44px;
+}
+
+.table-drill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: #94a3b8;
+  background: transparent;
+  transition: all 0.2s ease;
+  font-size: 16px;
+}
+
+.target-attainment-table tbody tr:hover .table-drill-btn {
+  background: var(--accent-subtle);
   color: var(--accent);
+  transform: translateX(3px);
+}
+
+.table-empty-row {
+  text-align: center;
+  padding: 36px 16px;
+  color: #64748b;
+  font-size: 13.5px;
 }
 
 /* ============================================================
