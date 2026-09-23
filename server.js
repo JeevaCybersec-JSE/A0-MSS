@@ -1232,16 +1232,19 @@ const server = http.createServer(async (req, res) => {
         };
       });
 
-      // Compute summary RAG counts
-      let green = 0, amber = 0, red = 0, total = 0;
+      // Compute summary RAG counts across entire 51-metric estate
+      let green = 0, amber = 0, red = 0, evaluatedTotal = 0;
       Object.values(computed).forEach(m => {
         if (m && m.rag) {
-          total++;
+          evaluatedTotal++;
           if (m.rag === 'green') green++;
           else if (m.rag === 'amber') amber++;
           else if (m.rag === 'red') red++;
         }
       });
+
+      const totalCatalog = METRICS.length; // 51
+      const telemetryCount = Math.max(0, totalCatalog - evaluatedTotal); // 20
 
       const overallRAG = computeOverallRAG(computed);
 
@@ -1257,7 +1260,9 @@ const server = http.createServer(async (req, res) => {
             green,
             amber,
             red,
-            total,
+            evaluatedTotal,
+            total: totalCatalog,
+            telemetryCount,
           },
           narrative: {
             topRisks: (monthObj.narrative && monthObj.narrative.topRisks) || '',

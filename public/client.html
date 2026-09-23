@@ -120,7 +120,10 @@
         <!-- RAG Posture: Donut + Summary Cards -->
         <div class="section-block">
           <div class="section-block-title-row">
-            <div class="section-block-title">Overall RAG Summary</div>
+            <div>
+              <div class="section-block-title">Overall RAG Summary</div>
+              <div class="section-block-desc">51 Total Estate Metrics &mdash; 31 Evaluated Contractual SLAs &bull; 20 Continuous Telemetry Trackers</div>
+            </div>
             <span class="rag-live-indicator"><span class="rag-orbit-dot"></span>LIVE EVALUATION</span>
           </div>
           <div class="t1-posture-row">
@@ -129,10 +132,11 @@
               <div class="donut-chart-area" id="donut-chart-container" aria-label="Overall RAG interactive donut chart" role="img">
                 <!-- Interactive SVG injected by JS -->
               </div>
-              <div class="donut-legend">
+              <div class="donut-legend" id="donut-legend-container">
                 <div class="donut-legend-item"><span class="donut-legend-dot dot-green"></span> Within Target</div>
                 <div class="donut-legend-item"><span class="donut-legend-dot dot-amber"></span> Attention</div>
                 <div class="donut-legend-item"><span class="donut-legend-dot dot-red"></span> Critical</div>
+                <div class="donut-legend-item"><span class="donut-legend-dot dot-telemetry"></span> Operational Telemetry</div>
               </div>
             </div>
             <!-- RAG Cards -->

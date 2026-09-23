@@ -127,11 +127,11 @@
    * - Orbit marker dot rotating along outer track
    * - Automatic smooth spring return to 0° on pointer leave
    */
-  function initRotatingDonutChart(container, cardWrap, green, amber, red) {
+  function initRotatingDonutChart(container, cardWrap, green, amber, red, telemetry = 0) {
     if (!container) return;
     container.innerHTML = '';
 
-    const total = green + amber + red;
+    const total = green + amber + red + telemetry;
     const VB = 180;
     const CX = 90, CY = 90;
     const R  = 68;
@@ -145,7 +145,7 @@
       height: '180',
       class: 'rag-donut-svg',
       role: 'img',
-      'aria-label': `RAG distribution: ${green} Within Target, ${amber} Attention, ${red} Critical`,
+      'aria-label': `Estate distribution (${total} metrics): ${green} Within Target, ${amber} Attention, ${red} Critical, ${telemetry} Telemetry`,
       style: 'overflow:visible;'
     });
 
@@ -217,9 +217,10 @@
     const baseG = createSVG('g', { transform: `rotate(-90 ${CX} ${CY})` });
 
     const SEG_DEFS = [
-      { v: green, color: '#059669', colorHover: '#10b981', label: 'Within Target', short: 'Green' },
-      { v: amber, color: '#d97706', colorHover: '#f59e0b', label: 'Attention Req.', short: 'Amber' },
-      { v: red,   color: '#dc2626', colorHover: '#ef4444', label: 'Critical Remed.', short: 'Red'   }
+      { v: green,     color: '#059669', colorHover: '#10b981', label: 'Within Target',          short: 'Green' },
+      { v: amber,     color: '#d97706', colorHover: '#f59e0b', label: 'Attention Req.',         short: 'Amber' },
+      { v: red,       color: '#dc2626', colorHover: '#ef4444', label: 'Critical Remed.',        short: 'Red'   },
+      { v: telemetry, color: '#6366f1', colorHover: '#818cf8', label: 'Operational Telemetry', short: 'Telemetry' }
     ].filter(s => s.v > 0);
 
     let accDeg = 0;
@@ -889,7 +890,7 @@
   // ===========================================================
 
   function renderTier1(portal) {
-    const summary    = portal.summary    || { total: 0, green: 0, amber: 0, red: 0 };
+    const summary    = portal.summary    || { total: 0, green: 0, amber: 0, red: 0, evaluatedTotal: 0, telemetryCount: 0 };
     const narrative  = portal.narrative  || {};
     const sections   = Array.isArray(portal.sections)          ? portal.sections          : [];
     const metricDefs = Array.isArray(portal.metricDefinitions) ? portal.metricDefinitions : [];
@@ -899,25 +900,37 @@
     const green = Number(summary.green) || 0;
     const amber = Number(summary.amber) || 0;
     const red   = Number(summary.red)   || 0;
-    const total = green + amber + red;
+    const evaluatedTotal = Number(summary.evaluatedTotal) || (green + amber + red);
+    const totalCatalog = Number(summary.total) || metricDefs.length || 51;
+    const telemetryCount = Number(summary.telemetryCount) || Math.max(0, totalCatalog - evaluatedTotal);
 
-    // ---- 1a. Dynamic Rotating Donut Chart ----
+    // ---- 1a. Dynamic Rotating Donut Chart (All 51 Estate Metrics) ----
     const donutEl = document.getElementById('donut-chart-container');
     const donutCard = document.getElementById('donut-distribution-card') || donutEl;
-    if (donutEl) initRotatingDonutChart(donutEl, donutCard, green, amber, red);
+    if (donutEl) initRotatingDonutChart(donutEl, donutCard, green, amber, red, telemetryCount);
 
-    // ---- 1b. RAG summary cards ----
+    const legendEl = document.getElementById('donut-legend-container');
+    if (legendEl) {
+      legendEl.innerHTML = `
+        <div class="donut-legend-item"><span class="donut-legend-dot dot-green"></span> Within Target (${green})</div>
+        <div class="donut-legend-item"><span class="donut-legend-dot dot-amber"></span> Attention (${amber})</div>
+        <div class="donut-legend-item"><span class="donut-legend-dot dot-red"></span> Critical (${red})</div>
+        <div class="donut-legend-item"><span class="donut-legend-dot dot-telemetry"></span> Operational Telemetry (${telemetryCount})</div>
+      `;
+    }
+
+    // ---- 1b. RAG summary cards (4 Estate Categories) ----
     const ragCardsEl = document.getElementById('rag-summary-cards');
     if (ragCardsEl) {
-      const pctG = total > 0 ? Math.round((green / total) * 100) : 0;
-      const pctA = total > 0 ? Math.round((amber / total) * 100) : 0;
-      const pctR = total > 0 ? Math.round((red   / total) * 100) : 0;
+      const pctG = evaluatedTotal > 0 ? Math.round((green / evaluatedTotal) * 100) : 0;
+      const pctA = evaluatedTotal > 0 ? Math.round((amber / evaluatedTotal) * 100) : 0;
+      const pctR = evaluatedTotal > 0 ? Math.round((red   / evaluatedTotal) * 100) : 0;
       ragCardsEl.innerHTML = `
         <div class="rag-card rag-card-green" role="status">
           <div class="rag-card-count">${green}</div>
           <div class="rag-card-info">
             <div class="rag-card-label">Within Target</div>
-            <div class="rag-card-pct">${pctG}% of evaluated metrics</div>
+            <div class="rag-card-pct">${green} of ${evaluatedTotal} SLA targets (${pctG}%)</div>
           </div>
           <div class="rag-card-dot"></div>
         </div>
@@ -925,7 +938,7 @@
           <div class="rag-card-count">${amber}</div>
           <div class="rag-card-info">
             <div class="rag-card-label">Attention Required</div>
-            <div class="rag-card-pct">${pctA}% of evaluated metrics</div>
+            <div class="rag-card-pct">${amber} of ${evaluatedTotal} SLA targets (${pctA}%)</div>
           </div>
           <div class="rag-card-dot"></div>
         </div>
@@ -933,7 +946,15 @@
           <div class="rag-card-count">${red}</div>
           <div class="rag-card-info">
             <div class="rag-card-label">Critical Remediation</div>
-            <div class="rag-card-pct">${pctR}% of evaluated metrics</div>
+            <div class="rag-card-pct">${red} of ${evaluatedTotal} SLA targets (${pctR}%)</div>
+          </div>
+          <div class="rag-card-dot"></div>
+        </div>
+        <div class="rag-card rag-card-telemetry" role="status">
+          <div class="rag-card-count">${telemetryCount}</div>
+          <div class="rag-card-info">
+            <div class="rag-card-label">Operational Telemetry</div>
+            <div class="rag-card-pct">${telemetryCount} continuous activity &amp; volume trackers</div>
           </div>
           <div class="rag-card-dot"></div>
         </div>
@@ -948,13 +969,38 @@
     // ---- 1d. Overall RAG Hero Card (Positioned Above Pie Chart) ----
     const ragHeroEl = document.getElementById('overall-rag-hero-container');
     if (ragHeroEl) {
-      const overallText = overallRAG === 'green'
-        ? 'All evaluated security metrics are within defined target thresholds. Security posture is operating at optimal levels for the reporting period.'
-        : overallRAG === 'amber'
-        ? 'Several security metrics have reached warning thresholds requiring active oversight and remediation during this period.'
-        : overallRAG === 'red'
-        ? 'Critical thresholds have been breached in one or more security domains. Prioritized intervention is required.'
-        : 'Security posture has been evaluated for the reporting period.';
+      // Check for zero-tolerance Target=0 breaches
+      const zeroBreaches = [];
+      metricDefs.forEach(def => {
+        const cleanT = def.target !== null && def.target !== undefined && def.target !== '' && def.target !== '-'
+          ? String(def.target).replace('%', '').trim()
+          : null;
+        const isZero = (cleanT !== null && (cleanT === '0' || parseFloat(cleanT) === 0) && (def.direction || '').toLowerCase() === 'lower') ||
+                       (def.ragRule === 'binary0' && (def.direction || '').toLowerCase() === 'lower');
+        if (isZero) {
+          const mVal = metricsData[def.id] && metricsData[def.id].computed;
+          if (mVal !== null && mVal !== undefined && Number(mVal) > 0) {
+            zeroBreaches.push({ name: def.name || def.id, val: mVal });
+          }
+        }
+      });
+
+      let overallText = '';
+      if (overallRAG === 'red') {
+        if (zeroBreaches.length > 0) {
+          const breachSummary = zeroBreaches.slice(0, 3).map(b => `${b.name} (${b.val})`).join(', ');
+          const extra = zeroBreaches.length > 3 ? ` and ${zeroBreaches.length - 3} other metric(s)` : '';
+          overallText = `Critical Zero-Tolerance SLA Breach Enforced: Target=0 metric increased &gt; 0 (${breachSummary}${extra}). Contractually, any Target=0 breach immediately sets the overall month status to RED regardless of majority count.`;
+        } else {
+          overallText = 'Critical thresholds have been breached across majority of evaluated SLA security metrics. Prioritized remediation is required.';
+        }
+      } else if (overallRAG === 'amber') {
+        overallText = 'Several security metrics have reached warning thresholds requiring active oversight and remediation during this period (all zero-tolerance metrics maintained at 0).';
+      } else if (overallRAG === 'green') {
+        overallText = 'All zero-tolerance targets met (0 breaches) and majority of evaluated security SLA metrics are within defined targets. Security posture is optimal.';
+      } else {
+        overallText = 'Security posture has been evaluated for the reporting period.';
+      }
 
       const overallLbl = ragLabel(overallRAG);
       const badgeCls   = `rag-badge-${overallRAG || 'neutral'}`;
@@ -969,6 +1015,14 @@
             <div class="exec-rag-badge ${badgeCls}" role="status">&#9679; ${overallLbl}</div>
           </div>
           <p class="exec-card-body exec-hero-body">${overallText}</p>
+          <div class="exec-hero-sub-stats">
+            <span class="exec-hero-sub-pill"><strong>Estate Monitored:</strong> ${totalCatalog} Metrics</span>
+            <span class="exec-hero-sub-pill"><strong>Evaluated SLAs:</strong> ${evaluatedTotal} Targets</span>
+            <span class="exec-hero-sub-pill"><strong>Operational Telemetry:</strong> ${telemetryCount} Metrics</span>
+            ${zeroBreaches.length > 0
+              ? `<span class="exec-hero-sub-pill" style="color:var(--red);background:#fef2f2;border:1px solid #fca5a5;"><strong>Zero-Tolerance:</strong> ${zeroBreaches.length} Breaches (&gt; 0)</span>`
+              : `<span class="exec-hero-sub-pill" style="color:var(--green);background:#f0fdf4;border:1px solid #a7f3d0;"><strong>Zero-Tolerance:</strong> 0 Breaches</span>`}
+          </div>
         </div>
       `;
     }

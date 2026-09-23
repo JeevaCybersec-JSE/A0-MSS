@@ -586,37 +586,44 @@ body {
 .donut-legend-dot.dot-green { background: var(--green); }
 .donut-legend-dot.dot-amber { background: var(--amber); }
 .donut-legend-dot.dot-red   { background: var(--red); }
+.donut-legend-dot.dot-telemetry { background: #6366f1; }
 
 /* RAG Summary Cards */
 .rag-summary-col {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-md);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .rag-summary-col {
+    grid-template-columns: 1fr;
+  }
 }
 
 .rag-card {
   border-radius: var(--r-lg);
-  padding: var(--gap-md) var(--gap-lg);
+  padding: 14px 18px;
   border: 1px solid var(--border);
   display: flex;
   align-items: center;
-  gap: var(--gap-lg);
+  gap: 14px;
   background: var(--bg-card);
   transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .rag-card:hover {
   box-shadow: var(--shadow-md);
-  transform: translateX(4px);
+  transform: translateY(-2px);
   border-color: #cbd5e1;
 }
 
 .rag-card-count {
-  font-size: 40px;
+  font-size: 34px;
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
-  min-width: 48px;
+  min-width: 44px;
   font-family: var(--mono);
 }
 
@@ -632,7 +639,7 @@ body {
 }
 
 .rag-card-pct {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--text-muted);
 }
 
@@ -654,6 +661,32 @@ body {
 .rag-card-red { border-left: 4px solid var(--red); }
 .rag-card-red .rag-card-count { color: var(--red); }
 .rag-card-red .rag-card-dot { background: var(--red); }
+
+.rag-card-telemetry { border-left: 4px solid #6366f1; }
+.rag-card-telemetry .rag-card-count { color: #6366f1; }
+.rag-card-telemetry .rag-card-dot { background: #6366f1; }
+
+.exec-hero-sub-stats {
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.exec-hero-sub-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.05);
+  font-family: var(--mono);
+  font-size: 11px;
+}
 
 /* ============================================================
    DOMAIN SECURITY POSTURE — INTERACTIVE COMPONENT
