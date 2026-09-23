@@ -110,6 +110,13 @@
           <p class="tier-subtitle">High-level security posture — how are we doing overall?</p>
         </div>
 
+        <!-- Overall RAG Status Hero Card (Above Pie Chart) -->
+        <div class="section-block" id="overall-rag-hero-block">
+          <div id="overall-rag-hero-container">
+            <!-- Overall RAG hero card injected by JS -->
+          </div>
+        </div>
+
         <!-- RAG Posture: Donut + Summary Cards -->
         <div class="section-block">
           <div class="section-block-title-row">
@@ -167,14 +174,6 @@
             <div class="domain-posture-list" id="domain-rag-chart-container" role="region" aria-label="Domain Security Posture Breakdown">
               <!-- Rich interactive domain rows injected by JS -->
             </div>
-          </div>
-        </div>
-
-        <!-- Executive Summary Cards -->
-        <div class="section-block">
-          <div class="section-block-title">Executive Summary</div>
-          <div class="exec-summary-grid" id="exec-summary-container" aria-label="Executive summary">
-            <!-- 4 cards injected by JS -->
           </div>
         </div>
       </section>
@@ -265,8 +264,40 @@
           <p class="tier-subtitle">Operational telemetry organized by security domain.</p>
         </div>
 
+        <!-- Telemetry Toolbar: Expand/Collapse All -->
+        <div class="telemetry-toolbar" id="telemetry-toolbar">
+          <div class="telemetry-toolbar-info">
+            <span class="telemetry-toolbar-count" id="telemetry-domain-total">— Security Domains</span>
+            <span class="telemetry-toolbar-sep">&bull;</span>
+            <span class="telemetry-toolbar-metrics" id="telemetry-metric-total">— Evaluated Metrics</span>
+          </div>
+          <div class="telemetry-toolbar-actions">
+            <button type="button" class="telemetry-btn-toggle" id="telemetry-expand-all" title="Expand all domain tables">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              Expand All
+            </button>
+            <button type="button" class="telemetry-btn-toggle" id="telemetry-collapse-all" title="Collapse all domain tables">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              Collapse All
+            </button>
+          </div>
+        </div>
+
         <div id="telemetry-catalog-container">
-          <!-- Domain blocks injected by JS -->
+          <!-- Collapsible domain blocks injected by JS -->
+        </div>
+
+        <!-- Executive Narrative Cards (Below Telemetry Catalog) -->
+        <div class="section-block" id="exec-narratives-block" style="margin-top: var(--gap-2xl);">
+          <div class="section-block-header-wrap">
+            <div>
+              <div class="section-block-title">Executive Insights &amp; Operational Next Steps</div>
+              <div class="section-block-desc">Key observations, risk disclosures, and forward-looking remediation roadmap</div>
+            </div>
+          </div>
+          <div class="exec-summary-grid exec-narratives-grid" id="exec-narratives-container" aria-label="Executive insights and operational next steps">
+            <!-- Top Risks, Key Improvements, Planned Actions injected by JS -->
+          </div>
         </div>
       </section>
 

@@ -636,10 +636,13 @@
           });
         });
 
-        // Click to jump to Tier 3 section
+        // Click to jump to Tier 3 section (auto-expands if collapsed)
         function jumpToTier3() {
           const targetBlock = document.getElementById('telemetry-section-' + d.id);
           if (targetBlock) {
+            targetBlock.classList.remove('is-collapsed');
+            const hdr = targetBlock.querySelector('.telemetry-domain-toggle');
+            if (hdr) hdr.setAttribute('aria-expanded', 'true');
             targetBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
             targetBlock.classList.add('telemetry-block-focused');
             setTimeout(() => targetBlock.classList.remove('telemetry-block-focused'), 2400);
@@ -800,12 +803,15 @@
       }, { passive: true });
       barCell.addEventListener('pointerleave', hideT2Tip, { passive: true });
 
-      // Click / keyboard: scroll to Tier 3 section for this metric's domain
+      // Click / keyboard: scroll to Tier 3 section for this metric's domain (auto-expands)
       function drillToTier3() {
         const secId = def.section;
         if (!secId) return;
         const t3Block = document.getElementById('telemetry-section-' + secId);
         if (t3Block) {
+          t3Block.classList.remove('is-collapsed');
+          const hdr = t3Block.querySelector('.telemetry-domain-toggle');
+          if (hdr) hdr.setAttribute('aria-expanded', 'true');
           t3Block.scrollIntoView({ behavior: 'smooth', block: 'center' });
           t3Block.classList.add('telemetry-block-focused');
           setTimeout(() => t3Block.classList.remove('telemetry-block-focused'), 2400);
@@ -881,9 +887,9 @@
     const controlsEl = document.getElementById('domain-posture-controls');
     if (domainEl) renderDomainSecurityPosture(domainEl, controlsEl, sections, metricDefs, metricsData);
 
-    // ---- 1d. Executive Summary ----
-    const execEl = document.getElementById('exec-summary-container');
-    if (execEl) {
+    // ---- 1d. Overall RAG Hero Card (Positioned Above Pie Chart) ----
+    const ragHeroEl = document.getElementById('overall-rag-hero-container');
+    if (ragHeroEl) {
       const overallText = overallRAG === 'green'
         ? 'All evaluated security metrics are within defined target thresholds. Security posture is operating at optimal levels for the reporting period.'
         : overallRAG === 'amber'
@@ -895,12 +901,8 @@
       const overallLbl = ragLabel(overallRAG);
       const badgeCls   = `rag-badge-${overallRAG || 'neutral'}`;
 
-      const topRisks      = cleanText(narrative.topRisks      || '').trim();
-      const improvements  = cleanText(narrative.improvements  || '').trim();
-      const plannedActions = cleanText(narrative.plannedActions || '').trim();
-
-      execEl.innerHTML = `
-        <div class="exec-card exec-card-status status-${overallRAG}">
+      ragHeroEl.innerHTML = `
+        <div class="exec-card exec-card-status status-${overallRAG} exec-card-hero">
           <div class="exec-hero-header">
             <div class="exec-card-header">
               <span class="exec-card-icon" aria-hidden="true">&#9711;</span>
@@ -909,27 +911,6 @@
             <div class="exec-rag-badge ${badgeCls}" role="status">&#9679; ${overallLbl}</div>
           </div>
           <p class="exec-card-body exec-hero-body">${overallText}</p>
-        </div>
-        <div class="exec-card">
-          <div class="exec-card-header">
-            <span class="exec-card-icon" aria-hidden="true">&#9888;</span>
-            <span class="exec-card-title">Top Risks</span>
-          </div>
-          <p class="exec-card-body">${topRisks || '<span class="exec-empty">No active risks identified for this reporting period.</span>'}</p>
-        </div>
-        <div class="exec-card">
-          <div class="exec-card-header">
-            <span class="exec-card-icon" aria-hidden="true">&#8593;</span>
-            <span class="exec-card-title">Key Improvements</span>
-          </div>
-          <p class="exec-card-body">${improvements || '<span class="exec-empty">No key improvements recorded for this reporting period.</span>'}</p>
-        </div>
-        <div class="exec-card">
-          <div class="exec-card-header">
-            <span class="exec-card-icon" aria-hidden="true">&#8594;</span>
-            <span class="exec-card-title">Planned Actions Next Month</span>
-          </div>
-          <p class="exec-card-body">${plannedActions || '<span class="exec-empty">No planned actions recorded for this reporting period.</span>'}</p>
         </div>
       `;
     }
@@ -1149,7 +1130,7 @@
   }
 
   // ===========================================================
-  // SECTION 8: TIER 3 — TELEMETRY CATALOG
+  // SECTION 8: TIER 3 — TELEMETRY CATALOG (Interactive Collapsible Toggle)
   // ===========================================================
 
   function renderTier3(portal) {
@@ -1162,23 +1143,62 @@
     container.innerHTML = '';
 
     let domainCount = 0;
+    let totalEvaluatedMetrics = 0;
+
     sections.forEach(section => {
       const secDefs = metricDefs.filter(d => d.section === section.id);
       if (secDefs.length === 0) return;
       if (!secDefs.some(d => { const e = metricsData[d.id]; return e && e.computed !== null && e.computed !== undefined; })) return;
 
       domainCount++;
+      totalEvaluatedMetrics += secDefs.length;
+
+      // Count RAG status per domain for quick pill preview
+      let dG = 0, dA = 0, dR = 0;
+      secDefs.forEach(def => {
+        const e = metricsData[def.id];
+        if (e && e.rag) {
+          const r = (e.rag || '').toLowerCase();
+          if (r === 'green') dG++;
+          else if (r === 'amber') dA++;
+          else if (r === 'red') dR++;
+        }
+      });
+
+      let pillsHtml = '';
+      if (dG > 0) pillsHtml += `<span class="telemetry-mini-pill pill-green">&#9679; ${dG} Met</span>`;
+      if (dA > 0) pillsHtml += `<span class="telemetry-mini-pill pill-amber">&#9679; ${dA} Attention</span>`;
+      if (dR > 0) pillsHtml += `<span class="telemetry-mini-pill pill-red">&#9679; ${dR} Critical</span>`;
+
       const block = document.createElement('div');
       block.className = 'telemetry-domain-block';
       block.id = 'telemetry-section-' + section.id;
 
-      const header = document.createElement('div');
-      header.className = 'telemetry-domain-header';
-      header.innerHTML = `
-        <span class="telemetry-domain-name">${cleanText(section.name)}</span>
-        <span class="telemetry-domain-count">${secDefs.length} metric${secDefs.length !== 1 ? 's' : ''}</span>
+      // Interactive Collapsible Toggle Header Button
+      const headerBtn = document.createElement('button');
+      headerBtn.type = 'button';
+      headerBtn.className = 'telemetry-domain-header telemetry-domain-toggle';
+      headerBtn.setAttribute('aria-expanded', 'true');
+      headerBtn.setAttribute('aria-controls', 'telemetry-table-wrap-' + section.id);
+      headerBtn.setAttribute('title', `Click to collapse or expand ${cleanText(section.name)} telemetry`);
+      headerBtn.innerHTML = `
+        <div class="telemetry-domain-header-left">
+          <span class="telemetry-toggle-chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+          <span class="telemetry-domain-name">${cleanText(section.name)}</span>
+          <span class="telemetry-domain-count">${secDefs.length} metric${secDefs.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="telemetry-domain-header-right">
+          <div class="telemetry-domain-rag-pills">${pillsHtml}</div>
+          <span class="telemetry-toggle-hint">Click to toggle</span>
+        </div>
       `;
-      block.appendChild(header);
+
+      // Collapsible Table Wrapper
+      const tableWrap = document.createElement('div');
+      tableWrap.className = 'telemetry-table-wrapper';
+      tableWrap.id = 'telemetry-table-wrap-' + section.id;
 
       const table = document.createElement('div');
       table.className = 'telemetry-table';
@@ -1228,12 +1248,82 @@
         table.appendChild(row);
       });
 
-      block.appendChild(table);
+      tableWrap.appendChild(table);
+
+      // Toggle click handler
+      headerBtn.addEventListener('click', () => {
+        const isCollapsed = block.classList.toggle('is-collapsed');
+        headerBtn.setAttribute('aria-expanded', String(!isCollapsed));
+      });
+
+      block.appendChild(headerBtn);
+      block.appendChild(tableWrap);
       container.appendChild(block);
     });
 
+    // Update Toolbar Stats
+    const totalDomainEl = document.getElementById('telemetry-domain-total');
+    const totalMetricEl = document.getElementById('telemetry-metric-total');
+    if (totalDomainEl) totalDomainEl.textContent = `${domainCount} Security Domains`;
+    if (totalMetricEl) totalMetricEl.textContent = `${totalEvaluatedMetrics} Evaluated Metrics`;
+
+    // Wire Toolbar Expand All / Collapse All buttons
+    const expandAllBtn = document.getElementById('telemetry-expand-all');
+    const collapseAllBtn = document.getElementById('telemetry-collapse-all');
+    if (expandAllBtn) {
+      expandAllBtn.onclick = () => {
+        container.querySelectorAll('.telemetry-domain-block').forEach(b => {
+          b.classList.remove('is-collapsed');
+          const hdr = b.querySelector('.telemetry-domain-toggle');
+          if (hdr) hdr.setAttribute('aria-expanded', 'true');
+        });
+      };
+    }
+    if (collapseAllBtn) {
+      collapseAllBtn.onclick = () => {
+        container.querySelectorAll('.telemetry-domain-block').forEach(b => {
+          b.classList.add('is-collapsed');
+          const hdr = b.querySelector('.telemetry-domain-toggle');
+          if (hdr) hdr.setAttribute('aria-expanded', 'false');
+        });
+      };
+    }
+
     if (domainCount === 0) {
       container.innerHTML = '<p class="no-data-notice">No telemetry catalog metrics available for this period.</p>';
+    }
+
+    // ---- Render Executive Insights & Operational Next Steps (Below Telemetry Catalog) ----
+    const narrativesEl = document.getElementById('exec-narratives-container') || document.getElementById('exec-summary-container');
+    if (narrativesEl) {
+      const narrative = portal.narrative || {};
+      const topRisks      = cleanText(narrative.topRisks      || '').trim();
+      const improvements  = cleanText(narrative.improvements  || '').trim();
+      const plannedActions = cleanText(narrative.plannedActions || '').trim();
+
+      narrativesEl.innerHTML = `
+        <div class="exec-card">
+          <div class="exec-card-header">
+            <span class="exec-card-icon" aria-hidden="true">&#9888;</span>
+            <span class="exec-card-title">Top Risks</span>
+          </div>
+          <p class="exec-card-body">${topRisks || '<span class="exec-empty">No active risks identified for this reporting period.</span>'}</p>
+        </div>
+        <div class="exec-card">
+          <div class="exec-card-header">
+            <span class="exec-card-icon" aria-hidden="true">&#8593;</span>
+            <span class="exec-card-title">Key Improvements</span>
+          </div>
+          <p class="exec-card-body">${improvements || '<span class="exec-empty">No key improvements recorded for this reporting period.</span>'}</p>
+        </div>
+        <div class="exec-card">
+          <div class="exec-card-header">
+            <span class="exec-card-icon" aria-hidden="true">&#8594;</span>
+            <span class="exec-card-title">Planned Actions Next Month</span>
+          </div>
+          <p class="exec-card-body">${plannedActions || '<span class="exec-empty">No planned actions recorded for this reporting period.</span>'}</p>
+        </div>
+      `;
     }
   }
 
