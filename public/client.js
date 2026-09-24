@@ -1221,7 +1221,8 @@
         // SVG Radial Gauge calculation
         const gaugeColor = rag === 'green' ? '#10b981' : rag === 'amber' ? '#f59e0b' : '#ef4444';
         const meterColorCls = rag === 'green' ? 'meter-green' : rag === 'amber' ? 'meter-amber' : 'meter-red';
-        const circumference = 2 * Math.PI * 22; // r=22
+        const ringRadius = 46;
+        const circumference = 2 * Math.PI * ringRadius; // r=46 -> ~289.03
         const dashOffset = circumference * (1 - attainmentPct / 100);
 
         const card = document.createElement('div');
@@ -1238,9 +1239,9 @@
 
           <div class="tkpi-gauge-center-block">
             <div class="tkpi-gauge-wrap" title="Achievement: ${displayPctText}">
-              <svg width="60" height="60" viewBox="0 0 60 60" style="transform:rotate(-90deg)" aria-hidden="true">
-                <circle cx="30" cy="30" r="22" fill="none" stroke="#f1f5f9" stroke-width="6"/>
-                <circle cx="30" cy="30" r="22" fill="none" stroke="${gaugeColor}" stroke-width="6"
+              <svg width="114" height="114" viewBox="0 0 114 114" style="transform:rotate(-90deg)" aria-hidden="true">
+                <circle cx="57" cy="57" r="46" fill="none" stroke="#f1f5f9" stroke-width="10"/>
+                <circle cx="57" cy="57" r="46" fill="none" stroke="${gaugeColor}" stroke-width="10"
                   stroke-dasharray="${circumference.toFixed(2)}"
                   stroke-dashoffset="${circumference.toFixed(2)}"
                   stroke-linecap="round"
