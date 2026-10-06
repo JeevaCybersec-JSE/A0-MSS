@@ -409,6 +409,10 @@ async function initApp() {
 
   buildSectionNav();
   await loadMonthsHistory();
+  const monthInput = document.getElementById('month-input');
+  if (monthInput && state.month) {
+    monthInput.value = state.month;
+  }
   await loadMonthData();
   setView('overview');
 }
@@ -441,6 +445,7 @@ async function loadMonthData() {
 async function onMonthChange(e) {
   state.month = e.target.value || currentMonthStr();
   await loadMonthData();
+  await loadMonthsHistory();
   renderView();
 }
 
@@ -451,8 +456,10 @@ async function shiftMonth(delta) {
   if (m < 1) { m = 12; y--; }
   else if (m > 12) { m = 1; y++; }
   state.month = `${y}-${String(m).padStart(2, '0')}`;
-  document.getElementById('month-input').value = state.month;
+  const monthInput = document.getElementById('month-input');
+  if (monthInput) monthInput.value = state.month;
   await loadMonthData();
+  await loadMonthsHistory();
   renderView();
 }
 
@@ -487,6 +494,8 @@ function exportMonthCSV() {
     'Computed Value',
     'Unit',
     'Status (RAG)',
+    'YTD Value',
+    'YTD Status',
     'Inputs / Scope Details',
     'Description'
   ]);
@@ -517,6 +526,8 @@ function exportMonthCSV() {
       } else {
         detailStr = `VPN Only Scope (VPN: ${vpnVal})`;
       }
+    } else if (metric.mode === 'four_layer') {
+      detailStr = `Sophos: ${inputs.sophos ?? ''} | ME: ${inputs.manageengine ?? ''} | VPN: ${inputs.vpn ?? ''} | MFA: ${inputs.mfa ?? ''} / Managed: ${inputs.den ?? ''}`;
     } else if (metric.mode === 'ratio') {
       detailStr = `${metric.numLabel || 'Num'}: ${inputs.num ?? ''} / ${metric.denLabel || 'Den'}: ${inputs.den ?? ''}`;
     } else if (metric.mode === 'avg') {
@@ -527,6 +538,10 @@ function exportMonthCSV() {
       detailStr = inputs.value !== undefined && inputs.value !== null ? `Value: ${inputs.value}` : '';
     }
 
+    const ytdEntry = (state.monthData && state.monthData.ytd && state.monthData.ytd[metric.id]) || {};
+    const ytdValStr = ytdEntry.computed !== null && ytdEntry.computed !== undefined ? String(ytdEntry.computed) : '';
+    const ytdRagStr = metric.direction === 'trend' ? 'TREND' : (ytdEntry.rag ? ytdEntry.rag.toUpperCase() : '');
+
     rows.push([
       secName,
       metric.id,
@@ -536,6 +551,8 @@ function exportMonthCSV() {
       valStr,
       metric.unit || '',
       ragStr,
+      ytdValStr,
+      ytdRagStr,
       detailStr,
       metric.desc || ''
     ]);
@@ -592,6 +609,11 @@ function downloadStatusReport() {
   const rag = (state.monthData.overallRAG || 'none').toUpperCase();
   const nar = state.monthData.narrative || {};
   const nowIST = formatIST(new Date().toISOString());
+  const overallDetails = state.monthData.overallDetails || {};
+  const vetoBreaches = overallDetails.vetoBreaches || [];
+  const weightedScore = overallDetails.weightedScore;
+  const numerator = overallDetails.numerator;
+  const denominator = overallDetails.denominator;
 
   let green = 0, amber = 0, red = 0, trend = 0;
   state.metrics.forEach(m => {
@@ -624,12 +646,22 @@ function downloadStatusReport() {
       else if (m.ragRule === 'prevMonth') tgt = '≤ Prev. Month';
       const rc = ragStr==='GREEN'?'#15803d':ragStr==='AMBER'?'#b45309':ragStr==='RED'?'#b91c1c':'#475569';
       const rb = ragStr==='GREEN'?'#dcfce7':ragStr==='AMBER'?'#fef9c3':ragStr==='RED'?'#fee2e2':'#f1f5f9';
+
+      const ytdEntry = (state.monthData.ytd && state.monthData.ytd[m.id]) || {};
+      const ytdVal = ytdEntry.computed !== null && ytdEntry.computed !== undefined
+        ? String(ytdEntry.computed) + (m.unit || '') : '—';
+      const ytdRagStr = m.direction === 'trend' ? 'TREND' : (ytdEntry.rag ? ytdEntry.rag.toUpperCase() : '—');
+      const yrc = ytdRagStr==='GREEN'?'#15803d':ytdRagStr==='AMBER'?'#b45309':ytdRagStr==='RED'?'#b91c1c':'#475569';
+      const yrb = ytdRagStr==='GREEN'?'#dcfce7':ytdRagStr==='AMBER'?'#fef9c3':ytdRagStr==='RED'?'#fee2e2':'#f1f5f9';
+
       rows += '<tr>'
         + '<td>' + escapeHTML(m.label) + '</td>'
         + '<td>' + escapeHTML(m.desc || '—') + '</td>'
         + '<td style="text-align:center">' + escapeHTML(tgt) + '</td>'
         + '<td style="text-align:center;font-weight:700">' + escapeHTML(val) + '</td>'
-        + '<td style="text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;background:' + rb + ';color:' + rc + '">' + ragStr + '</span></td>'
+        + '<td style="text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;background:' + rb + ';color:' + rc + '">' + ragStr + '</span></td>'
+        + '<td style="text-align:center;font-weight:700">' + escapeHTML(ytdVal) + '</td>'
+        + '<td style="text-align:center">' + (ytdRagStr !== '—' ? '<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;background:' + yrb + ';color:' + yrc + '">' + ytdRagStr + '</span>' : '—') + '</td>'
         + '</tr>';
     });
     sectionsHtml += '<h3 style="font-size:12px;font-weight:700;margin:18px 0 5px;padding-bottom:3px;border-bottom:1px solid #e2e8f0;text-transform:uppercase;letter-spacing:.5px">' + escapeHTML(sec.name) + '</h3>'
@@ -638,8 +670,10 @@ function downloadStatusReport() {
       + '<th style="padding:5px 8px;text-align:left;border-bottom:1px solid #e2e8f0;color:#475569">Metric</th>'
       + '<th style="padding:5px 8px;text-align:left;border-bottom:1px solid #e2e8f0;color:#475569">Description</th>'
       + '<th style="padding:5px 8px;text-align:center;border-bottom:1px solid #e2e8f0;color:#475569">Target</th>'
-      + '<th style="padding:5px 8px;text-align:center;border-bottom:1px solid #e2e8f0;color:#475569">Value</th>'
-      + '<th style="padding:5px 8px;text-align:center;border-bottom:1px solid #e2e8f0;color:#475569">Status</th>'
+      + '<th style="padding:5px 8px;text-align:center;border-bottom:1px solid #e2e8f0;color:#475569">Month Value</th>'
+      + '<th style="padding:5px 8px;text-align:center;border-bottom:1px solid #e2e8f0;color:#475569">Month Status</th>'
+      + '<th style="padding:5px 8px;text-align:center;border-bottom:1px solid #e2e8f0;color:#475569">YTD Value</th>'
+      + '<th style="padding:5px 8px;text-align:center;border-bottom:1px solid #e2e8f0;color:#475569">YTD Status</th>'
       + '</tr></thead>'
       + '<tbody>' + rows + '</tbody></table>';
   });
@@ -653,6 +687,14 @@ function downloadStatusReport() {
     execHtml += '</div>';
   }
 
+  const vetoNotice = vetoBreaches.length > 0
+    ? '<div style="margin-top:8px;padding:6px 12px;background:#fee2e2;border:1px solid #f87171;border-radius:6px;color:#991b1b;font-size:12px;font-weight:600">⚠ VETO TRIGGERED (' + vetoBreaches.length + ' metric breach' + (vetoBreaches.length>1?'es':'') + '): ' + vetoBreaches.map(b => escapeHTML(b)).join(', ') + '</div>'
+    : '';
+
+  const scoreText = weightedScore !== null && weightedScore !== undefined
+    ? 'Weighted Score: <strong>' + (weightedScore > 0 ? '+' : '') + weightedScore + '</strong> (Net: ' + (numerator ?? 0) + ' / Den: ' + (denominator ?? 0) + ')'
+    : 'Weighted Score: N/A';
+
   const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MSS Status Report — ' + month + '</title>'
     + '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Segoe UI",Arial,sans-serif;background:#fff;color:#0f172a;font-size:13px;padding:32px 36px;max-width:900px;margin:0 auto}'
     + 'table tbody tr td{padding:5px 8px;border-bottom:1px solid #f1f5f9;vertical-align:top}'
@@ -663,14 +705,17 @@ function downloadStatusReport() {
     + '<div><div style="font-size:20px;font-weight:800">A0 MSS Dashboard</div><div style="font-size:11px;color:#64748b;margin-top:2px">Security Operations Console — Client Status Report</div></div>'
     + '<div style="text-align:right"><div style="font-size:10px;color:#94a3b8">Reporting Period</div><div style="font-size:15px;font-weight:700">' + escapeHTML(month) + '</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">Generated: ' + escapeHTML(nowIST) + '</div></div>'
     + '</div>'
-    + '<div style="padding:14px 18px;border-radius:10px;background:' + ragBg + ';border:1.5px solid ' + ragColor + '44;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">'
-    + '<div><div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Overall Security Posture</div><div style="font-size:26px;font-weight:800;color:' + ragColor + '">' + rag + '</div><div style="font-size:10px;color:#64748b;margin-top:2px">Based on ' + (green+amber+red+trend) + ' tracked metrics</div></div>'
+    + '<div style="padding:14px 18px;border-radius:10px;background:' + ragBg + ';border:1.5px solid ' + ragColor + '44;margin-bottom:20px">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between">'
+    + '<div><div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Overall Security Posture</div><div style="font-size:26px;font-weight:800;color:' + ragColor + '">' + rag + '</div><div style="font-size:11px;color:#475569;margin-top:2px">' + scoreText + '</div></div>'
     + '<div style="display:flex;gap:16px;text-align:center">'
     + '<div><div style="font-size:20px;font-weight:800;color:#16a34a">' + green + '</div><div style="font-size:10px;color:#64748b;text-transform:uppercase">Green</div></div>'
     + '<div><div style="font-size:20px;font-weight:800;color:#d97706">' + amber + '</div><div style="font-size:10px;color:#64748b;text-transform:uppercase">Amber</div></div>'
     + '<div><div style="font-size:20px;font-weight:800;color:#dc2626">' + red + '</div><div style="font-size:10px;color:#64748b;text-transform:uppercase">Red</div></div>'
     + '<div><div style="font-size:20px;font-weight:800;color:#64748b">' + trend + '</div><div style="font-size:10px;color:#64748b;text-transform:uppercase">Trend</div></div>'
     + '</div></div>'
+    + vetoNotice
+    + '</div>'
     + '<h2 style="font-size:12px;font-weight:700;margin:0 0 10px;padding-bottom:4px;border-bottom:2px solid #e2e8f0;text-transform:uppercase;letter-spacing:.5px">KPI Metrics Detail</h2>'
     + sectionsHtml
     + execHtml
@@ -745,14 +790,11 @@ function renderView() {
   const subEl = document.getElementById('view-subtitle');
   root.innerHTML = '';
 
-  if (state.view === 'overview') {
+  if (state.view === 'overview' || state.view === 'trends') {
+    state.view = 'overview';
     titleEl.textContent = 'Overview';
     subEl.textContent = 'Reporting period: ' + state.month + (!hasPermission('metrics:write') ? ' • Read-Only' : '');
     root.appendChild(renderOverview());
-  } else if (state.view === 'trends') {
-    titleEl.textContent = 'Trends';
-    subEl.textContent = 'Overall status across reporting periods';
-    root.appendChild(renderTrends());
   } else if (state.view === 'exec') {
     titleEl.textContent = 'Executive Summary';
     subEl.textContent = 'Roll-up for ' + state.month + (!hasPermission('narrative:write') ? ' • Read-Only' : '');
@@ -1243,6 +1285,518 @@ function stopOverviewBgAnimation() {
   }
 }
 
+// ---------- Interactive Executive Posture Navigator & Status History Component ----------
+function buildInteractiveStatusHistoryPanel() {
+  const panel = document.createElement('div');
+  panel.className = 'panel interactive-history-panel';
+
+  const months = (state.monthsHistory && state.monthsHistory.length) ? [...state.monthsHistory] : [];
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  // Ensure current active month and calendar month are in months list
+  const activeMonth = state.month || currentMonthStr();
+  if (activeMonth && !months.some(m => m.month === activeMonth)) {
+    const rag = state.monthData ? state.monthData.overallRAG : null;
+    let g = 0, a = 0, r = 0, tr = 0;
+    if (state.monthData && state.monthData.metrics) {
+      Object.values(state.monthData.metrics).forEach(entry => {
+        if (entry && entry.rag === 'green') g++;
+        else if (entry && entry.rag === 'amber') a++;
+        else if (entry && entry.rag === 'red') r++;
+        else if (entry && entry.direction === 'trend') tr++;
+      });
+    }
+    months.push({
+      month: activeMonth,
+      overallRAG: rag,
+      overallDetails: state.monthData ? state.monthData.overallDetails : null,
+      green: g,
+      amber: a,
+      red: r,
+      trend: tr,
+      total: g + a + r + tr,
+      hasNarrative: false,
+      narrative: {}
+    });
+  }
+
+  // Ensure calendar current month is present
+  const calMonth = currentMonthStr();
+  if (calMonth && !months.some(m => m.month === calMonth)) {
+    months.push({
+      month: calMonth,
+      overallRAG: null,
+      overallDetails: null,
+      green: 0,
+      amber: 0,
+      red: 0,
+      trend: 0,
+      total: 0,
+      hasNarrative: false,
+      narrative: {}
+    });
+  }
+
+  // Sort chronologically
+  months.sort((a, b) => a.month.localeCompare(b.month));
+
+  let inspectedMonthKey = state.month || (months.length > 0 ? months[months.length - 1].month : '');
+  if (!months.some(m => m.month === inspectedMonthKey) && months.length > 0) {
+    inspectedMonthKey = months[months.length - 1].month;
+  }
+
+  let currentView = 'cards'; // 'cards' | 'trajectory' | 'delta'
+
+  panel.innerHTML = `
+    <div class="ih-header">
+      <div class="ih-title-group">
+        <div class="ih-title-row">
+          <div class="ih-title-icon">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 15l4.5-5 3 3L17 5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12.5 5H17v4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="ih-title">Status History &amp; SLA Performance</span>
+        </div>
+        <p class="ih-subtitle">Multi-period posture tracker &middot; Click any month to inspect &middot; 1-click dashboard sync</p>
+      </div>
+      <div class="ih-view-tabs">
+        <button type="button" class="ih-view-tab active" data-view="cards">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5"/></svg>
+          <span>SLA Matrix</span>
+        </button>
+        <button type="button" class="ih-view-tab" data-view="trajectory">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 13l4-5 3 3 5-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Trajectory</span>
+        </button>
+        <button type="button" class="ih-view-tab" data-view="delta">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v12M3 7l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>MoM Delta</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sleek Timeline Ribbon Track -->
+    <div class="ih-ribbon-wrap">
+      <div class="ih-ribbon-track" id="ih-ribbon-track"></div>
+    </div>
+
+    <!-- Active View Content Container -->
+    <div class="ih-stage-container" id="ih-stage-container"></div>
+  `;
+
+  const ribbon = panel.querySelector('#ih-ribbon-track');
+  const stage = panel.querySelector('#ih-stage-container');
+
+  // Tab switching
+  panel.querySelectorAll('.ih-view-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      panel.querySelectorAll('.ih-view-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentView = tab.dataset.view;
+      renderCurrentView();
+    });
+  });
+
+  function getMonthObj(mKey) {
+    return months.find(x => x.month === mKey) || months[months.length - 1] || null;
+  }
+
+  function getMonthLabel(mKey) {
+    if (!mKey) return 'N/A';
+    const parts = mKey.split('-');
+    const mNum = parseInt(parts[1], 10);
+    const mName = monthNames[mNum - 1] || parts[1];
+    return `${mName} 20${parts[0].slice(2)}`;
+  }
+
+  // Render Horizontal Timeline Ribbon
+  function renderTimelineRibbon() {
+    ribbon.innerHTML = '';
+    if (!months.length) {
+      ribbon.innerHTML = `<div class="empty-note" style="padding:6px 0;">No history recorded yet.</div>`;
+      return;
+    }
+
+    months.forEach(m => {
+      const isInspected = m.month === inspectedMonthKey;
+      const isDashboardCur = m.month === state.month;
+      const color = m.overallRAG || 'none';
+      const parts = m.month.split('-');
+      const mNum = parseInt(parts[1], 10);
+      const mName = monthNames[mNum - 1] || parts[1];
+      const yearShort = parts[0].slice(2);
+
+      const ov = m.overallDetails || {};
+      const hasVeto = (ov.vetoBreaches && ov.vetoBreaches.length > 0);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `ih-ribbon-btn ${isInspected ? 'is-active' : ''}`;
+      btn.dataset.month = m.month;
+
+      btn.innerHTML = `
+        <span class="ih-ribbon-dot ${color}"></span>
+        <span class="ih-ribbon-text">${mName} '${yearShort}</span>
+        <span class="ih-ribbon-badge ${color}">${hasVeto ? 'VETO' : color.toUpperCase()}</span>
+        ${isDashboardCur ? `<span class="ih-ribbon-cur" title="Currently selected in dashboard">Active</span>` : ''}
+      `;
+
+      btn.addEventListener('click', async () => {
+        inspectedMonthKey = m.month;
+        if (state.month !== m.month) {
+          state.month = m.month;
+          const monthInput = document.getElementById('month-input');
+          if (monthInput) monthInput.value = state.month;
+          await loadMonthData();
+          renderView();
+        } else {
+          renderTimelineRibbon();
+          renderCurrentView();
+        }
+      });
+
+      ribbon.appendChild(btn);
+    });
+  }
+
+  // Render Cockpit Action Header
+  function buildCockpitHeader(m) {
+    if (!m) return '';
+    const isCur = m.month === state.month;
+    const color = m.overallRAG || 'none';
+    const statusText = color === 'green' ? 'COMPLIANT' : (color === 'amber' ? 'TOLERANCE' : (color === 'red' ? 'BREACHED' : 'NO DATA'));
+    const ovDetails = m.overallDetails || {};
+    const vetoBreaches = ovDetails.vetoBreaches || [];
+    const weightedScore = ovDetails.weightedScore;
+
+    let scoreHtml = '';
+    if (vetoBreaches.length > 0) {
+      scoreHtml = `
+        <div class="ih-cockpit-pill veto" title="${vetoBreaches.join(', ')}">
+          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2l6 11H2L8 2zM8 6v3M8 11.5v.5" stroke-linecap="round"/></svg>
+          <span>VETO: ${vetoBreaches.length} Breach${vetoBreaches.length > 1 ? 'es' : ''}</span>
+        </div>
+      `;
+    } else if (weightedScore !== null && weightedScore !== undefined) {
+      const sCls = weightedScore > 0 ? 'score-green' : (weightedScore < 0 ? 'score-red' : 'score-amber');
+      scoreHtml = `
+        <div class="ih-cockpit-pill score ${sCls}">
+          <span>Score:</span>
+          <strong>${weightedScore > 0 ? '+' : ''}${weightedScore}</strong>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="ih-cockpit-header">
+        <div class="ih-cockpit-left">
+          <div class="ih-cockpit-period">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+              <path d="M2 6.5h12M5 1.5v3M11 1.5v3" stroke-linecap="round"/>
+            </svg>
+            <span>${getMonthLabel(m.month)}</span>
+          </div>
+          <div class="ih-cockpit-rag ${color}">
+            <span class="status-indicator-dot ${color}"></span>
+            <span>${color.toUpperCase()} &middot; ${statusText}</span>
+          </div>
+          ${scoreHtml}
+        </div>
+        <div class="ih-cockpit-right">
+          <button type="button" class="ih-sync-btn ${isCur ? 'is-active-period' : ''}" data-target-month="${m.month}">
+            ${isCur 
+              ? `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5l3.5 3.5 6.5-7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Currently Active</span>`
+              : `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Load ${getMonthLabel(m.month)}</span>`}
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  // View 1: 4 SLA Cards Matrix (pixel-perfect matching media_1790846426163.png)
+  function renderCardsView(m) {
+    if (!m) {
+      stage.innerHTML = `<div class="empty-note">No monthly data available.</div>`;
+      return;
+    }
+    const g = m.green || 0;
+    const a = m.amber || 0;
+    const r = m.red || 0;
+    const t = m.trend || 0;
+    const slaTotal = g + a + r || 31;
+    const gPct = Math.round((g / slaTotal) * 100);
+    const aPct = Math.round((a / slaTotal) * 100);
+    const rPct = Math.round((r / slaTotal) * 100);
+
+    stage.innerHTML = `
+      ${buildCockpitHeader(m)}
+      <div class="ih-quad-grid">
+        <!-- Within Target (Green) -->
+        <div class="ih-quad-card green" role="button" tabindex="0">
+          <div class="ih-quad-accent green"></div>
+          <div class="ih-quad-num green">${g}</div>
+          <div class="ih-quad-info">
+            <div class="ih-quad-title">Within Target</div>
+            <div class="ih-quad-sub">${g} of ${slaTotal} SLA targets (${gPct}%)</div>
+          </div>
+          <div class="ih-quad-dot green"></div>
+        </div>
+
+        <!-- Attention Required (Amber) -->
+        <div class="ih-quad-card amber" role="button" tabindex="0">
+          <div class="ih-quad-accent amber"></div>
+          <div class="ih-quad-num amber">${a}</div>
+          <div class="ih-quad-info">
+            <div class="ih-quad-title">Attention Required</div>
+            <div class="ih-quad-sub">${a} of ${slaTotal} SLA targets (${aPct}%)</div>
+          </div>
+          <div class="ih-quad-dot amber"></div>
+        </div>
+
+        <!-- Critical Remediation (Red) -->
+        <div class="ih-quad-card red" role="button" tabindex="0">
+          <div class="ih-quad-accent red"></div>
+          <div class="ih-quad-num red">${r}</div>
+          <div class="ih-quad-info">
+            <div class="ih-quad-title">Critical Remediation</div>
+            <div class="ih-quad-sub">${r} of ${slaTotal} SLA targets (${rPct}%)</div>
+          </div>
+          <div class="ih-quad-dot red"></div>
+        </div>
+
+        <!-- Operational Telemetry (Purple) -->
+        <div class="ih-quad-card purple" role="button" tabindex="0">
+          <div class="ih-quad-accent purple"></div>
+          <div class="ih-quad-num purple">${t}</div>
+          <div class="ih-quad-info">
+            <div class="ih-quad-title">Operational Telemetry</div>
+            <div class="ih-quad-sub">${t} continuous activity &amp; volume trackers</div>
+          </div>
+          <div class="ih-quad-dot purple"></div>
+        </div>
+      </div>
+    `;
+
+    bindActionButtons();
+  }
+
+  // View 2: Trajectory Chart View (Smooth Cyber Wave)
+  function renderTrajectoryView(m) {
+    if (!months.length) {
+      stage.innerHTML = `<div class="empty-note">No monthly data available.</div>`;
+      return;
+    }
+
+    const w = 580;
+    const h = 185;
+    const padL = 40;
+    const padR = 24;
+    const padT = 24;
+    const padB = 30;
+    const plotW = w - padL - padR;
+    const plotH = h - padT - padB;
+    const n = months.length;
+
+    let svg = `<svg class="ih-chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">`;
+    svg += `
+      <defs>
+        <linearGradient id="ihAreaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2563eb" stop-opacity="0.28"/>
+          <stop offset="70%" stop-color="#2563eb" stop-opacity="0.04"/>
+          <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0"/>
+        </linearGradient>
+      </defs>
+    `;
+
+    // 90% SLA Target guideline
+    const targetY = padT + (1 - 0.90) * plotH;
+    svg += `
+      <line x1="${padL}" y1="${targetY}" x2="${w - padR}" y2="${targetY}" stroke="#10b981" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.85"/>
+      <text x="${w - padR}" y="${targetY - 5}" font-size="9.5" font-weight="700" fill="#059669" text-anchor="end">90% Target</text>
+    `;
+
+    // 50% guideline
+    const midY = padT + 0.5 * plotH;
+    svg += `
+      <line x1="${padL}" y1="${midY}" x2="${w - padR}" y2="${midY}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="${padL - 6}" y="${midY + 3}" font-size="9" fill="#94a3b8" text-anchor="end">50%</text>
+    `;
+
+    // Calculate curve points
+    const pts = months.map((item, i) => {
+      const x = n === 1 ? padL + plotW / 2 : padL + (i / (n - 1)) * plotW;
+      const totalSLA = (item.green || 0) + (item.amber || 0) + (item.red || 0);
+      const rate = totalSLA > 0 ? (item.green || 0) / totalSLA : 0.5;
+      const y = padT + (1 - rate) * plotH;
+      return { x, y, item, rate: Math.round(rate * 100) };
+    });
+
+    // Build smooth cubic bezier curve
+    let linePath = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i];
+      const p1 = pts[i + 1];
+      const cx = (p0.x + p1.x) / 2;
+      linePath += ` C ${cx} ${p0.y}, ${cx} ${p1.y}, ${p1.x} ${p1.y}`;
+    }
+
+    const bottomY = padT + plotH;
+    const areaPath = `${linePath} L ${pts[pts.length - 1].x} ${bottomY} L ${pts[0].x} ${bottomY} Z`;
+
+    svg += `<path d="${areaPath}" fill="url(#ihAreaGrad)" />`;
+    svg += `<path d="${linePath}" fill="none" stroke="#2563eb" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />`;
+
+    // Data points & nodes
+    pts.forEach((pt, idx) => {
+      const isInspected = pt.item.month === inspectedMonthKey;
+      const parts = pt.item.month.split('-');
+      const mNum = parseInt(parts[1], 10);
+      const mName = monthNames[mNum - 1] || parts[1];
+      const color = pt.item.overallRAG === 'green' ? '#10b981' : (pt.item.overallRAG === 'amber' ? '#f59e0b' : (pt.item.overallRAG === 'red' ? '#ef4444' : '#94a3b8'));
+
+      // Vertical guide
+      svg += `<line x1="${pt.x}" y1="${padT}" x2="${pt.x}" y2="${bottomY}" stroke="${isInspected ? '#2563eb' : '#e2e8f0'}" stroke-width="${isInspected ? '1.5' : '1'}" stroke-dasharray="${isInspected ? 'none' : '2 2'}"/>`;
+
+      // Pulsing orbit for inspected month
+      if (isInspected) {
+        svg += `<circle cx="${pt.x}" cy="${pt.y}" r="11" fill="none" stroke="#2563eb" stroke-width="1.8" opacity="0.6"/>`;
+      }
+
+      // Outer & inner circle
+      svg += `<circle cx="${pt.x}" cy="${pt.y}" r="${isInspected ? '6' : '4.5'}" fill="${color}" stroke="#ffffff" stroke-width="2.5" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.15));"/>`;
+
+      // Percentage label above
+      svg += `<text x="${pt.x}" y="${pt.y - 10}" font-size="10" font-weight="700" fill="${isInspected ? '#2563eb' : '#0f172a'}" text-anchor="middle">${pt.rate}%</text>`;
+
+      // Month label below axis
+      svg += `<text x="${pt.x}" y="${h - 8}" font-size="10.5" font-weight="${isInspected ? '800' : '600'}" fill="${isInspected ? '#2563eb' : '#64748b'}" text-anchor="middle">${mName}</text>`;
+
+      // Hover zone
+      const colW = n > 1 ? plotW / (n - 1) : plotW;
+      svg += `<rect class="ih-traj-zone" data-month="${pt.item.month}" x="${pt.x - colW / 2}" y="${padT}" width="${colW}" height="${plotH + 25}" fill="transparent" style="cursor:pointer;"/>`;
+    });
+
+    svg += `</svg>`;
+
+    stage.innerHTML = `
+      ${buildCockpitHeader(m)}
+      <div class="ih-chart-stage-wrap">
+        ${svg}
+      </div>
+      <div style="font-size:11px; color:var(--text-faint); display:flex; justify-content:space-between; align-items:center; padding:4px 8px;">
+        <span>Interactive SLA Performance Curve &bull; Click any point to inspect</span>
+        <span>Target: <strong style="color:#059669;">&ge; 90% SLA Compliance</strong></span>
+      </div>
+    `;
+
+    stage.querySelectorAll('.ih-traj-zone').forEach(zone => {
+      zone.addEventListener('click', async () => {
+        const targetM = zone.dataset.month;
+        inspectedMonthKey = targetM;
+        if (state.month !== targetM) {
+          state.month = targetM;
+          const monthInput = document.getElementById('month-input');
+          if (monthInput) monthInput.value = state.month;
+          await loadMonthData();
+          renderView();
+        } else {
+          renderTimelineRibbon();
+          renderTrajectoryView(getMonthObj(inspectedMonthKey));
+        }
+      });
+    });
+
+    bindActionButtons();
+  }
+
+  // View 3: MoM Delta View
+  function renderDeltaView(m) {
+    if (!m) {
+      stage.innerHTML = `<div class="empty-note">No monthly data available.</div>`;
+      return;
+    }
+    const idx = months.findIndex(x => x.month === m.month);
+    const prev = idx > 0 ? months[idx - 1] : null;
+
+    let deltaHtml = '';
+    if (!prev) {
+      deltaHtml = `<div class="empty-note" style="padding:16px;">This is the earliest recorded month in history (${getMonthLabel(m.month)}). Prior comparison not available.</div>`;
+    } else {
+      const gDiff = (m.green || 0) - (prev.green || 0);
+      const rDiff = (m.red || 0) - (prev.red || 0);
+      const aDiff = (m.amber || 0) - (prev.amber || 0);
+
+      const mScore = m.overallDetails && m.overallDetails.weightedScore !== undefined ? m.overallDetails.weightedScore : 0;
+      const pScore = prev.overallDetails && prev.overallDetails.weightedScore !== undefined ? prev.overallDetails.weightedScore : 0;
+      const scoreDiff = (mScore - pScore).toFixed(4);
+
+      deltaHtml = `
+        <div class="ih-delta-grid">
+          <div class="ih-delta-card">
+            <div class="ih-delta-lbl">Prior Period</div>
+            <div class="ih-delta-val">${getMonthLabel(prev.month)}</div>
+            <div class="ih-delta-sub">RAG: <strong>${(prev.overallRAG || 'N/A').toUpperCase()}</strong></div>
+          </div>
+          <div class="ih-delta-card">
+            <div class="ih-delta-lbl">Inspected Period</div>
+            <div class="ih-delta-val">${getMonthLabel(m.month)}</div>
+            <div class="ih-delta-sub">RAG: <strong>${(m.overallRAG || 'N/A').toUpperCase()}</strong></div>
+          </div>
+          <div class="ih-delta-card ${gDiff >= 0 ? 'good' : 'bad'}">
+            <div class="ih-delta-lbl">SLA Compliant (Green)</div>
+            <div class="ih-delta-val">${gDiff >= 0 ? '+' + gDiff : gDiff}</div>
+            <div class="ih-delta-sub">${gDiff >= 0 ? '▲ Improved SLA' : '▼ Regressed SLA'}</div>
+          </div>
+          <div class="ih-delta-card ${rDiff <= 0 ? 'good' : 'bad'}">
+            <div class="ih-delta-lbl">Critical Breaches (Red)</div>
+            <div class="ih-delta-val">${rDiff > 0 ? '+' + rDiff : rDiff}</div>
+            <div class="ih-delta-sub">${rDiff <= 0 ? '▼ Breaches Reduced' : '▲ Breaches Increased'}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    stage.innerHTML = `
+      ${buildCockpitHeader(m)}
+      ${deltaHtml}
+    `;
+
+    bindActionButtons();
+  }
+
+  function renderCurrentView() {
+    const curObj = getMonthObj(inspectedMonthKey);
+    if (currentView === 'cards') {
+      renderCardsView(curObj);
+    } else if (currentView === 'trajectory') {
+      renderTrajectoryView(curObj);
+    } else {
+      renderDeltaView(curObj);
+    }
+  }
+
+  function bindActionButtons() {
+    const btn = stage.querySelector('.ih-sync-btn:not(.is-active-period)');
+    if (btn) {
+      btn.addEventListener('click', async () => {
+        state.month = btn.dataset.targetMonth;
+        const monthInput = document.getElementById('month-input');
+        if (monthInput) monthInput.value = state.month;
+        await loadMonthData();
+        renderView();
+      });
+    }
+  }
+
+  renderTimelineRibbon();
+  renderCurrentView();
+
+  return panel;
+}
+
 // ---------- Overview ----------
 function renderOverview() {
   const container = document.createElement('div');
@@ -1280,32 +1834,155 @@ function renderOverview() {
     else trend++;
   });
 
-  // 1. Overview Banner
+  const overallDetails = state.monthData.overallDetails || {};
+  const vetoBreaches = overallDetails.vetoBreaches || [];
+
+  // 1. Overview Banner with Dynamic RAG Visualization
+  const totalSLA = green + amber + red || 1;
+  const greenPct = Math.round((green / totalSLA) * 100);
+  const amberPct = Math.round((amber / totalSLA) * 100);
+  const redPct = Math.round((red / totalSLA) * 100);
+
+  const statusHeadline = rag === 'green' ? 'COMPLIANT' : (rag === 'amber' ? 'IN TOLERANCE' : (rag === 'red' ? (vetoBreaches.length > 0 ? 'VETO BREACH' : 'SLA BREACHED') : 'NO DATA'));
+  const statusSubLabel = rag === 'green' ? 'Optimal Posture' : (rag === 'amber' ? 'Tolerance Watch' : (rag === 'red' ? 'Critical Action Required' : 'Standby'));
+
+  let vetoDetailsHtml = '';
+  if (vetoBreaches.length > 0) {
+    const vetoNames = vetoBreaches.map(id => {
+      const found = state.metrics.find(x => x.id === id);
+      return found ? found.label : id;
+    });
+    vetoDetailsHtml = `
+      <div class="sc-veto-tag" title="${vetoNames.join(', ')}">
+        <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 2l6 11H2L8 2zM8 6v3M8 11.5v.5" stroke-linecap="round"/></svg>
+        <span>VETO: ${vetoNames.join(', ')}</span>
+      </div>
+    `;
+  }
+
+  const evaluatedTotal = green + amber + red || 1;
+
   const banner = document.createElement('div');
-  banner.className = 'overview-banner rag-' + (rag || 'none');
+  banner.className = 'overview-banner modern-scorecard-table rag-' + (rag || 'none');
   banner.innerHTML = `
-    <div>
-      <div class="banner-label">Overall status &middot; ${state.month}</div>
-      <div class="banner-status ${rag || 'none'}">${rag ? rag.toUpperCase() : 'NO DATA'}</div>
+    <!-- Col 1: Overall Posture -->
+    <div class="hud-col hud-col-posture">
+      <div class="hud-th">
+        <span class="hud-live-dot rag-${rag || 'none'}"></span>
+        <span>SECURITY POSTURE</span>
+        <span class="hud-th-sep">&bull;</span>
+        <span class="hud-th-period">${state.month}</span>
+      </div>
+      <div class="hud-td hud-td-posture">
+        <span class="hud-posture-title rag-${rag || 'none'}">${statusHeadline}</span>
+        <span class="hud-status-badge rag-${rag || 'none'}">${statusSubLabel}</span>
+      </div>
+      <div class="hud-sub hud-sub-posture">
+        ${vetoDetailsHtml ? vetoDetailsHtml : `<span class="hud-sub-text">Continuous SOC Posture Audit</span>`}
+      </div>
     </div>
-    <div class="banner-counts">
-      <div class="banner-count"><div class="n" style="color:var(--green)">${green}</div><div class="l">Green</div></div>
-      <div class="banner-count"><div class="n" style="color:var(--amber)">${amber}</div><div class="l">Amber</div></div>
-      <div class="banner-count"><div class="n" style="color:var(--red)">${red}</div><div class="l">Red</div></div>
-      <div class="banner-count"><div class="n" style="color:var(--text-dim)">${trend}</div><div class="l">Trend-only</div></div>
+
+    <div class="hud-divider" aria-hidden="true"></div>
+
+    <!-- Col 2: SLA Compliance -->
+    <div class="hud-col hud-col-kpi">
+      <div class="hud-th">
+        <span>SLA COMPLIANCE</span>
+      </div>
+      <div class="hud-td">
+        <span class="hud-kpi-val">${greenPct}<span class="hud-kpi-unit">%</span></span>
+      </div>
+      <div class="hud-sub">
+        <span class="hud-sub-text"><strong>${green}</strong> / ${evaluatedTotal} Targets Met</span>
+      </div>
     </div>
-    <div class="banner-actions">
-      <button id="btn-download-status-report" class="btn btn-clear" title="Download Overall Client Status Report">
-        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3v10M6 9l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15h14" stroke-linecap="round"/></svg>
-        <span>Download Status Report</span>
-      </button>
+
+    <div class="hud-divider" aria-hidden="true"></div>
+
+    <!-- Col 3: Green / Compliant -->
+    <div class="hud-col hud-col-kpi">
+      <div class="hud-th th-green">
+        <span class="hud-dot dot-green"></span>
+        <span>COMPLIANT</span>
+      </div>
+      <div class="hud-td">
+        <span class="hud-kpi-val val-green">${green}</span>
+      </div>
+      <div class="hud-sub">
+        <span class="hud-sub-text">Targets Met</span>
+      </div>
+    </div>
+
+    <div class="hud-divider" aria-hidden="true"></div>
+
+    <!-- Col 4: Amber / Tolerance -->
+    <div class="hud-col hud-col-kpi">
+      <div class="hud-th th-amber">
+        <span class="hud-dot dot-amber"></span>
+        <span>TOLERANCE</span>
+      </div>
+      <div class="hud-td">
+        <span class="hud-kpi-val val-amber">${amber}</span>
+      </div>
+      <div class="hud-sub">
+        <span class="hud-sub-text">${amber > 0 ? 'Tolerance Watch' : 'None At Risk'}</span>
+      </div>
+    </div>
+
+    <div class="hud-divider" aria-hidden="true"></div>
+
+    <!-- Col 5: Red / Critical -->
+    <div class="hud-col hud-col-kpi">
+      <div class="hud-th th-red">
+        <span class="hud-dot dot-red"></span>
+        <span>CRITICAL</span>
+      </div>
+      <div class="hud-td">
+        <span class="hud-kpi-val val-red">${red}</span>
+      </div>
+      <div class="hud-sub">
+        <span class="hud-sub-text ${red > 0 ? 'sub-warn' : ''}">${red > 0 ? 'Action Required' : 'Zero Breaches'}</span>
+      </div>
+    </div>
+
+    <div class="hud-divider" aria-hidden="true"></div>
+
+    <!-- Col 6: Trend Trackers -->
+    <div class="hud-col hud-col-kpi">
+      <div class="hud-th th-trend">
+        <span class="hud-dot dot-trend"></span>
+        <span>OBSERVATION</span>
+      </div>
+      <div class="hud-td">
+        <span class="hud-kpi-val val-trend">${trend}</span>
+      </div>
+      <div class="hud-sub">
+        <span class="hud-sub-text">Trend Trackers</span>
+      </div>
+    </div>
+
+    <div class="hud-divider" aria-hidden="true"></div>
+
+    <!-- Col 7: Executive Report Action -->
+    <div class="hud-col hud-col-action">
+      <div class="hud-th">
+        <span>EXECUTIVE DOSSIER</span>
+      </div>
+      <div class="hud-td hud-td-action">
+        <button id="btn-download-status-report" class="hud-btn-report rag-${rag || 'none'}" title="Download Complete Security Status Dossier">
+          <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 3v10M6 9l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15h14" stroke-linecap="round"/></svg>
+          <span>Download Report</span>
+        </button>
+      </div>
+      <div class="hud-sub">
+        <span class="hud-sub-text text-muted">Audited PDF / CSV</span>
+      </div>
     </div>
   `;
-  // Wire up Download Status Report button
   banner.querySelector('#btn-download-status-report').addEventListener('click', downloadStatusReport);
   frag.appendChild(banner);
 
-  // 2. Sections Grid
+  // 2. Section cards
   const grid = document.createElement('div');
   grid.className = 'section-grid';
   state.sections.forEach(sec => {
@@ -1334,20 +2011,12 @@ function renderOverview() {
   });
   frag.appendChild(grid);
 
-  // 3. RAG Distribution & Status History row
+  // 3. RAG Distribution & Interactive Cyber Posture Wave History
   const row = document.createElement('div');
   row.className = 'chart-row';
 
   const ragPanel = buildRAGDistributionPanel(green, amber, red, trend);
-  const histPanel = document.createElement('div');
-  histPanel.className = 'panel status-history-panel';
-  histPanel.innerHTML = `
-    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
-      <span>Status history</span>
-      <span style="font-size:11px; text-transform:none; color:var(--text-faint); font-weight:500;">Interactive timeline &middot; Click to select period</span>
-    </div>
-    ${monthsStripSVG()}
-  `;
+  const histPanel = buildInteractiveStatusHistoryPanel();
   row.appendChild(ragPanel);
   row.appendChild(histPanel);
   frag.appendChild(row);
@@ -1879,6 +2548,222 @@ function donutSVG(g, a, r, t) {
 
 
 
+function buildSecurityPostureGraph() {
+  const panel = document.createElement('div');
+  panel.className = 'security-posture-graph-panel';
+
+  const history = state.monthsHistory || [];
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  // Head
+  const head = document.createElement('div');
+  head.className = 'graph-panel-head';
+  head.innerHTML = `
+    <div class="graph-title-group">
+      <h3>Security Posture & SLA Attainment Trend</h3>
+      <p>Historical month-by-month SLA targets and weighted score rollup</p>
+    </div>
+    <div class="graph-legend">
+      <span class="graph-legend-item"><span class="graph-legend-dot green"></span> Within Target</span>
+      <span class="graph-legend-item"><span class="graph-legend-dot amber"></span> Attention</span>
+      <span class="graph-legend-item"><span class="graph-legend-dot red"></span> Critical</span>
+      <span class="graph-legend-item"><span class="graph-legend-line"></span> Attainment %</span>
+    </div>
+  `;
+  panel.appendChild(head);
+
+  if (!history.length) {
+    const em = document.createElement('div');
+    em.className = 'empty-note';
+    em.textContent = 'Save data for reporting months to generate performance trend charts.';
+    panel.appendChild(em);
+    return panel;
+  }
+
+  const stage = document.createElement('div');
+  stage.className = 'graph-stage';
+
+  const W = 620, H = 200;
+  const padLeft = 40, padRight = 30, padTop = 32, padBottom = 34;
+  const chartW = W - padLeft - padRight;
+  const chartH = H - padTop - padBottom;
+
+  const displayMonths = history.slice(-8); // Show up to last 8 months
+  const colW = chartW / Math.max(1, displayMonths.length);
+
+  let maxEvaluated = 25;
+  displayMonths.forEach(m => {
+    const ev = (m.green || 0) + (m.amber || 0) + (m.red || 0);
+    if (ev > maxEvaluated) maxEvaluated = ev;
+  });
+
+  const NS = 'http://www.w3.org/2000/svg';
+  function E(tag, attrs = {}) {
+    const el = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
+    return el;
+  }
+
+  const svg = E('svg', {
+    viewBox: `0 0 ${W} ${H}`,
+    class: 'graph-svg',
+    style: 'overflow:visible'
+  });
+
+  // Background Grid Lines
+  const gridLevels = [0, 0.5, 1.0];
+  gridLevels.forEach(pct => {
+    const y = padTop + chartH * (1 - pct);
+    svg.appendChild(E('line', {
+      x1: padLeft, y1: y, x2: W - padRight, y2: y,
+      stroke: '#f1f5f9', 'stroke-width': '1', 'stroke-dasharray': pct === 0 ? 'none' : '3 3'
+    }));
+    const gt = E('text', {
+      x: padLeft - 6, y: y + 3.5,
+      'text-anchor': 'end', 'font-family': 'var(--mono)', 'font-size': '9',
+      fill: '#94a3b8'
+    });
+    gt.textContent = Math.round(maxEvaluated * pct);
+    svg.appendChild(gt);
+  });
+
+  const linePoints = [];
+
+  displayMonths.forEach((m, i) => {
+    const isCur = m.month === state.month;
+    const parts = m.month.split('-');
+    const mNum = parseInt(parts[1], 10);
+    const mLabel = (monthNames[mNum - 1] || parts[1]) + " '" + parts[0].slice(2);
+
+    const g = m.green || 0;
+    const a = m.amber || 0;
+    const r = m.red || 0;
+    const ev = g + a + r;
+    const attainment = ev > 0 ? (g / ev) * 100 : 0;
+
+    const cx = padLeft + i * colW + colW / 2;
+    const barW = Math.min(28, colW * 0.44);
+    const bx = cx - barW / 2;
+
+    const gH = (g / maxEvaluated) * chartH;
+    const aH = (a / maxEvaluated) * chartH;
+    const rH = (r / maxEvaluated) * chartH;
+
+    let curY = padTop + chartH;
+
+    // Red (bottom)
+    if (rH > 0) {
+      curY -= rH;
+      svg.appendChild(E('rect', {
+        x: bx, y: curY, width: barW, height: rH,
+        fill: '#dc2626', rx: aH === 0 && gH === 0 ? '4' : '0'
+      }));
+    }
+    // Amber (middle)
+    if (aH > 0) {
+      curY -= aH;
+      svg.appendChild(E('rect', {
+        x: bx, y: curY, width: barW, height: aH,
+        fill: '#d97706', rx: gH === 0 ? '4' : '0'
+      }));
+    }
+    // Green (top)
+    if (gH > 0) {
+      curY -= gH;
+      svg.appendChild(E('rect', {
+        x: bx, y: curY, width: barW, height: gH,
+        fill: '#059669', rx: '4'
+      }));
+    }
+
+    // Attainment point
+    const py = padTop + chartH - (attainment / 100) * chartH;
+    linePoints.push({ x: cx, y: py, attainment, month: m.month });
+
+    // Active column glow border
+    if (isCur) {
+      svg.appendChild(E('rect', {
+        x: bx - 4, y: padTop - 10, width: barW + 8, height: chartH + 34,
+        fill: 'rgba(37,99,235,0.05)', stroke: '#3b82f6', 'stroke-width': '1.5',
+        rx: '8', 'stroke-dasharray': '3 3'
+      }));
+    }
+
+    // Top Posture & Score Pill
+    const scoreVal = m.overallDetails?.weightedScore;
+    const isVeto = m.overallDetails?.vetoBreaches?.length > 0;
+    let scoreTxt = isVeto ? 'VETO' : (scoreVal !== null && scoreVal !== undefined ? (scoreVal > 0 ? '+' : '') + scoreVal.toFixed(2) : (m.overallRAG ? m.overallRAG.toUpperCase() : ''));
+    if (scoreTxt) {
+      const pillBg = m.overallRAG === 'green' ? '#dcfce7' : m.overallRAG === 'amber' ? '#fef9c3' : '#fee2e2';
+      const pillCol = m.overallRAG === 'green' ? '#15803d' : m.overallRAG === 'amber' ? '#a16207' : '#b91c1c';
+      const pillW = Math.max(34, scoreTxt.length * 6.5);
+
+      svg.appendChild(E('rect', {
+        x: cx - pillW / 2, y: padTop - 18, width: pillW, height: 16,
+        fill: pillBg, rx: '4', stroke: pillCol, 'stroke-width': '0.7', opacity: '0.95'
+      }));
+      const pt = E('text', {
+        x: cx, y: padTop - 6.5, 'text-anchor': 'middle',
+        'font-family': 'var(--mono)', 'font-size': '9', 'font-weight': '700',
+        fill: pillCol
+      });
+      pt.textContent = scoreTxt;
+      svg.appendChild(pt);
+    }
+
+    // X-Axis Month label
+    const xl = E('text', {
+      x: cx, y: H - padBottom + 16,
+      'text-anchor': 'middle', 'font-family': 'var(--sans, Inter)',
+      'font-size': '11', 'font-weight': isCur ? '700' : '500',
+      fill: isCur ? '#0f172a' : '#64748b',
+      cursor: 'pointer'
+    });
+    xl.textContent = mLabel;
+    svg.appendChild(xl);
+
+    // Click target on each column to switch month
+    const hitRect = E('rect', {
+      x: cx - colW / 2, y: 0, width: colW, height: H,
+      fill: 'transparent', cursor: 'pointer'
+    });
+    hitRect.setAttribute('title', `${m.month} · ${m.overallRAG ? m.overallRAG.toUpperCase() : 'NO DATA'} (Score: ${scoreTxt}) · Click to switch`);
+    hitRect.addEventListener('click', async () => {
+      if (m.month !== state.month) {
+        state.month = m.month;
+        document.getElementById('month-input').value = state.month;
+        await loadMonthData();
+        renderView();
+      }
+    });
+    svg.appendChild(hitRect);
+  });
+
+  // Draw Attainment Trend Line
+  if (linePoints.length > 1) {
+    let d = `M ${linePoints[0].x} ${linePoints[0].y}`;
+    for (let i = 1; i < linePoints.length; i++) {
+      d += ` L ${linePoints[i].x} ${linePoints[i].y}`;
+    }
+    svg.appendChild(E('path', {
+      d, fill: 'none', stroke: '#2563eb', 'stroke-width': '2.2',
+      'stroke-linecap': 'round', 'stroke-linejoin': 'round'
+    }));
+
+    // Dots on trend line
+    linePoints.forEach(pt => {
+      svg.appendChild(E('circle', {
+        cx: pt.x, cy: pt.y, r: '3.5',
+        fill: '#ffffff', stroke: '#2563eb', 'stroke-width': '2.2'
+      }));
+    });
+  }
+
+  stage.appendChild(svg);
+  panel.appendChild(stage);
+  return panel;
+}
+
 function monthsStripSVG() {
   const months = state.monthsHistory;
   if (!months.length) return `<div class="empty-note">Save data for a month to start building history.</div>`;
@@ -2201,10 +3086,28 @@ function renderMetricCard(metric) {
       dualBreakdown = `<div class="dual-badge-pill"><span class="pill-tag">VPN: ${aVal}</span></div>`;
     }
   }
+
+  // YTD aggregated value
+  let ytdPillHtml = '';
+  const ytdMetric = state.monthData.ytd && state.monthData.ytd[metric.id];
+  if (ytdMetric && ytdMetric.computed !== null && ytdMetric.computed !== undefined) {
+    const ytdValFormatted = fmtVal(ytdMetric.computed, metric.unit);
+    const ytdRag = metric.direction === 'trend' ? '' : (ytdMetric.rag || '');
+    const mthd = (ytdMetric.method || 'ytd').toUpperCase();
+    ytdPillHtml = `
+      <div class="metric-ytd-pill" title="Year-to-Date (${mthd}) across active months in ${state.month.split('-')[0]}">
+        <span class="ytd-lbl">YTD (${mthd}):</span>
+        <span class="ytd-val">${ytdValFormatted}</span>
+        ${ytdRag ? `<span class="ytd-rag-dot ${ytdRag}"></span>` : ''}
+      </div>
+    `;
+  }
+
   valueBlock.innerHTML = `
     <div class="metric-value ${badge || ''}">${valStr !== null ? valStr : '<span class="metric-value-empty">-</span>'}</div>
     ${badge ? `<div class="metric-badge ${badge}">${badge === 'trend' ? 'TREND' : badge.toUpperCase()}</div>` : ''}
     ${dualBreakdown}
+    ${ytdPillHtml}
   `;
   body.appendChild(valueBlock);
 
@@ -2280,6 +3183,54 @@ function renderMetricCard(metric) {
     [aField, bField].forEach(f => f.querySelector('input').addEventListener('input', refreshDualUI));
     refreshDualUI();
     inputsBlock.appendChild(totalRow);
+  } else if (metric.mode === 'four_layer') {
+    const fGrid = document.createElement('div');
+    fGrid.className = 'four-layer-grid';
+    fGrid.style.cssText = 'display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;';
+
+    const sVal = entry.inputs ? (entry.inputs.sophos ?? (entry.inputs.sophos_agent ?? '')) : '';
+    const meVal = entry.inputs ? (entry.inputs.manageengine ?? (entry.inputs.manage_engine ?? '')) : '';
+    const vVal = entry.inputs ? (entry.inputs.vpn ?? (entry.inputs.vpn_client ?? '')) : '';
+    const mVal = entry.inputs ? (entry.inputs.mfa ?? (entry.inputs.mfa_enabled ?? '')) : '';
+
+    fGrid.appendChild(miniField('sophos', 'Sophos healthy', sVal));
+    fGrid.appendChild(miniField('manageengine', 'ManageEngine healthy', meVal));
+    fGrid.appendChild(miniField('vpn', 'VPN client healthy', vVal));
+    fGrid.appendChild(miniField('mfa', 'MFA enabled', mVal));
+    inputsBlock.appendChild(fGrid);
+
+    // Denominator (Managed endpoints)
+    let denVal = entry.inputs && entry.inputs.den;
+    if (denVal === undefined || denVal === null || denVal === '') {
+      const meEntry = state.monthData.metrics['managed_endpoints'];
+      if (meEntry && meEntry.computed !== null && meEntry.computed !== undefined) {
+        denVal = meEntry.computed;
+      } else if (meEntry && meEntry.inputs && meEntry.inputs.value !== null && meEntry.inputs.value !== undefined) {
+        denVal = meEntry.inputs.value;
+      }
+    }
+    const denField = miniField('den', 'Managed endpoints ↑', denVal);
+    const denInp = denField.querySelector('input');
+    if (denInp) {
+      denInp.setAttribute('data-managed-endpoints-den', 'true');
+      denInp.title = 'Auto-populated from Managed Endpoints';
+    }
+    const denLabel = denField.querySelector('label');
+    if (denLabel) {
+      denLabel.style.color = 'var(--accent, #6366f1)';
+      denLabel.style.fontStyle = 'italic';
+      denLabel.title = 'Auto-populated from Managed Endpoints';
+    }
+    inputsBlock.appendChild(denField);
+
+    // Backward compatibility notice if old data was single numerator
+    if (entry.inputs && entry.inputs.num !== undefined && entry.inputs.num !== null && sVal === '' && meVal === '' && vVal === '' && mVal === '') {
+      const legNote = document.createElement('div');
+      legNote.className = 'legacy-data-note';
+      legNote.style.cssText = 'font-size:11px; color:#f59e0b; margin-top:4px; font-style:italic;';
+      legNote.textContent = `Legacy single numerator stored: ${entry.inputs.num}. Fill all 4 layers above to activate MIN calculation.`;
+      inputsBlock.appendChild(legNote);
+    }
   } else if (metric.mode === 'ratio') {
     inputsBlock.appendChild(miniField('num', metric.numLabel, entry.inputs && entry.inputs.num));
     // For metrics using managed_endpoints as denominator, pre-populate from managed_endpoints stored value
@@ -2539,6 +3490,8 @@ async function saveMetric(metric, cardEl) {
     });
     state.monthData.metrics = res.metrics;
     state.monthData.overallRAG = res.overallRAG;
+    if (res.overallDetails) state.monthData.overallDetails = res.overallDetails;
+    if (res.ytd) state.monthData.ytd = res.ytd;
     if (res.history) state.monthData.history = res.history;
     updateTopbarRAG();
     updateSectionDots();
@@ -2563,6 +3516,8 @@ async function clearMetric(metric, cardEl) {
     });
     state.monthData.metrics = res.metrics;
     state.monthData.overallRAG = res.overallRAG;
+    if (res.overallDetails) state.monthData.overallDetails = res.overallDetails;
+    if (res.ytd) state.monthData.ytd = res.ytd;
     if (res.history) state.monthData.history = res.history;
     updateTopbarRAG();
     updateSectionDots();
@@ -2583,6 +3538,8 @@ async function restoreMetricHistory(metric, histEntry) {
     });
     state.monthData.metrics = res.metrics;
     state.monthData.overallRAG = res.overallRAG;
+    if (res.overallDetails) state.monthData.overallDetails = res.overallDetails;
+    if (res.ytd) state.monthData.ytd = res.ytd;
     if (res.history) state.monthData.history = res.history;
     updateTopbarRAG();
     updateSectionDots();
@@ -2603,6 +3560,8 @@ async function deleteMetricHistory(metric, index) {
     });
     state.monthData.metrics = res.metrics;
     state.monthData.overallRAG = res.overallRAG;
+    if (res.overallDetails) state.monthData.overallDetails = res.overallDetails;
+    if (res.ytd) state.monthData.ytd = res.ytd;
     if (res.history) state.monthData.history = res.history;
     showToast('History entry deleted', 'green');
     renderView();
@@ -2620,6 +3579,8 @@ async function clearAllMetricHistory(metric) {
     });
     state.monthData.metrics = res.metrics;
     state.monthData.overallRAG = res.overallRAG;
+    if (res.overallDetails) state.monthData.overallDetails = res.overallDetails;
+    if (res.ytd) state.monthData.ytd = res.ytd;
     if (res.history) state.monthData.history = res.history;
     showToast('All history cleared for ' + metric.label, 'green');
     renderView();
@@ -2892,6 +3853,31 @@ function renderUserManagement() {
         </table>
       </div>
     </div>
+
+    <!-- KPI Threshold Weights Configuration Card -->
+    <div class="users-table-card" style="margin-top: 24px;">
+      <div class="users-header-row" style="margin-bottom: 14px;">
+        <div class="users-header-info">
+          <h3>KPI Threshold Weights Configuration</h3>
+          <p>Configure weights for the 17 threshold metrics (High = 2, Medium = 1, Low = 0.5) used to calculate overall monthly RAG score. Changes are audit-logged.</p>
+        </div>
+        <button id="btn-save-weights" class="btn btn-primary">Save Weights</button>
+      </div>
+      <div id="weights-table-wrap">
+        <table class="users-table" id="weights-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Target</th>
+              <th>Direction</th>
+              <th>Tier</th>
+              <th style="width: 130px; text-align: right;">Weight</th>
+            </tr>
+          </thead>
+          <tbody id="weights-tbody"></tbody>
+        </table>
+      </div>
+    </div>
   `;
 
   const addPanel = frag.querySelector('#add-user-panel');
@@ -2937,8 +3923,87 @@ function renderUserManagement() {
     }
   });
 
+  // Weights save handler
+  const saveWeightsBtn = frag.querySelector('#btn-save-weights');
+  if (saveWeightsBtn) {
+    saveWeightsBtn.addEventListener('click', async () => {
+      saveWeightsBtn.disabled = true;
+      saveWeightsBtn.textContent = 'Saving...';
+      try {
+        const weights = {};
+        frag.querySelectorAll('.metric-weight-select').forEach(sel => {
+          weights[sel.dataset.id] = parseFloat(sel.value);
+        });
+        await api('/api/weights', {
+          method: 'POST',
+          body: JSON.stringify({ weights }),
+        });
+        showToast('KPI Threshold weights updated and audit-logged', 'green');
+        await loadMonthData();
+      } catch (err) {
+        showToast('Could not save weights: ' + err.message, 'red');
+      } finally {
+        saveWeightsBtn.disabled = false;
+        saveWeightsBtn.textContent = 'Save Weights';
+      }
+    });
+  }
+
   loadUsersList(frag);
+  loadWeightsConfig(frag);
   return frag;
+}
+
+async function loadWeightsConfig(container) {
+  const tbody = container.querySelector('#weights-tbody');
+  if (!tbody) return;
+  try {
+    const res = await api('/api/weights');
+    const weights = res.weights || {};
+    tbody.innerHTML = '';
+    const thresholdOrder = [
+      { id: 'devices_not_reporting_pct', tier: 'Medium', def: 1 },
+      { id: 'endpoint_protection_coverage_pct', tier: 'High', def: 2 },
+      { id: 'patch_compliance_pct', tier: 'High', def: 2 },
+      { id: 'high_patches_outstanding', tier: 'Medium', def: 1 },
+      { id: 'patch_deployment_success_rate_pct', tier: 'Low', def: 0.5 },
+      { id: 'avg_days_to_critical_patch', tier: 'Medium', def: 1 },
+      { id: 'devices_outdated_protection_pct', tier: 'High', def: 2 },
+      { id: 'mttd_hours', tier: 'High', def: 2 },
+      { id: 'mttr_hours', tier: 'Medium', def: 1 },
+      { id: 'high_vulns_open', tier: 'Medium', def: 1 },
+      { id: 'mttr_critical_days', tier: 'High', def: 2 },
+      { id: 'mfa_coverage_pct', tier: 'High', def: 2 },
+      { id: 'first_time_fix_pct', tier: 'Low', def: 0.5 },
+      { id: 'p1_response_sla_pct', tier: 'High', def: 2 },
+      { id: 'p2_response_sla_pct', tier: 'Medium', def: 1 },
+      { id: 'resolution_sla_pct', tier: 'Medium', def: 1 },
+      { id: 'recommendations_completion_pct', tier: 'Low', def: 0.5 }
+    ];
+
+    thresholdOrder.forEach(item => {
+      const metric = state.metrics.find(m => m.id === item.id) || { label: item.id, target: '-', direction: '-' };
+      const curVal = weights[item.id] !== undefined ? weights[item.id] : item.def;
+      const tr = document.createElement('tr');
+      const targetStr = (metric.target !== null && metric.target !== undefined) ? `${metric.direction === 'higher' ? '≥ ' : '≤ '}${metric.target}${metric.unit || ''}` : '-';
+      tr.innerHTML = `
+        <td style="font-weight:600;">${escapeHTML(metric.label)}</td>
+        <td style="color:var(--text-dim, #64748b); font-family:var(--mono);">${escapeHTML(targetStr)}</td>
+        <td style="text-transform:capitalize; color:var(--text-dim, #64748b);">${escapeHTML(metric.direction || '')}</td>
+        <td><span class="user-role-badge ${item.tier === 'High' ? 'admin' : (item.tier === 'Medium' ? 'editor' : 'viewer')}">${item.tier}</span></td>
+        <td style="text-align:right;">
+          <select class="metric-weight-select" data-id="${item.id}" style="padding:4px 8px; border-radius:6px; border:1px solid #cbd5e1; background:var(--surface,#fff); font-size:12px; font-weight:700;">
+            <option value="2" ${curVal === 2 ? 'selected' : ''}>2.0 (High)</option>
+            <option value="1" ${curVal === 1 ? 'selected' : ''}>1.0 (Med)</option>
+            <option value="0.5" ${curVal === 0.5 ? 'selected' : ''}>0.5 (Low)</option>
+          </select>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" style="color:#ef4444; padding:12px;">Could not load weights: ${escapeHTML(err.message)}</td></tr>`;
+  }
 }
 
 async function loadUsersList(container) {

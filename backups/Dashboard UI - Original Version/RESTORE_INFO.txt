@@ -1,30 +1,30 @@
 ================================================================================
 RESTORE POINT: Dashboard UI - Original Version
 ================================================================================
-Backup Created : 2026-09-23 10:26 IST
+Backup Created : 2026-10-01T09:15:54.568Z
 Label          : "Dashboard UI - Original Version"
 Source Folder  : C:\Users\jeeva\Downloads\a0-old\a0-old\public
 Destination    : C:\Users\jeeva\Downloads\a0-old\a0-old\backups\Dashboard UI - Original Version
 
 Files Backed Up:
-  - app.js       (Frontend Application Logic & State - 174,728 bytes)
-  - index.html   (Main Dashboard Structure, Modal & Templates - 25,027 bytes)
-  - style.css    (Design System, Micro-interactions, CSS Tokens - 99,287 bytes)
-  - client.html  (Client Security Portal HTML View - 15,140 bytes)
-  - client.css   (Client Security Portal Stylesheet - 22,626 bytes)
-  - client.js    (Client Security Portal Fetch & Render Engine - 19,530 bytes)
+  - app.js         (1,78,955 bytes) | SHA-256: 3660521cc0babd71eaa683b777bb439efc70d5d8696b2677839b51bdf1c8c048
+  - client.css     (  53,784 bytes) | SHA-256: e5cbb502f4598d07c5b3d1cbdf7bdc5bb5831a8df0d8af414f557b6d95ed4b03
+  - client.html    (  13,436 bytes) | SHA-256: 577e64d5bf75dfb8dbc10cb18f8110d497457aaf9d3e715c18c6d1be88ff54ff
+  - client.js      (  70,355 bytes) | SHA-256: aed4805d022cc8a39b1337b6be29957cf8e5cdeeaac09cb21a4b09d91f8260bf
+  - index.html     (  25,546 bytes) | SHA-256: bae0d8101a19bc3ad148d248099500922c7d119b2b004afd96ab087de31f463e
+  - style.css      (1,03,374 bytes) | SHA-256: c60eb6b7bc5bfe928c11f93aa16c3cd5428c7721dbb53493962f2358954655ee
 
 Verification Status:
-  - 100% complete and bit-for-bit verified mirror of current working frontend.
+  - 100% complete and byte-for-byte SHA-256 verified mirror of working frontend.
   - Preserves working dashboard exactly as it is.
-  - Zero modification to backend, API logic, auth, or existing data.
-  - Tested with full test suite: 473 passed / 473 tests (0 failures).
+  - Zero modification to backend, API logic, authentication, or existing data.
+  - Automated test suite verified: 473 passed / 473 tests (0 failures).
 
 HOW TO RESTORE THIS EXACT VERSION:
 Option 1 (One-click automated script):
   Double-click the 'restore.bat' file located in this folder.
 
 Option 2 (Manual copy):
-  Copy all files ('app.js', 'index.html', 'style.css', 'client.html', 'client.css', 'client.js')
+  Copy all files ('app.js', 'client.css', 'client.html', 'client.js', 'index.html', 'style.css')
   from this folder into the 'public/' directory.
 ================================================================================

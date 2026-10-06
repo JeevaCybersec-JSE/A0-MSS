@@ -3,20 +3,23 @@
 // Security Operations Console & Executive Reporting Engine
 // ============================================================
 
+// API base URL — empty string means same-origin (works on Render, Vercel, any host).
+// Only point to localhost when explicitly running on localhost/127.0.0.1.
 let API = (
-  window.location.protocol === 'file:' ||
-  (window.location.port !== '4321' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.port))
-) ? 'http://localhost:4321' : '';
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.protocol === 'file:'
+) ? 'http://' + (window.location.hostname || 'localhost') + ':4321' : '';
 
 async function fetchWithFallback(urlPath, options) {
   const fullUrl = API + urlPath;
   try {
     return await fetch(fullUrl, options);
   } catch (err) {
-    if (API === 'http://localhost:4321') {
+    if (API.includes('localhost')) {
       API = 'http://127.0.0.1:4321';
       return await fetch(API + urlPath, options);
-    } else if (API === 'http://127.0.0.1:4321') {
+    } else if (API.includes('127.0.0.1')) {
       API = 'http://localhost:4321';
       return await fetch(API + urlPath, options);
     }
@@ -112,7 +115,7 @@ async function api(path, opts = {}) {
   try {
     res = await fetchWithFallback(path, Object.assign({}, opts, { headers }));
   } catch (err) {
-    throw new Error('Server not reachable. Please make sure the backend is running at http://localhost:4321');
+    throw new Error('Server not reachable. Please check your connection and try again.');
   }
   if (res.status === 401) { doLogout(true); throw new Error('Not authenticated'); }
   const data = await res.json().catch(() => ({}));
@@ -331,7 +334,7 @@ async function onLoginSubmit(e) {
     });
   } catch (err) {
     if (err.name === 'TypeError' || (err.message && err.message.toLowerCase().includes('fetch'))) {
-      errBox.textContent = 'Server-க்கு connect பண்ண முடியல (Server not reachable). start.bat run பண்ணி http://localhost:4321-ல் open பண்ணவும்.';
+      errBox.textContent = 'Server-க்கு connect பண்ண முடியல. Network connection check பண்ணி மீண்டும் try பண்ணவும்.';
     } else {
       errBox.textContent = err.message || 'Could not sign in';
     }

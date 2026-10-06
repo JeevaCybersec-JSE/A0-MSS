@@ -359,6 +359,78 @@
       "createdBy": "Jeeva",
       "status": "active",
       "revokedAt": null
+    },
+    {
+      "id": "shr_e96ee1d1eb39dce4d662",
+      "tokenHash": "ceaff47926c02f7af2702b5c40598953331561406f6d1330d885df91f9d46da7",
+      "clientName": "A0 MSS Dashboard",
+      "scope": "month",
+      "month": "2026-09",
+      "createdAt": "2026-10-01T09:18:16.408Z",
+      "expiresAt": "2026-10-08T09:18:16.408Z",
+      "createdBy": "Jeeva",
+      "status": "active",
+      "revokedAt": null
+    },
+    {
+      "id": "shr_98b069b6b734675140a4",
+      "tokenHash": "cbac7a614b28e47a8c121b260288e2e4bb89a69332c91b113b361e6bcda88f0f",
+      "clientName": "A0 MSS Dashboard",
+      "scope": "month",
+      "month": "2026-08",
+      "createdAt": "2026-10-05T06:54:45.590Z",
+      "expiresAt": "2026-10-12T06:54:45.590Z",
+      "createdBy": "Jeeva",
+      "status": "active",
+      "revokedAt": null
+    },
+    {
+      "id": "shr_8c1763f91612cc939231",
+      "tokenHash": "3a1c5ebd49e36c2a1fd79fd02c92d37057189226c03c36640eb1eab31fd67c8c",
+      "clientName": "A0 MSS Dashboard",
+      "scope": "month",
+      "month": "2026-10",
+      "createdAt": "2026-10-05T08:32:00.462Z",
+      "expiresAt": "2026-10-12T08:32:00.462Z",
+      "createdBy": "Jeeva",
+      "status": "active",
+      "revokedAt": null
+    },
+    {
+      "id": "shr_ea2c9e0082257c57f3b3",
+      "tokenHash": "1a67f974e7cf1b5fcd4325ae049d4b26e8e4af3e37231587d64a4e07f278cb59",
+      "clientName": "A0 MSS Dashboard",
+      "scope": "month",
+      "month": "2026-10",
+      "createdAt": "2026-10-05T08:32:47.836Z",
+      "expiresAt": "2026-10-12T08:32:47.836Z",
+      "createdBy": "Jeeva",
+      "status": "active",
+      "revokedAt": null
+    },
+    {
+      "id": "shr_1673fdf7afbc86b3269c",
+      "tokenHash": "0a36fafee74c8560999d8b052f028885c42b3a4bdd1f584a84280f204fa5b483",
+      "clientName": "A0 MSS Dashboard",
+      "scope": "month",
+      "month": "2026-09",
+      "createdAt": "2026-10-05T12:52:13.313Z",
+      "expiresAt": "2026-10-12T12:52:13.313Z",
+      "createdBy": "Jeeva",
+      "status": "active",
+      "revokedAt": null
+    },
+    {
+      "id": "shr_5305408df76cdbcfff11",
+      "tokenHash": "44e8820c91c48d9aa44a81f96caf4e5b8f7c853270598462298e7d614c61952a",
+      "clientName": "A0 MSS Dashboard",
+      "scope": "month",
+      "month": "2026-10",
+      "createdAt": "2026-10-05T13:43:15.783Z",
+      "expiresAt": "2026-10-12T13:43:15.783Z",
+      "createdBy": "Jeeva",
+      "status": "active",
+      "revokedAt": null
     }
   ]
 }

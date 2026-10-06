@@ -12,7 +12,7 @@ const crypto = require('crypto');
 const url = require('url');
 
 const { SECTIONS, METRICS } = require('./lib/metrics');
-const { computeMonth, computeOverallRAG } = require('./lib/calc');
+const { computeMonth, computeOverallRAG, computeYTD, DEFAULT_WEIGHTS } = require('./lib/calc');
 const {
   createShare,
   revokeShare,
@@ -28,9 +28,22 @@ const DB_PATH = path.join(__dirname, 'data', 'db.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 // ---- Storage Paths ----
-const USERS_PATH  = path.join(__dirname, 'data', 'users.json');
-const AUDIT_PATH  = path.join(__dirname, 'data', 'audit.json');
-const SHARES_PATH = path.join(__dirname, 'data', 'shares.json'); // share-token store (referenced by lib/shares.js)
+const USERS_PATH   = path.join(__dirname, 'data', 'users.json');
+const AUDIT_PATH   = path.join(__dirname, 'data', 'audit.json');
+const SHARES_PATH  = path.join(__dirname, 'data', 'shares.json'); // share-token store (referenced by lib/shares.js)
+const WEIGHTS_PATH = path.join(__dirname, 'data', 'weights.json');
+
+function loadWeights() {
+  try {
+    return JSON.parse(fs.readFileSync(WEIGHTS_PATH, 'utf8'));
+  } catch (e) {
+    return Object.assign({}, DEFAULT_WEIGHTS);
+  }
+}
+
+function saveWeights(w) {
+  fs.writeFileSync(WEIGHTS_PATH, JSON.stringify(w, null, 2), 'utf8');
+}
 
 // ---- Role-Based Access Control (RBAC) Definitions ----
 const ROLES = {
@@ -552,7 +565,9 @@ const server = http.createServer(async (req, res) => {
         });
       }
       if (!db.months[month]) {
-        return sendJSON(res, 200, { month, metrics: {}, narrative: {}, overallRAG: null, prevMonth: prevKey, prevData, history: {} });
+        const year = month.split('-')[0];
+        const ytd = computeYTD(db.months, year);
+        return sendJSON(res, 200, { month, metrics: {}, narrative: {}, overallRAG: null, overallDetails: null, ytd, prevMonth: prevKey, prevData, history: {} });
       }
       const metrics = recomputeMonth(db, month); // ensure fresh (handles first-load-after-earlier-edit case)
       saveDB(db);
@@ -564,11 +579,18 @@ const server = http.createServer(async (req, res) => {
         }
       });
 
+      const weights = loadWeights();
+      const overall = computeOverallRAG(metrics, weights);
+      const year = month.split('-')[0];
+      const ytd = computeYTD(db.months, year);
+
       return sendJSON(res, 200, {
         month,
         metrics,
         narrative: db.months[month].narrative || {},
-        overallRAG: computeOverallRAG(metrics),
+        overallRAG: overall ? overall.rag : null,
+        overallDetails: overall,
+        ytd,
         prevMonth: prevKey,
         prevData,
         history,
@@ -617,10 +639,16 @@ const server = http.createServer(async (req, res) => {
             history[mId] = db.months[month].metrics[mId].history;
           }
         });
+        const weights = loadWeights();
+        const overall = computeOverallRAG(metrics, weights);
+        const year = month.split('-')[0];
+        const ytd = computeYTD(db.months, year);
         return sendJSON(res, 200, {
           month,
           metrics,
-          overallRAG: computeOverallRAG(metrics),
+          overallRAG: overall ? overall.rag : null,
+          overallDetails: overall,
+          ytd,
           history,
         });
       }
@@ -635,10 +663,16 @@ const server = http.createServer(async (req, res) => {
             history[mId] = db.months[month].metrics[mId].history;
           }
         });
+        const weights = loadWeights();
+        const overall = computeOverallRAG(metrics, weights);
+        const year = month.split('-')[0];
+        const ytd = computeYTD(db.months, year);
         return sendJSON(res, 200, {
           month,
           metrics,
-          overallRAG: computeOverallRAG(metrics),
+          overallRAG: overall ? overall.rag : null,
+          overallDetails: overall,
+          ytd,
           history,
         });
       }
@@ -687,10 +721,17 @@ const server = http.createServer(async (req, res) => {
         }
       });
 
+      const weights = loadWeights();
+      const overall = computeOverallRAG(metrics, weights);
+      const year = month.split('-')[0];
+      const ytd = computeYTD(db.months, year);
+
       return sendJSON(res, 200, {
         month,
         metrics,
-        overallRAG: computeOverallRAG(metrics),
+        overallRAG: overall ? overall.rag : null,
+        overallDetails: overall,
+        ytd,
         history,
       });
     }
@@ -1010,6 +1051,17 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/months' && req.method === 'GET') {
       if (!requireAuth(req, res)) return;
       const db = loadDB();
+      const now = new Date();
+      const currentCalMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+      if (!db.months[currentCalMonth]) {
+        const prevKey = prevMonthKey(db, currentCalMonth);
+        const templateMetrics = prevKey && db.months[prevKey] ? db.months[prevKey].metrics : {};
+        db.months[currentCalMonth] = {
+          metrics: JSON.parse(JSON.stringify(templateMetrics || {})),
+          narrative: { topRisks: '', improvements: '', plannedActions: '' }
+        };
+        saveDB(db);
+      }
       const keys = sortedMonthKeys(db);
       const out = keys.map(k => {
         const mObj = db.months[k] || {};
@@ -1033,9 +1085,12 @@ const server = http.createServer(async (req, res) => {
           (nar.improvements && nar.improvements.trim()) ||
           (nar.plannedActions && nar.plannedActions.trim())
         );
+        const weights = loadWeights();
+        const overall = computeOverallRAG(monthMetrics, weights);
         return {
           month: k,
-          overallRAG: computeOverallRAG(monthMetrics),
+          overallRAG: overall ? overall.rag : null,
+          overallDetails: overall,
           green,
           amber,
           red,
@@ -1243,10 +1298,12 @@ const server = http.createServer(async (req, res) => {
         }
       });
 
-      const totalCatalog = METRICS.length; // 51
-      const telemetryCount = Math.max(0, totalCatalog - evaluatedTotal); // 20
+      const totalCatalog = METRICS.length;
+      const telemetryCount = Math.max(0, totalCatalog - evaluatedTotal);
 
-      const overallRAG = computeOverallRAG(computed);
+      const weights = loadWeights();
+      const overall = computeOverallRAG(computed, weights);
+      const overallRAG = overall ? overall.rag : null;
 
       return sendJSON(res, 200, {
         success: true,
@@ -1274,6 +1331,203 @@ const server = http.createServer(async (req, res) => {
           metrics: sanitizedMetrics,
         },
       });
+    }
+
+    // ================================================================
+    // PUBLIC CLIENT DELIVERABLE API — Direct live connection to Main Dashboard data
+    // Single Source of Truth: reads db.json and executes calc.js directly
+    // Does NOT require Bearer auth (client deliverable page)
+    // Strictly read-only, sanitizes sensitive internal fields
+    // ================================================================
+    if (pathname === '/api/public/client-data' && req.method === 'GET') {
+      const db = loadDB();
+      const allMonthKeys = Object.keys(db.months || {}).sort();
+
+      // Dynamic calendar previous month helper (correctly handles Dec of prior year for Jan)
+      function getCalendarPrevMonth(mKey) {
+        if (!mKey || typeof mKey !== 'string') return null;
+        const [yStr, mStr] = mKey.split('-');
+        let y = parseInt(yStr, 10);
+        let m = parseInt(mStr, 10);
+        if (isNaN(y) || isNaN(m)) return null;
+        if (m === 1) {
+          y -= 1;
+          m = 12;
+        } else {
+          m -= 1;
+        }
+        return `${y}-${String(m).padStart(2, '0')}`;
+      }
+
+      // Determine requested month, default to latest month with data or 2026-03
+      let month = parsed.query.month;
+      if (!month || !isValidMonth(month)) {
+        month = allMonthKeys.slice().reverse().find(m => {
+          const raw = db.months[m]?.metrics || {};
+          return Object.values(raw).some(e => e && (e.computed !== null || e.inputs));
+        }) || allMonthKeys[allMonthKeys.length - 1] || '2026-03';
+      }
+
+      const year = month.split('-')[0];
+      const prevKey = prevMonthKey(db, month);
+
+      // Dynamically discover all years from db.months + requested year (NO ARBITRARY LIMITS)
+      const yearsSet = new Set();
+      allMonthKeys.forEach(k => {
+        const y = parseInt(k.split('-')[0], 10);
+        if (y && !isNaN(y)) yearsSet.add(y);
+      });
+      const reqYearInt = parseInt(year, 10);
+      if (reqYearInt && !isNaN(reqYearInt)) yearsSet.add(reqYearInt);
+      const availableYears = Array.from(yearsSet).sort((a, b) => a - b);
+
+      // Generate all 12 calendar months for the selected year
+      const yearMonths = [];
+      for (let i = 1; i <= 12; i++) {
+        yearMonths.push(`${year}-${String(i).padStart(2, '0')}`);
+      }
+
+      // Pre-calculate all months in database + selected year's calendar months for trends and sparklines
+      const computedAll = {};
+      const allMonthsSummary = {};
+      const weights = loadWeights();
+
+      let lastComputed = null;
+      const combinedMonthKeys = Array.from(new Set([...allMonthKeys, ...yearMonths])).sort();
+      combinedMonthKeys.forEach(mKey => {
+        const mObj = db.months[mKey];
+        const comp = mObj ? computeMonth(mObj.metrics || {}, lastComputed) : computeMonth({}, null);
+        computedAll[mKey] = comp;
+        if (mObj) lastComputed = comp;
+
+        const ov = mObj ? computeOverallRAG(comp, weights) : null;
+        allMonthsSummary[mKey] = {
+          rag: ov ? ov.rag : null,
+          metrics: {},
+        };
+        Object.keys(comp).forEach(metricId => {
+          allMonthsSummary[mKey].metrics[metricId] = {
+            computed: comp[metricId].computed,
+            rag: comp[metricId].rag,
+            inputs: comp[metricId].inputs || {},
+          };
+        });
+      });
+
+      // Target month data (cleanly handles empty/missing month without fake data)
+      const currentComputed = db.months[month]
+        ? (computedAll[month] || computeMonth((db.months[month] && db.months[month].metrics) || {}, null))
+        : computeMonth({}, null);
+
+      const prevComputed = prevKey && db.months[prevKey]
+        ? (computedAll[prevKey] || computeMonth((db.months[prevKey] && db.months[prevKey].metrics) || {}, null))
+        : null;
+
+      const overall = computeOverallRAG(currentComputed, weights);
+
+      // Sanitized current month metrics
+      const sanitizedMetrics = {};
+      Object.keys(currentComputed).forEach(mId => {
+        const item = currentComputed[mId];
+        sanitizedMetrics[mId] = {
+          computed: item.computed,
+          rag: item.rag,
+          inputs: item.inputs || {},
+        };
+      });
+
+      // Sanitized prev month metrics
+      const sanitizedPrev = {};
+      if (prevComputed) {
+        Object.keys(prevComputed).forEach(mId => {
+          sanitizedPrev[mId] = {
+            computed: prevComputed[mId].computed,
+            rag: prevComputed[mId].rag,
+          };
+        });
+      }
+
+      // Compute YTD up to the selected month
+      const scopedMonths = {};
+      allMonthKeys.filter(k => k.startsWith(year + '-') && k <= month).forEach(k => {
+        scopedMonths[k] = db.months[k];
+      });
+      const ytd = computeYTD(scopedMonths, year);
+
+      // Narrative for current month
+      const narrative = (db.months[month] && db.months[month].narrative) || {};
+
+      // Calculate RAG counts
+      let greenCount = 0, amberCount = 0, redCount = 0, scoredCount = 0;
+      Object.values(currentComputed).forEach(m => {
+        if (m && m.rag) {
+          scoredCount++;
+          if (m.rag === 'green') greenCount++;
+          else if (m.rag === 'amber') amberCount++;
+          else if (m.rag === 'red') redCount++;
+        }
+      });
+
+      return sendJSON(res, 200, {
+        success: true,
+        clientName: 'Brysa',
+        month,
+        year,
+        availableYears,
+        yearMonths,
+        availableMonths: allMonthKeys,
+        prevMonth: prevKey,
+        sections: SECTIONS,
+        metrics: METRICS,
+        monthData: sanitizedMetrics,
+        prevData: sanitizedPrev,
+        overall: {
+          rag: overall ? overall.rag : null,
+          vetoBreaches: (overall && overall.vetoBreaches) || [],
+          weightedScore: overall ? overall.weightedScore : null,
+          scoredCount,
+          greenCount,
+          amberCount,
+          redCount,
+          passCount: greenCount,
+        },
+        ytd: ytd ? (ytd.metrics || {}) : {},
+        narrative: {
+          topRisks: narrative.topRisks || '',
+          improvements: narrative.improvements || '',
+          plannedActions: narrative.plannedActions || '',
+        },
+        allMonthsData: allMonthsSummary,
+      });
+    }
+
+    // ---- WEIGHTS API ----
+    if (pathname === '/api/weights' && req.method === 'GET') {
+      const session = requireAuth(req, res);
+      if (!session) return;
+      return sendJSON(res, 200, {
+        weights: loadWeights(),
+        defaults: DEFAULT_WEIGHTS,
+      });
+    }
+
+    if (pathname === '/api/weights' && req.method === 'POST') {
+      const session = requireAuth(req, res);
+      if (!session) return;
+      if (session.role !== 'superadmin' && session.role !== 'admin') {
+        return sendJSON(res, 403, { error: 'Forbidden: Admin or Super Admin role required to update weights' });
+      }
+      const body = await readBody(req);
+      const incoming = body.weights || {};
+      const current = loadWeights();
+      const updated = {};
+      Object.keys(DEFAULT_WEIGHTS).forEach(id => {
+        const val = Number(incoming[id] !== undefined ? incoming[id] : current[id]);
+        updated[id] = Number.isFinite(val) && val >= 0 ? val : DEFAULT_WEIGHTS[id];
+      });
+      saveWeights(updated);
+      recordAudit(session.username, 'weights:update', 'weights.json', 'SUCCESS', { updated });
+      return sendJSON(res, 200, { success: true, weights: updated });
     }
 
     // ---- static frontend files ----

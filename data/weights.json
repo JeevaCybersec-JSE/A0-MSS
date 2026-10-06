@@ -1,0 +1,19 @@
+{
+  "devices_not_reporting_pct": 1,
+  "endpoint_protection_coverage_pct": 2,
+  "patch_compliance_pct": 2,
+  "high_patches_outstanding": 1,
+  "patch_deployment_success_rate_pct": 0.5,
+  "avg_days_to_critical_patch": 1,
+  "devices_outdated_protection_pct": 2,
+  "mttd_hours": 2,
+  "mttr_hours": 1,
+  "high_vulns_open": 1,
+  "mttr_critical_days": 2,
+  "mfa_coverage_pct": 2,
+  "first_time_fix_pct": 0.5,
+  "p1_response_sla_pct": 2,
+  "p2_response_sla_pct": 1,
+  "resolution_sla_pct": 1,
+  "recommendations_completion_pct": 0.5
+}
