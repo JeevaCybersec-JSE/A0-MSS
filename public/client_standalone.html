@@ -8767,48 +8767,156 @@ button.sla-radial-card:hover {
               '</div>' +
             '</section>' +
 
-            '<section class="card incident-sla-card" aria-label="Response and resolution performance">' +
+            '<section class="card incident-sla-card" aria-label="Speed of detection, response & remediation">' +
               '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
-                '<div><h2 class="h2" style="margin-bottom:2px">Response &amp; resolution performance</h2><span class="sub" style="margin:0">Key operational service levels</span></div>' +
-                '<span class="perf-badge g" style="font-size:11px"><span class="dot"></span>SLAs</span>' +
+                '<div><h2 class="h2" style="margin-bottom:2px">Speed of detection, response &amp; remediation</h2><span class="sub" style="margin:0">Key operational performance indicators</span></div>' +
+                '<span class="perf-badge g" style="font-size:11px"><span class="dot"></span>Operations</span>' +
               '</div>' +
               '<div style="display:flex;flex-direction:column;gap:8px">' +
-                ['P1 response SLA %', 'P2 response SLA %', 'Resolution SLA %', 'First-time fix rate %', 'Recommendations completion %'].map(fl).filter(Boolean).map(r => {
-                  const v = r.v[m], x = r.rag[m];
-                  const pctVal = typeof v === 'number' ? Math.min(100, Math.max(0, v * 100)) : 0;
-                  const tgtVal = typeof r.target === 'number' ? Math.min(100, r.target * 100) : 0;
-                  return '<button type="button" class="perf-row" data-open="' + r.r + '" style="grid-template-columns:minmax(0, 1.4fr) minmax(80px, 1fr) 48px 76px;padding:6px 6px" title="View ' + r.name + '">' +
-                    '<div class="perf-metric-name"><b style="font-size:12.5px">' + r.name.replace(/ %$/, '') + '</b><small>' + target(r) + '</small></div>' +
-                    '<div class="perf-gauge" style="height:7px"><div class="perf-gauge-fill ' + cls(x) + '" style="width:' + pctVal.toFixed(1) + '%"></div><div class="perf-gauge-target" style="left:' + tgtVal.toFixed(1) + '%"></div></div>' +
-                    '<div class="perf-val" style="font-size:13px">' + fmt(r, v) + '</div>' +
-                    '<div class="perf-pill ' + cls(x) + '" style="font-size:10px;padding:2px 6px">' + label(r, x) + '</div>' +
+                [
+                  { name: 'Mean time to detect (hours)', disp: 'Mean time to detect', sub: '' },
+                  { name: 'Mean time to respond (hours)', disp: 'Mean time to respond', sub: 'Detection to containment · ' },
+                  { name: 'Avg days to critical patch', disp: 'Avg days to critical patch', sub: '' },
+                  { name: 'High patches outstanding', disp: 'High patches outstanding', sub: '' },
+                  { name: 'High vulnerabilities open', disp: 'High vulnerabilities open', sub: '' }
+                ].map(item => {
+                  const r = fl(item.name);
+                  if (!r) return '';
+                  const v = r.v[m];
+                  const tgt = r.target;
+                  const hasVal = typeof v === 'number' && !isNaN(v);
+
+                  // Unit handling
+                  let unitStr = '';
+                  let tgtUnitStr = '';
+                  if (/hours/i.test(r.name)) {
+                    unitStr = (hasVal && v === 1) ? ' hr' : ' hrs';
+                    tgtUnitStr = (tgt === 1) ? ' hr' : ' hrs';
+                  } else if (/days/i.test(r.name)) {
+                    unitStr = (hasVal && v === 1) ? ' day' : ' days';
+                    tgtUnitStr = (tgt === 1) ? ' day' : ' days';
+                  }
+
+                  // Value display string (No % sign)
+                  const dispVal = hasVal ? ((Number.isInteger(v) ? v : v.toFixed(1)) + unitStr) : '—';
+                  const tgtLabel = (tgt !== null && tgt !== undefined) ? ('≤ ' + tgt + tgtUnitStr) : '—';
+
+                  // Status & Pill
+                  let pillCls = 'n';
+                  let pillText = 'No data';
+                  if (hasVal && tgt !== null && tgt !== undefined) {
+                    if (r.rag && r.rag[m] !== null && r.rag[m] !== undefined) {
+                      pillCls = cls(r.rag[m]);
+                      pillText = label(r, r.rag[m]);
+                    } else if (v <= tgt) {
+                      pillCls = 'g';
+                      pillText = 'On target';
+                    } else if (v <= tgt * 1.1) {
+                      pillCls = 'a';
+                      pillText = 'Near target';
+                    } else {
+                      pillCls = 'r';
+                      pillText = 'Off target';
+                    }
+                  }
+
+                  // Gauge fill = actual / (2 * target), capped at 100%. Target marker line at 50%.
+                  let fillPct = 0;
+                  if (hasVal && tgt && tgt > 0) {
+                    fillPct = Math.min(100, Math.max(0, (v / (2 * tgt)) * 100));
+                  }
+
+                  return '<button type="button" class="perf-row" data-open="' + r.r + '" style="grid-template-columns:minmax(0, 1.15fr) minmax(48px, 1fr) minmax(46px, auto) 70px;gap:6px;padding:6px 4px" title="View ' + r.name + '">' +
+                    '<div class="perf-metric-name"><b style="font-size:12.5px">' + item.disp + '</b><small>' + item.sub + tgtLabel + '</small></div>' +
+                    '<div class="perf-gauge" style="height:7px">' +
+                      (hasVal ? '<div class="perf-gauge-fill ' + pillCls + '" style="width:' + fillPct.toFixed(1) + '%"></div>' : '') +
+                      '<div class="perf-gauge-target" style="left:50%"></div>' +
+                    '</div>' +
+                    '<div class="perf-val" style="font-size:13px">' + dispVal + '</div>' +
+                    '<div class="perf-pill ' + pillCls + '" style="font-size:9.5px;padding:2px 5px">' + (pillCls !== 'n' ? '<i class="pdot"></i>' : '') + pillText + '</div>' +
                   '</button>';
                 }).join('') +
               '</div>' +
               '<div class="sla-radial-grid">' +
-                [
-                  { label: 'Resolution SLA', r: fl('Resolution SLA %') },
-                  { label: 'First-Time Fix', r: fl('First-time fix rate %') },
-                  { label: 'P2 Response', r: fl('P2 response SLA %') },
-                  { label: 'P1 Response', r: fl('P1 response SLA %') }
-                ].map(s => {
-                  const row = s.r;
-                  if (!row) return '';
-                  const v = row.v[m];
-                  const p = typeof v === 'number' ? Math.min(100, Math.max(0, v * 100)) : 0;
-                  const off = (150.8 * (1 - (p / 100))).toFixed(1);
-                  const colorCls = cls(row.rag[m]);
-                  return '<button type="button" class="sla-radial-card" data-open="' + row.r + '" title="View ' + row.name + '">' +
+                (() => {
+                  const incResRow = fl('Incidents resolved');
+                  const supReqRow = fl('Support requests');
+                  const reopRow = fl('Reopened incidents');
+                  const critVulnRow = fl('Critical vulnerabilities open');
+                  const polExRow = fl('Policy exceptions open');
+
+                  const incResVal = incResRow && typeof incResRow.v[m] === 'number' ? incResRow.v[m] : null;
+                  const supReqVal = supReqRow && typeof supReqRow.v[m] === 'number' ? supReqRow.v[m] : null;
+                  const reopVal = reopRow && typeof reopRow.v[m] === 'number' ? reopRow.v[m] : 0;
+                  const critVulnVal = critVulnRow && typeof critVulnRow.v[m] === 'number' ? critVulnRow.v[m] : 0;
+                  const polExVal = polExRow && typeof polExRow.v[m] === 'number' ? polExRow.v[m] : 0;
+
+                  // 1. Ticket clearance % = Incidents resolved ÷ Support requests
+                  let clearanceDisplay = '—';
+                  let clearanceOff = 150.8;
+                  let clearanceCls = 'n';
+                  if (incResVal !== null && supReqVal !== null && supReqVal > 0) {
+                    const clPct = (incResVal / supReqVal) * 100;
+                    clearanceDisplay = (Math.abs(clPct % 1) < 1e-9 ? clPct.toFixed(0) : clPct.toFixed(1)) + '%';
+                    const p1 = Math.min(100, Math.max(0, clPct));
+                    clearanceOff = (150.8 * (1 - (p1 / 100))).toFixed(1);
+                    clearanceCls = clPct >= 90 ? 'g' : (clPct >= 80 ? 'a' : 'r');
+                  } else if (supReqVal === 0 && incResVal !== null) {
+                    clearanceDisplay = '100%';
+                    clearanceOff = 0;
+                    clearanceCls = 'g';
+                  }
+
+                  // 2. Reopen-free rate % = 1 − (Reopened incidents ÷ Incidents resolved). If Incidents resolved is 0, show "—".
+                  let reopenDisplay = '—';
+                  let reopenOff = 150.8;
+                  let reopenCls = 'n';
+                  if (incResVal !== null && incResVal > 0) {
+                    const roPct = Math.max(0, (1 - (reopVal / incResVal))) * 100;
+                    reopenDisplay = (Math.abs(roPct % 1) < 1e-9 ? roPct.toFixed(0) : roPct.toFixed(1)) + '%';
+                    const p2 = Math.min(100, Math.max(0, roPct));
+                    reopenOff = (150.8 * (1 - (p2 / 100))).toFixed(1);
+                    reopenCls = roPct >= 95 ? 'g' : (roPct >= 90 ? 'a' : 'r');
+                  }
+
+                  return '<button type="button" class="sla-radial-card" ' + (incResRow ? 'data-open="' + incResRow.r + '"' : '') + ' title="Ticket clearance: ' + clearanceDisplay + ' (' + (incResVal ?? 0) + ' resolved / ' + (supReqVal ?? 0) + ' requests)">' +
                     '<div class="sla-radial-meter">' +
                       '<svg class="sla-radial-svg" viewBox="0 0 64 64">' +
                         '<circle fill="none" class="exec-radial-bg" cx="32" cy="32" r="24" stroke-width="5" />' +
-                        '<circle fill="none" class="exec-radial-fill ' + colorCls + '" cx="32" cy="32" r="24" stroke-width="5" stroke-dasharray="150.8" stroke-dashoffset="' + off + '" />' +
+                        '<circle fill="none" class="exec-radial-fill ' + clearanceCls + '" cx="32" cy="32" r="24" stroke-width="5" stroke-dasharray="150.8" stroke-dashoffset="' + clearanceOff + '" />' +
                       '</svg>' +
-                      '<span class="sla-radial-val">' + fmt(row, v) + '</span>' +
+                      '<span class="sla-radial-val">' + clearanceDisplay + '</span>' +
                     '</div>' +
-                    '<span class="sla-radial-lbl">' + s.label + '</span>' +
+                    '<span class="sla-radial-lbl">Ticket Clearance</span>' +
+                  '</button>' +
+
+                  '<button type="button" class="sla-radial-card" ' + (reopRow ? 'data-open="' + reopRow.r + '"' : '') + ' title="Reopen-free rate: ' + reopenDisplay + ' (' + reopVal + ' reopened)">' +
+                    '<div class="sla-radial-meter">' +
+                      '<svg class="sla-radial-svg" viewBox="0 0 64 64">' +
+                        '<circle fill="none" class="exec-radial-bg" cx="32" cy="32" r="24" stroke-width="5" />' +
+                        '<circle fill="none" class="exec-radial-fill ' + reopenCls + '" cx="32" cy="32" r="24" stroke-width="5" stroke-dasharray="150.8" stroke-dashoffset="' + reopenOff + '" />' +
+                      '</svg>' +
+                      '<span class="sla-radial-val">' + reopenDisplay + '</span>' +
+                    '</div>' +
+                    '<span class="sla-radial-lbl">Reopen-Free Rate</span>' +
+                  '</button>' +
+
+                  '<button type="button" class="sla-radial-card" ' + (critVulnRow ? 'data-open="' + critVulnRow.r + '"' : '') + ' title="Critical vulnerabilities open: ' + critVulnVal + ' (Target: 0)">' +
+                    '<div class="sla-radial-meter" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">' +
+                      '<span style="font-size:26px;font-weight:800;line-height:1;color:' + (critVulnVal === 0 ? 'var(--g, #059669)' : 'var(--r, #dc2626)') + '">' + critVulnVal + '</span>' +
+                      '<span style="font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;margin-top:3px">Target 0</span>' +
+                    '</div>' +
+                    '<span class="sla-radial-lbl">Critical Vulns</span>' +
+                  '</button>' +
+
+                  '<button type="button" class="sla-radial-card" ' + (polExRow ? 'data-open="' + polExRow.r + '"' : '') + ' title="Policy exceptions open: ' + polExVal + ' (Target: 0)">' +
+                    '<div class="sla-radial-meter" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">' +
+                      '<span style="font-size:26px;font-weight:800;line-height:1;color:' + (polExVal === 0 ? 'var(--g, #059669)' : 'var(--r, #dc2626)') + '">' + polExVal + '</span>' +
+                      '<span style="font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;margin-top:3px">Target 0</span>' +
+                    '</div>' +
+                    '<span class="sla-radial-lbl">Policy Exceptions</span>' +
                   '</button>';
-                }).join('') +
+                })() +
               '</div>' +
             '</section>' +
           '</div>';
