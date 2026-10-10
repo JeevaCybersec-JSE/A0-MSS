@@ -1,284 +1,144 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MSS Intelligence — Client Security Report</title>
-  <meta name="description" content="Executive client security report — MSS Intelligence. Tier 1 posture overview, Tier 2 target achievement, Tier 3 operational telemetry.">
-  <link rel="stylesheet" href="/client.css?v=7.2">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Brysa Security · Executive Performance Report</title>
+  
+  <!-- Premium Modern Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="client.css?v=33.0">
 </head>
 <body>
 
-  <!-- ================================================
-       LOADING STATE
-       =============================================== -->
-  <div id="loading-state" class="state-container">
-    <div class="state-card">
-      <div class="brand-badge">
-        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-        <span>MSS Intelligence</span>
+  <!-- Top Executive Strip -->
+  <header class="top-strip">
+    <div class="top-strip-inner">
+      <div class="top-strip-left">
+        <div class="telemetry-pulse-badge">
+          <span class="pulse-dot"></span>
+          <span>LIVE TELEMETRY VERIFIED</span>
+        </div>
+        <span>Brysa MSS · Security Operations &amp; SLA Governance</span>
+        <span style="opacity:0.35">|</span>
+        <span>Reporting Period: <strong id="top-reporting-period">May 2026</strong></span>
       </div>
-      <div class="spinner-circle"></div>
-      <h2 class="state-title">Preparing your security report…</h2>
-      <p class="state-desc">Loading verified security intelligence data</p>
+
+      <div class="top-actions">
+        <!-- Year Selector -->
+        <div class="period-control-group" title="Select Reporting Year">
+          <button type="button" class="year-btn" id="year-prev-btn" title="Previous Year" aria-label="Previous Year">&lt;</button>
+          <span class="year-val" id="year-display">2026</span>
+          <button type="button" class="year-btn" id="year-next-btn" title="Next Year" aria-label="Next Year">&gt;</button>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button type="button" class="action-btn" id="theme-toggle-btn" title="Toggle Light / Dark mode">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <span id="theme-btn-text">Dark Theme</span>
+        </button>
+
+        <!-- Print / PDF -->
+        <button type="button" class="action-btn" id="print-portal-btn" title="Print or save as PDF">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          <span>Print / PDF</span>
+        </button>
+
+        <!-- Download Standalone HTML -->
+        <button type="button" class="action-btn primary" id="download-self-btn" title="Download standalone HTML document">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Download HTML</span>
+        </button>
+      </div>
     </div>
-  </div>
+  </header>
 
-  <!-- ================================================
-       ERROR STATE
-       =============================================== -->
-  <div id="error-state" class="state-container" hidden>
-    <div class="state-card error-card">
-      <div class="error-icon-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-brand-meta">
+          <svg class="shield-icon" viewBox="0 0 24 24">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+          <span>BRYSA · MANAGED SECURITY INTELLIGENCE</span>
+        </div>
+        <h1 class="hero-title">Security Performance Report<br><span id="hero-title-period">May 2026 Executive Audit</span></h1>
+        <p class="hero-subtitle">Comprehensive monthly SLA intelligence, threat hunting metrics, incident response posture, and remediations.</p>
       </div>
-      <h2 id="error-title" class="state-title">Report Unavailable</h2>
-      <p id="error-message" class="state-desc">
-        This secure report link is invalid, expired, or has been revoked.<br>
-        Please contact your MSS administrator for a new report link.
-      </p>
+
+      <div class="hero-score-card">
+        <div class="ring-wrapper">
+          <svg viewBox="0 0 176 176">
+            <circle cx="88" cy="88" r="74" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="12"/>
+            <circle id="hero-ring-circle" cx="88" cy="88" r="74" fill="none" stroke="#f59e0b" stroke-width="12" stroke-linecap="round" stroke-dasharray="195 465"/>
+          </svg>
+          <div class="ring-content">
+            <span class="score-val" id="hero-score-val">42</span>
+            <span class="score-max">Score / 100</span>
+          </div>
+        </div>
+
+        <div class="score-meta-text">
+          <h4>Posture Health</h4>
+          <p id="hero-score-note">Overall workbook security compliance index for May 2026.</p>
+          <span class="score-badge-status" id="hero-status-badge">Needs Attention</span>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <!-- ================================================
-       MAIN CLIENT PORTAL
-       =============================================== -->
-  <div id="portal-app" class="portal-wrapper" hidden>
+  <!-- Top KPI Stats Row (Hero Overlap) -->
+  <section class="stats-container" id="hs"></section>
 
-    <!-- ---- HEADER ---- -->
-    <header class="portal-header">
-      <div class="header-inner">
-        <div class="header-brand-group">
-          <div class="header-logo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-          </div>
-          <div>
-            <div class="header-title">MSS Intelligence</div>
-            <div class="header-subtitle" id="client-name-display">Client: —</div>
-          </div>
-        </div>
+  <!-- Dynamic 12-Month Selector Pills (JAN -> DEC) -->
+  <div class="month-pills-bar" id="month-pills" role="tablist" aria-label="Reporting month selector"></div>
 
-        <div class="header-meta-group">
-          <div class="month-pill" id="report-month-display">—</div>
-          <div class="expiry-box">
-            <span class="expiry-label">Valid until:</span>
-            <span class="expiry-val" id="report-expiry-val">—</span>
-          </div>
-          <span class="readonly-badge">
-            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-            READ-ONLY
-          </span>
-          <button type="button" class="print-btn" id="print-report-btn" aria-label="Print report">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6 9 6 2 18 2 18 9"/>
-              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-              <rect x="6" y="14" width="12" height="8"/>
-            </svg>
-            Print
-          </button>
-        </div>
-      </div>
-    </header>
+  <!-- Sticky Tabs Navigation (Image 1 Style) -->
+  <nav class="sticky-tabs">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Dashboard sections"></div>
+  </nav>
 
-    <!-- ---- MAIN CONTENT ---- -->
-    <main class="portal-main">
+  <!-- Main View Container -->
+  <main id="view" class="main-content-view"></main>
 
-      <!-- ============================================================
-           TIER 1 — EXECUTIVE OVERVIEW
-           ============================================================ -->
-      <section class="tier-section" id="tier1-section" aria-label="Tier 1: Executive Overview">
-        <div class="tier-header">
-          <div class="tier-label-row">
-            <span class="tier-badge">Tier 1</span>
-            <div class="tier-number-line"></div>
-          </div>
-          <h1 class="tier-title">Executive Overview</h1>
-          <p class="tier-subtitle">High-level security posture — how are we doing overall?</p>
-        </div>
+  <!-- Slide-out Telemetry Details Drawer Layer -->
+  <div id="layer"></div>
 
-        <!-- Overall RAG Status Hero Card (Above Pie Chart) -->
-        <div class="section-block" id="overall-rag-hero-block">
-          <div id="overall-rag-hero-container">
-            <!-- Overall RAG hero card injected by JS -->
-          </div>
-        </div>
+  <!-- Executive Footer -->
+  <footer>
+    <div>
+      <strong>Source &amp; Methodology:</strong> Brysa Managed Security KPI engine. Certified Authoritative Performance Audit. Single Source of Truth: Main Operations Database.
+    </div>
+    <div>
+      <strong>SLA Thresholds:</strong> Amber = Within 10% of contractual SLA target. Zero-tolerance items escalate to Red on any breach. Health score is the workbook's aggregate index normalized to 0–100.
+    </div>
+  </footer>
 
-        <!-- RAG Posture: Donut + Summary Cards -->
-        <div class="section-block">
-          <div class="section-block-title-row">
-            <div>
-              <div class="section-block-title">Overall RAG Summary</div>
-              <div class="section-block-desc">51 Total Estate Metrics &mdash; 31 Evaluated Contractual SLAs &bull; 20 Continuous Telemetry Trackers</div>
-            </div>
-            <span class="rag-live-indicator"><span class="rag-orbit-dot"></span>LIVE EVALUATION</span>
-          </div>
-          <div class="t1-posture-row">
-            <!-- Donut chart -->
-            <div class="donut-wrap rag-distribution-card" id="donut-distribution-card">
-              <div class="donut-chart-area" id="donut-chart-container" aria-label="Overall RAG interactive donut chart" role="img">
-                <!-- Interactive SVG injected by JS -->
-              </div>
-              <div class="donut-legend" id="donut-legend-container">
-                <div class="donut-legend-item"><span class="donut-legend-dot dot-green"></span> Within Target</div>
-                <div class="donut-legend-item"><span class="donut-legend-dot dot-amber"></span> Attention</div>
-                <div class="donut-legend-item"><span class="donut-legend-dot dot-red"></span> Critical</div>
-                <div class="donut-legend-item"><span class="donut-legend-dot dot-telemetry"></span> Operational Telemetry</div>
-              </div>
-            </div>
-            <!-- RAG Cards -->
-            <div class="rag-summary-col" id="rag-summary-cards" aria-label="RAG status counts">
-              <!-- Injected by JS -->
-            </div>
-          </div>
-        </div>
+  <!-- Chart.js Engine -->
+  <script src="chart.umd.js"></script>
+  <script>
+    if (!window.Chart) {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>');
+    }
+  </script>
 
-        <!-- Domain-wise RAG chart -->
-        <div class="section-block" id="domain-posture-block">
-          <div class="section-block-header-wrap">
-            <div>
-              <div class="section-block-title">Domain Security Posture</div>
-              <div class="section-block-desc">Security posture across all operational domains &mdash; click any domain to inspect telemetry in Tier 3</div>
-            </div>
-            <div class="domain-controls-bar" id="domain-posture-controls">
-              <!-- Filter pills & sort injected by JS -->
-            </div>
-          </div>
-          <div class="domain-chart-card">
-            <div class="domain-chart-header">
-              <div class="domain-chart-header-left">
-                <div class="domain-chart-title">Security Domain Health Cards</div>
-                <div class="domain-chart-desc">Radial health dials and metric attainment per security operational domain</div>
-              </div>
-              <div class="domain-chart-legend">
-                <div class="domain-chart-legend-item">
-                  <span class="domain-chart-legend-dot" style="background:var(--green)"></span> Within Target
-                </div>
-                <div class="domain-chart-legend-item">
-                  <span class="domain-chart-legend-dot" style="background:var(--amber)"></span> Attention Required
-                </div>
-                <div class="domain-chart-legend-item">
-                  <span class="domain-chart-legend-dot" style="background:var(--red)"></span> Critical Remediation
-                </div>
-              </div>
-            </div>
-            <div class="domain-posture-grid" id="domain-rag-chart-container" role="region" aria-label="Domain Security Posture Breakdown">
-              <!-- Rich interactive domain cards injected by JS -->
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           TIER 2 — CLIENT TARGET ACHIEVEMENT
-           ============================================================ -->
-      <section class="tier-section" id="tier2-section" aria-label="Tier 2: Client Target Achievement">
-        <div class="tier-header">
-          <div class="tier-label-row">
-            <span class="tier-badge">Tier 2</span>
-            <div class="tier-number-line"></div>
-          </div>
-          <h2 class="tier-title">Client Target Achievement</h2>
-          <p class="tier-subtitle">Are we meeting the targets defined in the service agreement?</p>
-        </div>
-
-        <!-- Target KPI summary row -->
-        <div class="section-block">
-          <div class="section-block-title">Target KPI Summary</div>
-          <div class="target-summary-row" id="target-summary-row" aria-label="Target achievement summary">
-            <!-- Injected by JS -->
-          </div>
-        </div>
-
-        <!-- Target KPI detail cards -->
-        <div class="section-block" id="target-kpi-details-block">
-          <div class="section-block-header-wrap">
-            <div>
-              <div class="section-block-title">Target KPI Details</div>
-              <div class="section-block-desc">In-depth scorecard for every target-defined metric with live achievement gauges, attainment meters &amp; SLA variance</div>
-            </div>
-            <div class="target-controls-bar" id="target-controls-bar">
-              <!-- Filter pills and search injected by JS -->
-            </div>
-          </div>
-          <div class="target-kpi-grid" id="target-kpi-cards" aria-label="Target KPI detail cards">
-            <!-- Injected by JS -->
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================
-           TIER 3 — TELEMETRY CATALOG
-           ============================================================ -->
-      <section class="tier-section" id="tier3-section" aria-label="Tier 3: Telemetry Catalog">
-        <div class="tier-header">
-          <div class="tier-label-row">
-            <span class="tier-badge">Tier 3</span>
-            <div class="tier-number-line"></div>
-          </div>
-          <h2 class="tier-title">Telemetry Catalog</h2>
-          <p class="tier-subtitle">Operational telemetry organized by security domain.</p>
-        </div>
-
-        <!-- Telemetry Toolbar: Domain & Metric totals -->
-        <div class="telemetry-toolbar" id="telemetry-toolbar">
-          <div class="telemetry-toolbar-info">
-            <span class="telemetry-toolbar-count" id="telemetry-domain-total">&mdash; Security Domains</span>
-            <span class="telemetry-toolbar-sep">&bull;</span>
-            <span class="telemetry-toolbar-metrics" id="telemetry-metric-total">&mdash; Evaluated Metrics</span>
-          </div>
-        </div>
-
-        <div id="telemetry-catalog-container">
-          <!-- Collapsible domain blocks injected by JS -->
-        </div>
-
-        <!-- Executive Narrative Cards (Below Telemetry Catalog) -->
-        <div class="section-block" id="exec-narratives-block" style="margin-top: var(--gap-2xl);">
-          <div class="section-block-header-wrap">
-            <div>
-              <div class="section-block-title">Executive Insights &amp; Operational Next Steps</div>
-              <div class="section-block-desc">Key observations, risk disclosures, and forward-looking remediation roadmap</div>
-            </div>
-          </div>
-          <div class="exec-summary-grid exec-narratives-grid" id="exec-narratives-container" aria-label="Executive insights and operational next steps">
-            <!-- Top Risks, Key Improvements, Planned Actions injected by JS -->
-          </div>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- ---- FOOTER ---- -->
-    <footer class="portal-footer">
-      <div class="footer-inner">
-        <div class="footer-left">
-          <strong>MSS Intelligence Portal</strong>
-          <span>Confidential Client Deliverable &bull; Authorized for: <span id="footer-client-name">—</span></span>
-        </div>
-        <div class="footer-right">
-          <span>Reporting Period: <span id="footer-month">—</span></span>
-          <span class="footer-dot">•</span>
-          <span>Verified Read-Only View</span>
-        </div>
-      </div>
-    </footer>
-
-  </div><!-- /portal-app -->
-
-  <script src="/client.js?v=7.2"></script>
+  <!-- Main Dashboard Data Integration & UI Engine -->
+  <script src="client.js?v=33.0"></script>
 </body>
 </html>

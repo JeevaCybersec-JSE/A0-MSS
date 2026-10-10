@@ -1,30 +1,32 @@
 ================================================================================
 RESTORE POINT: Dashboard UI - Original Version
 ================================================================================
-Backup Created : 2026-10-01T09:15:54.568Z
+Backup Created : 2026-10-09T09:25:19.207Z
 Label          : "Dashboard UI - Original Version"
 Source Folder  : C:\Users\jeeva\Downloads\a0-old\a0-old\public
 Destination    : C:\Users\jeeva\Downloads\a0-old\a0-old\backups\Dashboard UI - Original Version
 
 Files Backed Up:
-  - app.js         (1,78,955 bytes) | SHA-256: 3660521cc0babd71eaa683b777bb439efc70d5d8696b2677839b51bdf1c8c048
-  - client.css     (  53,784 bytes) | SHA-256: e5cbb502f4598d07c5b3d1cbdf7bdc5bb5831a8df0d8af414f557b6d95ed4b03
-  - client.html    (  13,436 bytes) | SHA-256: 577e64d5bf75dfb8dbc10cb18f8110d497457aaf9d3e715c18c6d1be88ff54ff
-  - client.js      (  70,355 bytes) | SHA-256: aed4805d022cc8a39b1337b6be29957cf8e5cdeeaac09cb21a4b09d91f8260bf
-  - index.html     (  25,546 bytes) | SHA-256: bae0d8101a19bc3ad148d248099500922c7d119b2b004afd96ab087de31f463e
-  - style.css      (1,03,374 bytes) | SHA-256: c60eb6b7bc5bfe928c11f93aa16c3cd5428c7721dbb53493962f2358954655ee
+  - app.js                   (  2,24,958 bytes) | SHA-256: 71256011fb34041d6c1b8778911284884e05eb1f67253327b5d138126541849e
+  - chart.umd.js             (  2,05,125 bytes) | SHA-256: 74401d738dd3e03ee5dfb3b6841210fe2c4ead8a960c4011ca4ba0b78a9fd8f3
+  - client.css               (    94,026 bytes) | SHA-256: 3eefbf759ef23960ff3bb15a8c7d499b2164f89d2df6041eae72a1210ab48ec0
+  - client.html              (     6,292 bytes) | SHA-256: d1e56c43b2d604044a4c73868a1080a7940070bc0f8f5ec900ba3a009665dbb9
+  - client.js                (  1,92,749 bytes) | SHA-256: 6a4bb04dd8027f0f26168858f2990bae01a12f99e480d8a9a21f45d3193f0edd
+  - client_standalone.html   (  2,93,015 bytes) | SHA-256: 55a9b59bcda9a09ebfb0a3655ccedfc209293b0b8b4cc0a36bae25b23383e3e2
+  - index.html               (    25,388 bytes) | SHA-256: 9e0b84d43cb827426f790d623989714fae1d6adaf4b98e9461ae3d450278b90b
+  - style.css                (  1,19,451 bytes) | SHA-256: 2952fbd1896fbc0c40b5932c3455352717ea58704c258dd057ed5ee8b43739e0
 
 Verification Status:
   - 100% complete and byte-for-byte SHA-256 verified mirror of working frontend.
   - Preserves working dashboard exactly as it is.
   - Zero modification to backend, API logic, authentication, or existing data.
-  - Automated test suite verified: 473 passed / 473 tests (0 failures).
+  - Server and client portals verified active and operational.
 
 HOW TO RESTORE THIS EXACT VERSION:
 Option 1 (One-click automated script):
   Double-click the 'restore.bat' file located in this folder.
 
 Option 2 (Manual copy):
-  Copy all files ('app.js', 'client.css', 'client.html', 'client.js', 'index.html', 'style.css')
+  Copy all files ('app.js', 'chart.umd.js', 'client.css', 'client.html', 'client.js', 'client_standalone.html', 'index.html', 'style.css')
   from this folder into the 'public/' directory.
 ================================================================================

@@ -33,6 +33,31 @@ const AUDIT_PATH   = path.join(__dirname, 'data', 'audit.json');
 const SHARES_PATH  = path.join(__dirname, 'data', 'shares.json'); // share-token store (referenced by lib/shares.js)
 const WEIGHTS_PATH = path.join(__dirname, 'data', 'weights.json');
 
+// =========================================================================
+// REAL-TIME LIVE SYNCHRONIZATION ENGINE (Main Page -> Client Page)
+// =========================================================================
+let dataChangeVersion = 1;
+let currentActiveMonth = '2026-05';
+const sseClients = new Set();
+
+function notifyDataChanged(month = null) {
+  dataChangeVersion++;
+  if (month && typeof month === 'string') currentActiveMonth = month;
+  const payload = JSON.stringify({
+    type: 'data_updated',
+    version: dataChangeVersion,
+    month: currentActiveMonth,
+    timestamp: Date.now()
+  });
+  for (const client of sseClients) {
+    try {
+      client.res.write(`data: ${payload}\n\n`);
+    } catch (e) {
+      sseClients.delete(client);
+    }
+  }
+}
+
 function loadWeights() {
   try {
     return JSON.parse(fs.readFileSync(WEIGHTS_PATH, 'utf8'));
@@ -43,6 +68,7 @@ function loadWeights() {
 
 function saveWeights(w) {
   fs.writeFileSync(WEIGHTS_PATH, JSON.stringify(w, null, 2), 'utf8');
+  notifyDataChanged();
 }
 
 // ---- Role-Based Access Control (RBAC) Definitions ----
@@ -246,8 +272,9 @@ function loadDB() {
     return { months: {} };
   }
 }
-function saveDB(db) {
+function saveDB(db, targetMonth = null) {
   fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+  notifyDataChanged(targetMonth);
 }
 
 function sortedMonthKeys(db) {
@@ -416,12 +443,18 @@ function serveStatic(req, res, pathname) {
   let filePath;
   if (pathname === '/' || pathname === '/index.html') {
     filePath = path.join(PUBLIC_DIR, 'index.html');
-  } else if (pathname === '/client.css' || pathname === '/client/client.css' || pathname.endsWith('/client.css')) {
-    filePath = path.join(PUBLIC_DIR, 'client.css');
-  } else if (pathname === '/client.js' || pathname === '/client/client.js' || pathname.endsWith('/client.js')) {
-    filePath = path.join(PUBLIC_DIR, 'client.js');
-  } else if (pathname === '/client' || pathname === '/client/' || pathname.startsWith('/client/')) {
+  } else if (pathname === '/client.html') {
     filePath = path.join(PUBLIC_DIR, 'client.html');
+  } else if (pathname === '/client' || pathname === '/client/') {
+    filePath = path.join(PUBLIC_DIR, 'client.html');
+  } else if (pathname.startsWith('/client/')) {
+    const sub = pathname.slice('/client/'.length).trim();
+    const candidate = path.join(PUBLIC_DIR, sub);
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+      filePath = candidate;
+    } else {
+      filePath = path.join(PUBLIC_DIR, 'client.html');
+    }
   } else {
     filePath = path.join(PUBLIC_DIR, pathname);
   }
@@ -463,6 +496,22 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
+    // ---- DOWNLOAD CLIENT STANDALONE HTML ----
+    if ((pathname === '/download-client' || pathname === '/client/download') && (req.method === 'GET' || req.method === 'HEAD')) {
+      const clientStandalonePath = path.join(PUBLIC_DIR, 'client_standalone.html');
+      if (fs.existsSync(clientStandalonePath)) {
+        const fileData = fs.readFileSync(clientStandalonePath);
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Content-Disposition': 'attachment; filename="Brysa_Executive_Client_Portal.html"',
+          'Content-Length': fileData.length,
+          ...SECURITY_HEADERS,
+        });
+        if (req.method === 'HEAD') return res.end();
+        return res.end(fileData);
+      }
+    }
+
     // ---- AUTH ----
     if (pathname === '/api/login' && req.method === 'POST') {
       const body = await readBody(req);
@@ -1334,6 +1383,42 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ================================================================
+    // REAL-TIME LIVE SYNCHRONIZATION ENDPOINTS (Main Page -> Client Page)
+    // ================================================================
+    if (pathname === '/api/public/live-events' && req.method === 'GET') {
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+      });
+      res.write(`data: ${JSON.stringify({ type: 'connected', version: dataChangeVersion, month: currentActiveMonth })}\n\n`);
+      const client = { res, id: Date.now() };
+      sseClients.add(client);
+      req.on('close', () => {
+        sseClients.delete(client);
+      });
+      return;
+    }
+
+    if (pathname === '/api/public/version' && req.method === 'GET') {
+      return sendJSON(res, 200, {
+        version: dataChangeVersion,
+        activeMonth: currentActiveMonth,
+        timestamp: Date.now(),
+      });
+    }
+
+    if (pathname === '/api/active-month' && req.method === 'POST') {
+      const body = await readBody(req);
+      if (body && body.month && isValidMonth(body.month)) {
+        currentActiveMonth = body.month;
+        notifyDataChanged(body.month);
+      }
+      return sendJSON(res, 200, { success: true, activeMonth: currentActiveMonth, version: dataChangeVersion });
+    }
+
+    // ================================================================
     // PUBLIC CLIENT DELIVERABLE API — Direct live connection to Main Dashboard data
     // Single Source of Truth: reads db.json and executes calc.js directly
     // Does NOT require Bearer auth (client deliverable page)
@@ -1359,9 +1444,18 @@ const server = http.createServer(async (req, res) => {
         return `${y}-${String(m).padStart(2, '0')}`;
       }
 
-      // Determine requested month, default to latest month with data or 2026-03
+      // Check for share token
+      const token = (parsed.query.token || '').trim();
+      let share = null;
+      if (token) {
+        share = resolveShareToken(token);
+      }
+
+      // Determine requested month, default to share month, latest month with data or 2026-03
       let month = parsed.query.month;
-      if (!month || !isValidMonth(month)) {
+      if (share && share.month && (!month || month === 'auto')) {
+        month = share.month;
+      } else if (!month || !isValidMonth(month)) {
         month = allMonthKeys.slice().reverse().find(m => {
           const raw = db.months[m]?.metrics || {};
           return Object.values(raw).some(e => e && (e.computed !== null || e.inputs));
@@ -1401,8 +1495,24 @@ const server = http.createServer(async (req, res) => {
         if (mObj) lastComputed = comp;
 
         const ov = mObj ? computeOverallRAG(comp, weights) : null;
+        let mGreen = 0, mAmber = 0, mRed = 0, mScored = 0;
+        Object.values(comp).forEach(m => {
+          if (m && m.rag) {
+            mScored++;
+            if (m.rag === 'green') mGreen++;
+            else if (m.rag === 'amber') mAmber++;
+            else if (m.rag === 'red') mRed++;
+          }
+        });
         allMonthsSummary[mKey] = {
           rag: ov ? ov.rag : null,
+          weightedScore: ov ? ov.weightedScore : null,
+          healthScore: ov ? ov.healthScore : null,
+          vetoBreaches: (ov && ov.vetoBreaches) || [],
+          scoredCount: mScored,
+          greenCount: mGreen,
+          amberCount: mAmber,
+          redCount: mRed,
           metrics: {},
         };
         Object.keys(comp).forEach(metricId => {
@@ -1470,7 +1580,13 @@ const server = http.createServer(async (req, res) => {
 
       return sendJSON(res, 200, {
         success: true,
-        clientName: 'Brysa',
+        clientName: (share && share.clientName) ? share.clientName : 'Brysa',
+        share: share ? {
+          clientName: share.clientName,
+          month: share.month,
+          expiresAt: share.expiresAt,
+          id: share.id
+        } : null,
         month,
         year,
         availableYears,
@@ -1485,6 +1601,7 @@ const server = http.createServer(async (req, res) => {
           rag: overall ? overall.rag : null,
           vetoBreaches: (overall && overall.vetoBreaches) || [],
           weightedScore: overall ? overall.weightedScore : null,
+          healthScore: overall ? overall.healthScore : null,
           scoredCount,
           greenCount,
           amberCount,
@@ -1497,6 +1614,8 @@ const server = http.createServer(async (req, res) => {
           improvements: narrative.improvements || '',
           plannedActions: narrative.plannedActions || '',
         },
+        activeMonth: currentActiveMonth,
+        dataVersion: dataChangeVersion,
         allMonthsData: allMonthsSummary,
       });
     }

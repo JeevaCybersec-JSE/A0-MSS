@@ -1,69 +1,137 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Brysa KPI Dashboard</title>
+  <base href="/">
+  <title>Brysa Security · Executive Performance Report</title>
+  
+  <!-- Premium Modern Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="client.css?v=24.0">
-  <script src="chart.umd.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/client.css?v=35.0">
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <div class="brand">
-      <div>
-        <h1>Brysa KPI Dashboard</h1>
-        <p>Managed security service · monthly report, 2026</p>
-      </div>
-    </div>
-    <div class="control-group month-control-group">
-      <div class="month-label-row">
-        <span class="seg-label" id="mlabel">Reporting month</span>
-        <div class="year-control-box" title="Type or scroll any year">
-          <button type="button" class="year-nav-arrow prev" id="year-scroll-prev" aria-label="Previous year" title="Previous year">
-            <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10 13L5 8l5-5"/>
-            </svg>
-          </button>
-          <div class="year-input-wrap">
-            <span class="year-prefix">YEAR</span>
-            <input type="text" inputmode="numeric" id="year-input" class="year-input" value="2026" maxlength="4" placeholder="YYYY" aria-label="Reporting Year" autocomplete="off">
-          </div>
-          <button type="button" class="year-nav-arrow next" id="year-scroll-next" aria-label="Next year" title="Next year">
-            <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 3l5 5-5 5"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="month-carousel" role="region" aria-label="Reporting month selector">
-        <button type="button" class="month-nav-arrow prev" id="month-scroll-prev" aria-label="Scroll earlier months" title="Scroll left">
-          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10 13L5 8l5-5"/>
-          </svg>
-        </button>
-        <div class="seg month-scroll-track" id="months" role="group" aria-labelledby="mlabel"></div>
-        <button type="button" class="month-nav-arrow next" id="month-scroll-next" aria-label="Scroll later months" title="Scroll right">
-          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 3l5 5-5 5"/>
-          </svg>
-        </button>
-      </div>
-      <p class="sub" style="margin:6px 0 0;text-align:right">Data last updated <strong style="color:#ffffff;font-weight:600">30 Sep 2026</strong></p>
-    </div>
-  </div>
-  <div class="tabs" id="tabs" role="tablist" aria-label="Dashboard sections"></div>
-  <main id="view"></main>
-  <div class="foot">
-    <span>Figures from the KPI workbook, Feb to May 2026.</span>
-    <span>Amber means within 10% of target. Any zero-tolerance breach turns the month Red.</span>
-  </div>
-</div>
-<div id="layer"></div>
 
-<script src="client.js?v=26.0"></script>
+  <!-- Top Executive Strip -->
+  <header class="top-strip">
+    <div class="top-strip-inner">
+      <div class="top-strip-left">
+        <div class="telemetry-pulse-badge">
+          <span class="pulse-dot"></span>
+          <span>LIVE TELEMETRY VERIFIED</span>
+        </div>
+        <span>Brysa MSS · Security Operations &amp; SLA Governance</span>
+        <span style="opacity:0.35">|</span>
+        <span>Reporting Period: <strong id="top-reporting-period">May 2026</strong></span>
+      </div>
+
+      <div class="top-actions">
+        <!-- Year Selector -->
+        <div class="period-control-group" title="Select Reporting Year">
+          <button type="button" class="year-btn" id="year-prev-btn" title="Previous Year" aria-label="Previous Year">&lt;</button>
+          <span class="year-val" id="year-display">2026</span>
+          <button type="button" class="year-btn" id="year-next-btn" title="Next Year" aria-label="Next Year">&gt;</button>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button type="button" class="action-btn" id="theme-toggle-btn" title="Toggle Light / Dark mode">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <span id="theme-btn-text">Dark Theme</span>
+        </button>
+
+        <!-- Print / PDF -->
+        <button type="button" class="action-btn" id="print-portal-btn" title="Print or save as PDF">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          <span>Print / PDF</span>
+        </button>
+
+        <!-- Download Standalone HTML -->
+        <button type="button" class="action-btn primary" id="download-self-btn" title="Download standalone HTML document">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Download HTML</span>
+        </button>
+
+        <!-- Main Operations Dashboard Link -->
+        <a href="/" class="action-btn" title="Open Main Operations Console" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <span>Main Console</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-brand-block">
+        <div class="hero-brand-meta">
+          <svg class="shield-icon" viewBox="0 0 24 24">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+          <span>BRYSA · MANAGED SECURITY INTELLIGENCE</span>
+        </div>
+        <h1 class="hero-title">Security Performance Report<br><span id="hero-title-period">May 2026 Executive Audit</span></h1>
+        <p class="hero-subtitle">Comprehensive monthly SLA intelligence, threat hunting metrics, incident response posture, and remediations.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Top KPI Stats Row (Hero Overlap) -->
+  <section class="stats-container" id="hs"></section>
+
+  <!-- Dynamic 12-Month Selector Pills (JAN -> DEC) -->
+  <div class="month-pills-bar" id="month-pills" role="tablist" aria-label="Reporting month selector"></div>
+
+  <!-- Sticky Tabs Navigation (Image 1 Style) -->
+  <nav class="sticky-tabs">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Dashboard sections"></div>
+  </nav>
+
+  <!-- Main View Container -->
+  <main id="view" class="main-content-view"></main>
+
+  <!-- Slide-out Telemetry Details Drawer Layer -->
+  <div id="layer"></div>
+
+  <!-- Executive Footer -->
+  <footer>
+    <div>
+      <strong>Source &amp; Methodology:</strong> Brysa Managed Security KPI engine. Certified Authoritative Performance Audit. Single Source of Truth: Main Operations Database.
+    </div>
+    <div>
+      <strong>SLA Thresholds:</strong> Amber = Within 10% of contractual SLA target. Zero-tolerance items escalate to Red on any breach.
+    </div>
+  </footer>
+
+  <!-- Chart.js Engine -->
+  <script src="/chart.umd.js"></script>
+  <script>
+    if (!window.Chart) {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>');
+    }
+  </script>
+
+  <!-- Main Dashboard Data Integration & UI Engine -->
+  <script src="/client.js?v=35.0"></script>
 </body>
 </html>

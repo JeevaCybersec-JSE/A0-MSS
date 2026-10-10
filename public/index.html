@@ -381,6 +381,14 @@
             <span>Share</span>
           </button>
 
+          <!-- Direct Client Portal View Link -->
+          <a href="/client.html" target="_blank" class="btn btn-secondary btn-share-topbar" id="view-client-topbar-btn" title="Open Executive Client Report in new tab" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M11 3h6v6M10 10l7-7M16 11v6a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1h6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Client View</span>
+          </a>
+
           <button id="export-csv-btn" class="btn btn-export-topbar" title="Export current month metrics to CSV">
             <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M4 16v1a1 1 0 001 1h10a1 1 0 001-1v-1M10 3v10M6 9l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -491,6 +499,12 @@
               </svg>
               <span id="share-copy-btn-text">Copy Link</span>
             </button>
+            <a id="share-open-link-btn" href="#" target="_blank" class="btn btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px" title="Test/open generated link in new tab">
+              <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M11 3h6v6M10 10l7-7M16 11v6a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1h6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>Open Link ↗</span>
+            </a>
           </div>
 
           <div class="share-security-notice">

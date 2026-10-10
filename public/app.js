@@ -108,6 +108,27 @@ function formatIST(isoString) {
 }
 // ────────────────────────────────────────────────────────────────────────────
 
+// ---- Live Client Page Sync Broadcaster ----
+const mainSyncChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('brysa_mss_channel') : null;
+
+function broadcastMainUpdate(targetMonth) {
+  const m = targetMonth || state.month;
+  try {
+    localStorage.setItem('brysa_active_month', m);
+    localStorage.setItem('brysa_data_version', String(Date.now()));
+  } catch (e) {}
+  if (mainSyncChannel) {
+    try {
+      mainSyncChannel.postMessage({ type: 'main_page_updated', month: m, timestamp: Date.now() });
+    } catch (e) {}
+  }
+  fetch('/api/active-month', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ month: m })
+  }).catch(() => {});
+}
+
 async function api(path, opts = {}) {
   const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
   if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
@@ -120,6 +141,9 @@ async function api(path, opts = {}) {
   if (res.status === 401) { doLogout(true); throw new Error('Not authenticated'); }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'Request failed');
+  if (opts.method && opts.method.toUpperCase() === 'POST' && (path.includes('/api/data') || path.includes('/api/weights') || path.includes('/api/narrative'))) {
+    broadcastMainUpdate(state.month);
+  }
   return data;
 }
 
@@ -447,6 +471,7 @@ async function onMonthChange(e) {
   await loadMonthData();
   await loadMonthsHistory();
   renderView();
+  broadcastMainUpdate(state.month);
 }
 
 async function shiftMonth(delta) {
@@ -461,6 +486,7 @@ async function shiftMonth(delta) {
   await loadMonthData();
   await loadMonthsHistory();
   renderView();
+  broadcastMainUpdate(state.month);
 }
 
 function updateTopbarRAG() {
@@ -5099,6 +5125,8 @@ async function onGenerateShareLink() {
     successSection.hidden = false;
     if (urlInput) urlInput.value = res.url;
     if (copyBtnText) copyBtnText.textContent = 'Copy Link';
+    const openLinkBtn = document.getElementById('share-open-link-btn');
+    if (openLinkBtn) openLinkBtn.href = res.url;
 
     showToast('Secure share link created', 'green');
   } catch (err) {

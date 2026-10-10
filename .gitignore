@@ -20,3 +20,14 @@ scratch/
 
 # Node modules
 node_modules/
+
+# Temporary backups
+backups/pre*
+backups/audit_backup_*
+backups/*Archived Baseline*
+backups/Dashboard UI - Original Version/client_standalone.html
+backups/Dashboard UI - Original Version/chart.umd.js
+
+# Chrome profiles
+chrome-*/
+chrome_*
