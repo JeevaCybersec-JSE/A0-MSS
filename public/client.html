@@ -18,16 +18,6 @@
   <!-- Top Executive Strip -->
   <header class="top-strip">
     <div class="top-strip-inner">
-      <div class="top-strip-left">
-        <div class="telemetry-pulse-badge">
-          <span class="pulse-dot"></span>
-          <span>LIVE TELEMETRY VERIFIED</span>
-        </div>
-        <span>Brysa MSS · Security Operations &amp; SLA Governance</span>
-        <span style="opacity:0.35">|</span>
-        <span>Reporting Period: <strong id="top-reporting-period">May 2026</strong></span>
-      </div>
-
       <div class="top-actions">
         <!-- Year Selector -->
         <div class="period-control-group" title="Select Reporting Year">
@@ -54,27 +44,6 @@
           </svg>
           <span>Print / PDF</span>
         </button>
-
-        <!-- Download Standalone HTML -->
-        <button type="button" class="action-btn primary" id="download-self-btn" title="Download standalone HTML document">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          <span>Download HTML</span>
-        </button>
-
-        <!-- Main Operations Dashboard Link -->
-        <a href="/" class="action-btn" title="Open Main Operations Console" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7"/>
-            <rect x="14" y="3" width="7" height="7"/>
-            <rect x="14" y="14" width="7" height="7"/>
-            <rect x="3" y="14" width="7" height="7"/>
-          </svg>
-          <span>Main Console</span>
-        </a>
       </div>
     </div>
   </header>
@@ -83,13 +52,6 @@
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-brand-block">
-        <div class="hero-brand-meta">
-          <svg class="shield-icon" viewBox="0 0 24 24">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            <path d="M9 12l2 2 4-4"/>
-          </svg>
-          <span>BRYSA · MANAGED SECURITY INTELLIGENCE</span>
-        </div>
         <h1 class="hero-title">Security Performance Report<br><span id="hero-title-period">May 2026 Executive Audit</span></h1>
         <p class="hero-subtitle">Comprehensive monthly SLA intelligence, threat hunting metrics, incident response posture, and remediations.</p>
       </div>
@@ -112,16 +74,6 @@
 
   <!-- Slide-out Telemetry Details Drawer Layer -->
   <div id="layer"></div>
-
-  <!-- Executive Footer -->
-  <footer>
-    <div>
-      <strong>Source &amp; Methodology:</strong> Brysa Managed Security KPI engine. Certified Authoritative Performance Audit. Single Source of Truth: Main Operations Database.
-    </div>
-    <div>
-      <strong>SLA Thresholds:</strong> Amber = Within 10% of contractual SLA target. Zero-tolerance items escalate to Red on any breach.
-    </div>
-  </footer>
 
   <!-- Chart.js Engine -->
   <script src="/chart.umd.js"></script>
