@@ -5662,7 +5662,7 @@ button.sla-radial-card:hover {
   gap: 24px;
 }
 
-.sc-th-tele { width: 320px; text-align: center; }
+.sc-th-tele { text-align: center; }
 .sc-th-score { width: 76px; text-align: center; }
 .sc-th-action { width: 20px; text-align: center; }
 
@@ -5712,8 +5712,7 @@ button.sla-radial-card:hover {
   width: 36px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 4px;
+  justify-content: center;
   flex-shrink: 0;
 }
 
@@ -5722,10 +5721,7 @@ button.sla-radial-card:hover {
   font-weight: 700;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
-}
-
-.sc-trophy {
-  font-size: 14px;
+  text-align: center;
 }
 
 .sc-metric-col {
@@ -5787,8 +5783,7 @@ button.sla-radial-card:hover {
 .sc-tele-wrap {
   display: flex;
   align-items: center;
-  gap: 32px;
-  width: 320px;
+  gap: clamp(16px, 2.5vw, 32px);
   justify-content: flex-end;
 }
 

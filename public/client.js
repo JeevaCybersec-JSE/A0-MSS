@@ -3491,14 +3491,21 @@
       return (a.rag[m] ?? 0) - (b.rag[m] ?? 0);
     });
 
+    // Dynamic telemetry months: all months available in data (CHART_MONTHS)
+    const telemetryMonths = (Array.isArray(CHART_MONTHS) && CHART_MONTHS.length > 0)
+      ? CHART_MONTHS
+      : [2, 3, 4, 5];
+    const firstMon = telemetryMonths.length > 0 ? (MON[telemetryMonths[0]] || '') : '';
+    const lastMon = telemetryMonths.length > 0 ? (MON[telemetryMonths[telemetryMonths.length - 1]] || '') : '';
+    const teleHeaderLabel = 'MONTHLY TELEMETRY' + (firstMon && lastMon ? ' (' + firstMon.toUpperCase() + (firstMon !== lastMon ? ' – ' + lastMon.toUpperCase() : '') + ')' : '');
+    const teleColWidth = Math.max(280, telemetryMonths.length * 70);
+
     const rowsHtml = sortedScored.map((r, idx) => {
       const rank = idx + 1;
-      const isTop1 = (rank === 1);
       const currentVal = fmt(r, r.v[m]);
       const statusCls = cls(r.rag[m]);
 
-      // Telemetry mini-metrics (4 recent reporting periods with relaxed, free spacing)
-      const telemetryMonths = [2, 3, 4, 5];
+      // Telemetry mini-metrics across all active reporting periods
       const telemetryHtml = telemetryMonths.map(i => {
         const val = typeof r.v[i] === 'number' ? fmt(r, r.v[i]) : '–';
         const isCur = (i === m);
@@ -3512,7 +3519,6 @@
       return '<div class="sc-card-row" data-open="' + r.r + '" data-status="' + r.rag[m] + '" role="button" tabindex="0" title="Click to view full 12-month telemetry audit for ' + r.name + '">' +
         '<div class="sc-row-left">' +
           '<div class="sc-rank-col">' +
-            (isTop1 ? '<span class="sc-trophy">🏆</span>' : '') +
             '<span class="sc-rank-num">' + rank + '</span>' +
           '</div>' +
           '<div class="sc-metric-col">' +
@@ -3528,7 +3534,7 @@
         '</div>' +
 
         '<div class="sc-row-right">' +
-          '<div class="sc-tele-wrap">' + telemetryHtml + '</div>' +
+          '<div class="sc-tele-wrap" style="width:' + teleColWidth + 'px">' + telemetryHtml + '</div>' +
           '<div class="sc-score-col">' +
             '<div class="sc-score-pill ' + statusCls + '" title="Current Actual Value">' + currentVal + '</div>' +
           '</div>' +
@@ -3584,7 +3590,7 @@
           '<span class="sc-th-metric">METRIC &amp; TARGET</span>' +
         '</div>' +
         '<div class="sc-th-right">' +
-          '<span class="sc-th-tele">MONTHLY TELEMETRY (' + MON[2] + ' – ' + MON[5] + ')</span>' +
+          '<span class="sc-th-tele" style="width:' + teleColWidth + 'px">' + teleHeaderLabel + '</span>' +
           '<span class="sc-th-score">SCORE</span>' +
           '<span class="sc-th-action"></span>' +
         '</div>' +
