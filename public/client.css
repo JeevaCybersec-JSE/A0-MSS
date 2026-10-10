@@ -5738,8 +5738,10 @@ button.sla-radial-card:hover {
   box-shadow: var(--shadow-sm);
 }
 
-/* Chrome UI Metallic Silver Pill Button with Purple Glow Shadow */
-.sc-download-btn {
+/* Chrome UI Metallic Silver Pill Buttons with Purple Glow Shadow (Download & Print) */
+.sc-download-btn,
+.chrome-pill-btn,
+#print-portal-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5766,7 +5768,22 @@ button.sla-radial-card:hover {
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.sc-download-btn:hover {
+/* Compact header styling for Print / PDF button */
+#print-portal-btn {
+  height: 34px;
+  min-width: 100px;
+  padding: 6px 18px;
+  font-size: 12.5px;
+  box-shadow:
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 2px rgba(70, 75, 90, 0.25),
+    0 6px 18px -2px rgba(139, 92, 246, 0.48),
+    0 3px 8px rgba(124, 58, 237, 0.3);
+}
+
+.sc-download-btn:hover,
+.chrome-pill-btn:hover,
+#print-portal-btn:hover {
   background: linear-gradient(180deg, #ffffff 0%, #e6e9f0 35%, #c8cdd9 75%, #b5bbc8 100%);
   color: #1a1d24;
   transform: translateY(-1.5px);
@@ -5778,7 +5795,9 @@ button.sla-radial-card:hover {
     0 6px 16px rgba(124, 58, 237, 0.45);
 }
 
-.sc-download-btn:active {
+.sc-download-btn:active,
+.chrome-pill-btn:active,
+#print-portal-btn:active {
   transform: translateY(1px) scale(0.985);
   box-shadow:
     inset 0 1px 1px rgba(255, 255, 255, 0.75),
@@ -5786,7 +5805,9 @@ button.sla-radial-card:hover {
     0 6px 16px -2px rgba(139, 92, 246, 0.42);
 }
 
-[data-theme="dark"] .sc-download-btn {
+[data-theme="dark"] .sc-download-btn,
+[data-theme="dark"] .chrome-pill-btn,
+[data-theme="dark"] #print-portal-btn {
   background: linear-gradient(180deg, #e2e5ed 0%, #c4c9d5 35%, #9fa6b6 75%, #8890a2 100%);
   color: #151821;
   border-color: rgba(140, 150, 175, 0.5);
@@ -5797,7 +5818,9 @@ button.sla-radial-card:hover {
     0 4px 14px rgba(139, 92, 246, 0.4);
 }
 
-[data-theme="dark"] .sc-download-btn:hover {
+[data-theme="dark"] .sc-download-btn:hover,
+[data-theme="dark"] .chrome-pill-btn:hover,
+[data-theme="dark"] #print-portal-btn:hover {
   background: linear-gradient(180deg, #eff1f7 0%, #d1d6e3 35%, #adb4c4 75%, #949cb0 100%);
   box-shadow:
     inset 0 1.5px 1.5px rgba(255, 255, 255, 0.95),
