@@ -333,60 +333,59 @@ body {
   position: relative;
   display: inline-flex;
   align-items: center;
-  width: 94px;
-  height: 32px;
+  width: 98px;
+  height: 34px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(22, 24, 28, 0.92);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow:
-    inset 0 1px 2px rgba(255, 255, 255, 0.4),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.14),
-    0 4px 14px rgba(0, 0, 0, 0.15);
+    inset 0 1px 2px rgba(255, 255, 255, 0.12),
+    inset 0 -1.5px 2px rgba(0, 0, 0, 0.5),
+    0 4px 14px rgba(0, 0, 0, 0.35);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: visible;
 }
 
 .theme-glass-toggle:hover .tgt-track {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.28);
   box-shadow:
-    inset 0 1px 2px rgba(255, 255, 255, 0.5),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.14),
-    0 6px 18px rgba(0, 0, 0, 0.2);
+    inset 0 1px 2px rgba(255, 255, 255, 0.18),
+    inset 0 -1.5px 2px rgba(0, 0, 0, 0.5),
+    0 6px 18px rgba(0, 0, 0, 0.45);
 }
 
-/* Glass Spherical Knob */
+/* Glass Spherical Knob (Default Light mode: Obsidian glass sphere on left with Moon) */
 .tgt-knob {
   position: absolute;
   top: 50%;
-  left: -4px;
+  left: -5px;
   transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 32%, rgba(255, 255, 255, 0.98) 0%, rgba(240, 245, 255, 0.74) 42%, rgba(195, 205, 222, 0.5) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: radial-gradient(circle at 35% 30%, rgba(68, 76, 90, 0.95) 0%, rgba(30, 34, 42, 0.98) 55%, rgba(14, 16, 20, 1) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow:
-    inset 0 2.5px 2px rgba(255, 255, 255, 0.95),
-    inset 0 -2.5px 3px rgba(35, 45, 65, 0.3),
-    inset 2px 0 3px rgba(255, 255, 255, 0.6),
-    0 6px 18px rgba(0, 0, 0, 0.28),
-    0 2px 6px rgba(0, 0, 0, 0.16);
+    inset 0 3px 2.5px rgba(255, 255, 255, 0.6),
+    inset 0 -2.5px 3px rgba(0, 0, 0, 0.75),
+    inset 2.5px 0 3px rgba(255, 255, 255, 0.35),
+    0 8px 22px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: left 0.35s cubic-bezier(0.34, 1.45, 0.64, 1), transform 0.2s ease, background 0.35s ease, box-shadow 0.35s ease;
+  transition: left 0.35s cubic-bezier(0.34, 1.45, 0.64, 1), transform 0.2s ease, background 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
   z-index: 2;
 }
 
 .theme-glass-toggle:hover .tgt-knob {
   box-shadow:
-    inset 0 2.5px 2px rgba(255, 255, 255, 1),
-    inset 0 -2.5px 3px rgba(35, 45, 65, 0.3),
-    0 8px 22px rgba(0, 0, 0, 0.35),
-    0 2px 6px rgba(0, 0, 0, 0.2);
+    inset 0 3px 2.5px rgba(255, 255, 255, 0.7),
+    inset 0 -2.5px 3px rgba(0, 0, 0, 0.75),
+    0 10px 26px rgba(0, 0, 0, 0.65),
+    0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 .theme-glass-toggle:active .tgt-knob {
@@ -400,66 +399,73 @@ body {
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  filter: drop-shadow(0 0 2.5px rgba(255, 255, 255, 0.95));
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95));
   transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
+/* In Light mode: Moon is visible on left, Sun is hidden */
 .tgt-icon-moon {
-  display: none;
-  color: #f8fafc;
-  filter: drop-shadow(0 0 3px rgba(192, 132, 252, 0.9));
+  display: flex;
 }
 
-/* Label text inside track */
+.tgt-icon-sun {
+  display: none;
+}
+
+/* Label text inside track (In Light mode: "Light" on the right) */
 .tgt-label {
   font-family: var(--font-sans, system-ui, sans-serif);
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
   color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   letter-spacing: -0.15px;
   position: absolute;
-  right: 14px;
+  right: 18px;
+  left: auto;
   transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
   line-height: 1;
 }
 
 /* ==========================================================================
-   DARK MODE STATE
+   DARK MODE STATE (Exact Image 1 Reference)
    ========================================================================== */
 [data-theme="dark"] .tgt-track {
-  background: rgba(30, 41, 59, 0.55);
-  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(45, 48, 55, 0.88);
+  border-color: rgba(255, 255, 255, 0.2);
   box-shadow:
-    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.16),
     inset 0 -1.5px 2px rgba(0, 0, 0, 0.4),
-    0 4px 14px rgba(0, 0, 0, 0.35);
+    0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
+/* Knob moves to RIGHT, crystal glass bubble with bright white rim highlights */
 [data-theme="dark"] .tgt-knob {
-  left: calc(100% - 36px);
-  background: radial-gradient(circle at 35% 32%, rgba(225, 235, 250, 0.95) 0%, rgba(148, 163, 184, 0.72) 45%, rgba(60, 75, 95, 0.55) 100%);
-  border-color: rgba(148, 163, 184, 0.55);
+  left: calc(100% - 39px);
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.8) 0%, rgba(185, 195, 210, 0.45) 45%, rgba(110, 120, 135, 0.3) 100%);
+  border-color: rgba(255, 255, 255, 0.7);
   box-shadow:
-    inset 0 2px 3px rgba(255, 255, 255, 0.8),
-    inset 0 -2px 3px rgba(15, 23, 42, 0.5),
-    0 6px 18px rgba(0, 0, 0, 0.5),
-    0 0 14px rgba(139, 92, 246, 0.35);
-}
-
-[data-theme="dark"] .tgt-icon-sun {
-  display: none;
+    inset 0 3px 2.5px rgba(255, 255, 255, 0.95),
+    inset 0 -2.5px 3px rgba(0, 0, 0, 0.4),
+    inset 2.5px 0 3px rgba(255, 255, 255, 0.65),
+    0 8px 22px rgba(0, 0, 0, 0.45),
+    0 0 16px rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="dark"] .tgt-icon-moon {
+  display: none;
+}
+
+[data-theme="dark"] .tgt-icon-sun {
   display: flex;
 }
 
+/* Label moves to LEFT saying "Dark" */
 [data-theme="dark"] .tgt-label {
   right: auto;
-  left: 14px;
-  color: #f1f5f9;
+  left: 18px;
+  color: #ffffff;
 }
 
 /* Hero Banner */
@@ -6181,15 +6187,15 @@ button.sla-radial-card:hover {
         <button type="button" class="theme-glass-toggle" id="theme-toggle-btn" role="switch" aria-checked="false" title="Toggle Light / Dark mode">
           <span class="tgt-track">
             <span class="tgt-knob">
-              <span class="tgt-icon-sun">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
-                  <circle cx="12" cy="12" r="4" fill="currentColor"/>
-                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+              <span class="tgt-icon-moon">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" fill="#ffffff"/>
                 </svg>
               </span>
-              <span class="tgt-icon-moon">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>
+              <span class="tgt-icon-sun">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <circle cx="12" cy="12" r="4.2" fill="#ffffff"/>
+                  <path d="M12 2.5v2.2M12 19.3v2.2M3.7 12h2.2M18.1 12h2.2M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M5.6 18.4l1.6-1.6M16.8 7.2l1.6-1.6" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round"/>
                 </svg>
               </span>
             </span>
