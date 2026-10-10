@@ -312,6 +312,156 @@ body {
   background: #1d4ed8;
 }
 
+/* ==========================================================================
+   FROSTED GLASS LIQUID THEME TOGGLE (Exact Chrome UI Reference)
+   ========================================================================== */
+.theme-glass-toggle {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  outline: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  vertical-align: middle;
+}
+
+.tgt-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 94px;
+  height: 32px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    inset 0 -1.5px 2px rgba(0, 0, 0, 0.14),
+    0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: visible;
+}
+
+.theme-glass-toggle:hover .tgt-track {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    inset 0 -1.5px 2px rgba(0, 0, 0, 0.14),
+    0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* Glass Spherical Knob */
+.tgt-knob {
+  position: absolute;
+  top: 50%;
+  left: -4px;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, rgba(255, 255, 255, 0.98) 0%, rgba(240, 245, 255, 0.74) 42%, rgba(195, 205, 222, 0.5) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    inset 0 2.5px 2px rgba(255, 255, 255, 0.95),
+    inset 0 -2.5px 3px rgba(35, 45, 65, 0.3),
+    inset 2px 0 3px rgba(255, 255, 255, 0.6),
+    0 6px 18px rgba(0, 0, 0, 0.28),
+    0 2px 6px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: left 0.35s cubic-bezier(0.34, 1.45, 0.64, 1), transform 0.2s ease, background 0.35s ease, box-shadow 0.35s ease;
+  z-index: 2;
+}
+
+.theme-glass-toggle:hover .tgt-knob {
+  box-shadow:
+    inset 0 2.5px 2px rgba(255, 255, 255, 1),
+    inset 0 -2.5px 3px rgba(35, 45, 65, 0.3),
+    0 8px 22px rgba(0, 0, 0, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.theme-glass-toggle:active .tgt-knob {
+  transform: translateY(-50%) scale(0.94);
+}
+
+/* Icons inside Knob */
+.tgt-icon-sun,
+.tgt-icon-moon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  filter: drop-shadow(0 0 2.5px rgba(255, 255, 255, 0.95));
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.tgt-icon-moon {
+  display: none;
+  color: #f8fafc;
+  filter: drop-shadow(0 0 3px rgba(192, 132, 252, 0.9));
+}
+
+/* Label text inside track */
+.tgt-label {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 13px;
+  font-weight: 500;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  letter-spacing: -0.15px;
+  position: absolute;
+  right: 14px;
+  transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* ==========================================================================
+   DARK MODE STATE
+   ========================================================================== */
+[data-theme="dark"] .tgt-track {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    inset 0 -1.5px 2px rgba(0, 0, 0, 0.4),
+    0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .tgt-knob {
+  left: calc(100% - 36px);
+  background: radial-gradient(circle at 35% 32%, rgba(225, 235, 250, 0.95) 0%, rgba(148, 163, 184, 0.72) 45%, rgba(60, 75, 95, 0.55) 100%);
+  border-color: rgba(148, 163, 184, 0.55);
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 3px rgba(15, 23, 42, 0.5),
+    0 6px 18px rgba(0, 0, 0, 0.5),
+    0 0 14px rgba(139, 92, 246, 0.35);
+}
+
+[data-theme="dark"] .tgt-icon-sun {
+  display: none;
+}
+
+[data-theme="dark"] .tgt-icon-moon {
+  display: flex;
+}
+
+[data-theme="dark"] .tgt-label {
+  right: auto;
+  left: 14px;
+  color: #f1f5f9;
+}
+
 /* Hero Banner */
 .hero {
   background: linear-gradient(135deg, #09111e 0%, #0d1b33 45%, #102447 100%);
@@ -5979,13 +6129,24 @@ button.sla-radial-card:hover {
           <button type="button" class="year-btn" id="year-next-btn" title="Next Year" aria-label="Next Year">&gt;</button>
         </div>
 
-        <!-- Theme Toggle -->
-        <button type="button" class="action-btn" id="theme-toggle-btn" title="Toggle Light / Dark mode">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"/>
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-          </svg>
-          <span id="theme-btn-text">Dark Theme</span>
+        <!-- Frosted Glass Liquid Theme Toggle -->
+        <button type="button" class="theme-glass-toggle" id="theme-toggle-btn" role="switch" aria-checked="false" title="Toggle Light / Dark mode">
+          <span class="tgt-track">
+            <span class="tgt-knob">
+              <span class="tgt-icon-sun">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+                  <circle cx="12" cy="12" r="4" fill="currentColor"/>
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                </svg>
+              </span>
+              <span class="tgt-icon-moon">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>
+                </svg>
+              </span>
+            </span>
+            <span class="tgt-label" id="theme-btn-text">Light</span>
+          </span>
         </button>
 
         <!-- Print / PDF -->
@@ -12613,15 +12774,26 @@ button.sla-radial-card:hover {
     nextYearBtn.addEventListener('click', () => changeYear(state.year + 1));
   }
 
-  // Theme toggle
+  // Theme toggle (Frosted glass liquid switch)
   const themeBtn = document.getElementById('theme-toggle-btn');
   const themeBtnText = document.getElementById('theme-btn-text');
+
+  function syncThemeToggleUI(theme) {
+    if (!themeBtn) return;
+    const isDark = theme === 'dark';
+    themeBtn.setAttribute('aria-checked', isDark ? 'true' : 'false');
+    if (themeBtnText) themeBtnText.textContent = isDark ? 'Dark' : 'Light';
+  }
+
   if (themeBtn) {
+    const initialTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    syncThemeToggleUI(initialTheme);
+
     themeBtn.addEventListener('click', () => {
       const current = document.documentElement.getAttribute('data-theme') || 'light';
       const next = current === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
-      if (themeBtnText) themeBtnText.textContent = next === 'dark' ? 'Light Theme' : 'Dark Theme';
+      syncThemeToggleUI(next);
       closeDrawer();
       render();
     });

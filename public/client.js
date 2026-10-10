@@ -6573,15 +6573,26 @@
     nextYearBtn.addEventListener('click', () => changeYear(state.year + 1));
   }
 
-  // Theme toggle
+  // Theme toggle (Frosted glass liquid switch)
   const themeBtn = document.getElementById('theme-toggle-btn');
   const themeBtnText = document.getElementById('theme-btn-text');
+
+  function syncThemeToggleUI(theme) {
+    if (!themeBtn) return;
+    const isDark = theme === 'dark';
+    themeBtn.setAttribute('aria-checked', isDark ? 'true' : 'false');
+    if (themeBtnText) themeBtnText.textContent = isDark ? 'Dark' : 'Light';
+  }
+
   if (themeBtn) {
+    const initialTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    syncThemeToggleUI(initialTheme);
+
     themeBtn.addEventListener('click', () => {
       const current = document.documentElement.getAttribute('data-theme') || 'light';
       const next = current === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
-      if (themeBtnText) themeBtnText.textContent = next === 'dark' ? 'Light Theme' : 'Dark Theme';
+      syncThemeToggleUI(next);
       closeDrawer();
       render();
     });
