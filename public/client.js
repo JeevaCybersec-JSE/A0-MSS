@@ -3465,32 +3465,224 @@
     '</div>';
   }
 
+  // ==========================================================================
+  // FOOTBAR-INSPIRED SCORECARD LEADERBOARD & EXPORT ENGINE
+  // ==========================================================================
+
+  window.exportScorecardCSV = function () {
+    const m = state.m;
+    const headers = [
+      'Rank',
+      'Metric Name',
+      'Pillar',
+      'Weight Tier',
+      'Target SLA',
+      'Direction',
+      'Current Value (' + MON[m] + ' ' + state.year + ')',
+      'Performance Status',
+      'YTD Performance',
+      ...CHART_MONTHS.map(i => MON[i] + ' ' + state.year)
+    ];
+
+    const weightOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 };
+    const sortedScored = [...scored].sort((a, b) => {
+      const wa = weightOrder[a.weight] ?? 9;
+      const wb = weightOrder[b.weight] ?? 9;
+      if (wa !== wb) return wa - wb;
+      return (a.rag[m] ?? 0) - (b.rag[m] ?? 0);
+    });
+
+    const csvRows = [headers.join(',')];
+
+    sortedScored.forEach((r, idx) => {
+      const statusStr = r.rag[m] === 1 ? 'On Target' : (r.rag[m] === 0 ? 'Near Target' : 'Off Target');
+      const row = [
+        idx + 1,
+        '"' + r.name.replace(/"/g, '""') + '"',
+        '"' + (r.sec || '').replace(/"/g, '""') + '"',
+        '"' + (r.veto ? 'Zero Tolerance' : (r.weight || 'Standard')).toUpperCase() + '"',
+        '"' + target(r).replace(/"/g, '""') + '"',
+        '"' + (r.dir || '') + '"',
+        '"' + fmt(r, r.v[m]) + '"',
+        '"' + statusStr + '"',
+        '"' + fmt(r, r.ytd) + '"',
+        ...CHART_MONTHS.map(i => typeof r.v[i] === 'number' ? '"' + fmt(r, r.v[i]) + '"' : '""')
+      ];
+      csvRows.push(row.join(','));
+    });
+
+    const blob = new Blob([csvRows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Brysa_MSS_KPI_Scorecard_' + FULL[m] + '_' + state.year + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   function scorecard() {
     const m = state.m;
-    return '<section class="card"><h2 class="h2">Scorecard</h2><p class="sub">All ' + scored.length + ' scored metrics by month, grouped by weight. Select a row for its trend and definition.</p>' +
-      '<div class="legend2"><span><i style="background:var(--g-soft);border:1px solid var(--g)"></i>On target</span><span><i style="background:var(--a-soft);border:1px solid var(--a)"></i>Within 10% of target</span><span><i style="background:var(--r-soft);border:1px solid var(--r)"></i>Off target</span></div>' +
-      '<div class="scroll"><table class="sc"><thead><tr><th class="l">Metric</th><th>Target</th>' + CHART_MONTHS.map(i => '<th>' + MON[i] + '</th>').join('') + '</tr></thead><tbody>' + scorecardRows(m) + '</tbody></table></div></section>' +
-      '<section class="card" style="margin-top:16px"><h2 class="h2">How the month’s status is decided</h2>' +
-        '<ul style="margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px">' +
-          '<li>Each measure is scored On target, Within 10% of target, or Off target.</li>' +
-          '<li>Any zero-tolerance breach turns the whole month Red.</li>' +
-          '<li>Otherwise the measures vote. High-weight measures count most, then Medium, then Low.</li>' +
-          '<li>More weight on target than off target gives Green. An even balance gives Amber. Otherwise the month is Red.</li></ul></section>';
-  }
+    const prev = m - 1;
 
-  function scorecardRows(m) {
-    const groups = [['Zero tolerance', 'Any breach turns the month Red'], ['High', 'Real security or response impact'], ['Medium', 'Standard operational measures'], ['Low', 'Process and admin measures, which count least']];
-    let out = '';
-    groups.forEach(([t, d]) => {
-      const rows = scored.filter(r => tier(r) === t);
-      if (!rows.length) return;
-      out += '<tr class="sec"><td colspan="' + (CHART_MONTHS.length + 2) + '">' + t + ' · ' + rows.length + ' measures <span class="meta" style="font-weight:400;letter-spacing:0">&nbsp;' + d + '</span></td></tr>';
-      rows.forEach(r => {
-        out += '<tr class="m" data-open="' + r.r + '"><td class="l">' + r.name + '</td><td class="meta">' + target(r) + '</td>' +
-          CHART_MONTHS.map(i => '<td><span class="cell ' + cls(r.rag[i]) + ' ' + (i === m ? 'sel' : '') + '">' + fmt(r, r.v[i]) + '</span></td>').join('') + '</tr>';
-      });
+    // Filter counts for summary pills
+    const totalCount = scored.length;
+    const onTargetCount = scored.filter(r => r.rag[m] === 1).length;
+    const nearTargetCount = scored.filter(r => r.rag[m] === 0).length;
+    const offTargetCount = scored.filter(r => r.rag[m] === -1).length;
+
+    // Ordered ranking: Zero tolerance first, then High, then Medium, then Low
+    const weightOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 };
+    const sortedScored = [...scored].sort((a, b) => {
+      const wa = weightOrder[a.weight] ?? 9;
+      const wb = weightOrder[b.weight] ?? 9;
+      if (wa !== wb) return wa - wb;
+      return (a.rag[m] ?? 0) - (b.rag[m] ?? 0);
     });
-    return out;
+
+    const getPillarIcon = sec => {
+      const s = (sec || '').toLowerCase();
+      if (s.includes('endpoint') || s.includes('patch')) return '💻';
+      if (s.includes('threat') || s.includes('incident')) return '🛡️';
+      if (s.includes('vulnerab')) return '⚠️';
+      if (s.includes('identity') || s.includes('access') || s.includes('email')) return '🔑';
+      if (s.includes('service') || s.includes('delivery')) return '⚡';
+      if (s.includes('compliance')) return '📋';
+      return '📊';
+    };
+
+    const rowsHtml = sortedScored.map((r, idx) => {
+      const rank = idx + 1;
+      const isTop1 = (rank === 1);
+      const isHighlight = (rank === 3); // Neon laser highlight row matching Reference UI
+
+      // Evolution delta vs previous month
+      let evolHtml = '<span class="sc-evol n" title="Stable vs previous month">= 0</span>';
+      if (prev >= 1 && r.rag[prev] !== null && r.rag[m] !== null) {
+        if (r.rag[m] > r.rag[prev]) {
+          evolHtml = '<span class="sc-evol g" title="Improved status vs previous month">▲ +1</span>';
+        } else if (r.rag[m] < r.rag[prev]) {
+          evolHtml = '<span class="sc-evol r" title="Slipped status vs previous month">▼ -1</span>';
+        }
+      }
+
+      const icon = getPillarIcon(r.sec);
+      const currentVal = fmt(r, r.v[m]);
+      const statusCls = cls(r.rag[m]);
+
+      // Telemetry mini-metrics (4 recent reporting periods)
+      const telemetryMonths = [2, 3, 4, 5];
+      const telemetryHtml = telemetryMonths.map(i => {
+        const val = typeof r.v[i] === 'number' ? fmt(r, r.v[i]) : '–';
+        const isCur = (i === m);
+        const cellCls = cls(r.rag[i]);
+        return '<div class="sc-tele-item ' + (isCur ? 'cur' : '') + '">' +
+          '<span class="sc-tele-lbl">' + MON[i] + '</span>' +
+          '<span class="sc-tele-val ' + cellCls + '">' + val + '</span>' +
+        '</div>';
+      }).join('');
+
+      return '<div class="sc-card-row ' + (isHighlight ? 'sc-highlight' : '') + '" data-open="' + r.r + '" data-status="' + r.rag[m] + '" role="button" tabindex="0" title="Click to view full 12-month telemetry audit">' +
+        '<div class="sc-row-left">' +
+          '<div class="sc-rank-col">' +
+            (isTop1 ? '<span class="sc-trophy">🏆</span>' : '') +
+            '<span class="sc-rank-num">' + rank + '</span>' +
+          '</div>' +
+          '<div class="sc-evol-col">' + evolHtml + '</div>' +
+          '<div class="sc-avatar-col">' +
+            '<div class="sc-avatar-hex" title="' + (r.sec || 'Metric') + '">' + icon + '</div>' +
+          '</div>' +
+          '<div class="sc-metric-col">' +
+            '<div class="sc-metric-name">' + r.name + '</div>' +
+            '<div class="sc-metric-sub">' +
+              '<span class="sc-weight-tag ' + (r.weight || 'std') + '">' + (r.veto ? 'ZERO TOLERANCE' : (r.weight || 'STANDARD').toUpperCase()) + '</span>' +
+              '<span class="sc-sep">·</span>' +
+              '<span>Target: <strong>' + target(r) + '</strong></span>' +
+              '<span class="sc-sep">·</span>' +
+              '<span>' + (r.sec || '') + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="sc-row-right">' +
+          '<div class="sc-tele-wrap">' + telemetryHtml + '</div>' +
+          '<div class="sc-score-col">' +
+            '<div class="sc-score-pill ' + statusCls + '" title="Current Actual Value">' + currentVal + '</div>' +
+          '</div>' +
+          '<div class="sc-action-col">' +
+            '<span class="sc-chevron">›</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<section class="scorecard-container" aria-label="Executive KPI Scorecard Leaderboard">' +
+      // Header Bar
+      '<div class="sc-header-bar">' +
+        '<div class="sc-title-block">' +
+          '<h2 class="h2" style="margin-bottom:4px">Executive KPI Scorecard</h2>' +
+          '<p class="sub" style="margin:0">Ranked performance across all ' + totalCount + ' scored operational & security indicators for ' + FULL[m] + ' ' + state.year + '</p>' +
+        '</div>' +
+        '<div class="sc-header-actions">' +
+          '<button type="button" class="sc-download-btn" id="sc-export-csv" onclick="exportScorecardCSV()" title="Export complete 12-month scorecard data to CSV">' +
+            '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+              '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>' +
+              '<polyline points="7 10 12 15 17 10"/>' +
+              '<line x1="12" y1="15" x2="12" y2="3"/>' +
+            '</svg>' +
+            '<span>Download Scorecard CSV</span>' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+
+      // Filter & Search Controls Bar
+      '<div class="sc-controls-bar">' +
+        '<div class="sc-search-wrap">' +
+          '<svg class="sc-search-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">' +
+            '<circle cx="11" cy="11" r="8"/>' +
+            '<line x1="21" y1="21" x2="16.65" y2="16.65"/>' +
+          '</svg>' +
+          '<input type="text" id="scorecard-search" placeholder="Search metric name, category, or pillar..." />' +
+        '</div>' +
+        '<div class="sc-filter-tabs">' +
+          '<button type="button" class="sc-filter-tab active" data-filter="all">All (' + totalCount + ')</button>' +
+          '<button type="button" class="sc-filter-tab" data-filter="on-target">On Target (' + onTargetCount + ')</button>' +
+          '<button type="button" class="sc-filter-tab" data-filter="off-target">Off Target (' + offTargetCount + ')</button>' +
+          (nearTargetCount > 0 ? '<button type="button" class="sc-filter-tab" data-filter="near-target">Near Target (' + nearTargetCount + ')</button>' : '') +
+        '</div>' +
+      '</div>' +
+
+      // Table Header Row
+      '<div class="sc-table-heading">' +
+        '<div class="sc-th-left">' +
+          '<span class="sc-th-rank">RANK</span>' +
+          '<span class="sc-th-evol">TREND</span>' +
+          '<span class="sc-th-avatar">PILLAR</span>' +
+          '<span class="sc-th-metric">METRIC &amp; TARGET</span>' +
+        '</div>' +
+        '<div class="sc-th-right">' +
+          '<span class="sc-th-tele">MONTHLY TELEMETRY (' + MON[2] + ' - ' + MON[5] + ')</span>' +
+          '<span class="sc-th-score">SCORE</span>' +
+          '<span class="sc-th-action">VIEW</span>' +
+        '</div>' +
+      '</div>' +
+
+      // The List of Rows
+      '<div class="sc-rows-list" id="sc-rows-container">' +
+        rowsHtml +
+      '</div>' +
+
+      // Methodology Guide Card
+      '<div class="card" style="margin-top:20px;border-top:1px solid var(--line-soft);padding:18px">' +
+        '<h3 style="margin:0 0 8px 0;font-size:14px;font-weight:700;color:var(--ink)">How Metrics Are Scored &amp; Weighted</h3>' +
+        '<ul style="margin:0;padding-left:18px;font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:5px">' +
+          '<li><strong>Zero Tolerance:</strong> Immediate red veto on any breach (e.g. Ransomware detections).</li>' +
+          '<li><strong>High Weight:</strong> Direct operational or SLA security impact with highest governance voting power.</li>' +
+          '<li><strong>Medium / Low Weight:</strong> Supporting administration, workflow, and hygiene processes.</li>' +
+        '</ul>' +
+      '</div>' +
+    '</section>';
   }
 
   function section(tab) {
@@ -6598,6 +6790,37 @@
       return;
     }
     if (t.dataset.open) openDrawer(+t.dataset.open);
+  });
+
+  // Scorecard live search input listener
+  document.addEventListener('input', e => {
+    if (e.target && e.target.id === 'scorecard-search') {
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll('.sc-card-row').forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+  });
+
+  // Scorecard status filter tabs
+  document.addEventListener('click', e => {
+    const tab = e.target.closest('.sc-filter-tab');
+    if (tab) {
+      document.querySelectorAll('.sc-filter-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const f = tab.dataset.filter;
+      const searchVal = (document.getElementById('scorecard-search')?.value || '').toLowerCase().trim();
+
+      document.querySelectorAll('.sc-card-row').forEach(row => {
+        const matchesStatus = (f === 'all') ||
+          (f === 'on-target' && row.dataset.status === '1') ||
+          (f === 'near-target' && row.dataset.status === '0') ||
+          (f === 'off-target' && row.dataset.status === '-1');
+        const matchesSearch = !searchVal || row.textContent.toLowerCase().includes(searchVal);
+        row.style.display = (matchesStatus && matchesSearch) ? 'flex' : 'none';
+      });
+    }
   });
 
   document.addEventListener('keydown', e => {
