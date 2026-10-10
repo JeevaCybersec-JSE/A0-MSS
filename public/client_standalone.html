@@ -1104,59 +1104,118 @@ button.exec-kpi-card:hover {
    3. SLA Radial Gauges Cockpit
    ============================================================ */
 
-/* 1. Estate Health Composition */
+/* 1. Estate Health Composition & Modern Donut */
 .estate-card {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
-.estate-bar-wrap {
+.estate-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.estate-main-grid {
+  display: grid;
+  grid-template-columns: minmax(290px, 340px) 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.estate-donut-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  padding: 18px 16px 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.estate-donut-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.donut-arc-path {
+  transition: opacity 0.2s ease, filter 0.2s ease;
+  cursor: pointer;
+}
+
+.donut-arc-path:hover {
+  filter: brightness(1.08);
+  opacity: 0.92;
+}
+
+.estate-donut-legend-grid {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.estate-seg-bar {
-  display: flex;
-  height: 14px;
   width: 100%;
-  border-radius: 999px;
-  overflow: hidden;
-  background: var(--line-soft);
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+  border-top: 1px solid var(--line-soft);
+  padding-top: 12px;
 }
 
-.estate-seg {
-  height: 100%;
-  transition: width 0.3s ease;
-  position: relative;
-}
-
-.estate-seg.healthy { background: linear-gradient(90deg, #10b981, #059669); }
-.estate-seg.warning { background: linear-gradient(90deg, #f59e0b, #d97706); }
-.estate-seg.danger  { background: linear-gradient(90deg, #ef4444, #dc2626); }
-
-.estate-legend {
+.donut-legend-item {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
-  font-size: 11.5px;
+  gap: 10px;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  transition: background 0.15s ease;
+}
+
+.donut-legend-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.donut-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.donut-legend-name {
   color: var(--muted);
+  font-weight: 500;
+  flex: 1;
 }
 
-.estate-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.donut-legend-val {
+  color: var(--ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
 }
 
-.estate-legend i {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.donut-legend-val small {
+  font-weight: 500;
+  color: var(--muted);
+  margin-left: 2px;
+}
+
+.estate-stats-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (max-width: 860px) {
+  .estate-main-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 .estate-tiles-grid {
@@ -8579,29 +8638,98 @@ button.sla-radial-card:hover {
         const pOutdatedPct = (pOutdated * 100);
         const pHealthyPct = Math.max(0, 100 - (pNotRepPct + pOutdatedPct));
         const totEstateDevices = mEnd + mobEnd;
+        const dHealthy = Math.max(0, totEstateDevices - dOutdated - dNotRep);
+
+        // Donut SVG generator matching modern interface reference
+        const donutSvg = (function () {
+          const cx = 110, cy = 110, R = 90, r = 54, rMid = 72;
+          let curAngle = -Math.PI / 2;
+          const paths = [];
+          const texts = [];
+          const segs = [
+            { label: 'Fully Healthy', pct: pHealthyPct, count: dHealthy, color: '#10b981' },
+            { label: 'Outdated Protection', pct: pOutdatedPct, count: dOutdated, color: '#f59e0b' },
+            { label: 'Non-Reporting', pct: pNotRepPct, count: dNotRep, color: '#ef4444' }
+          ];
+
+          const active = segs.filter(s => s.pct > 0.05);
+          active.forEach(s => {
+            const isFull = s.pct >= 99.9;
+            const span = isFull ? (2 * Math.PI - 0.0005) : (s.pct / 100) * 2 * Math.PI;
+            const startA = curAngle;
+            const endA = curAngle + span;
+
+            const x1 = cx + R * Math.cos(startA);
+            const y1 = cy + R * Math.sin(startA);
+            const x2 = cx + R * Math.cos(endA);
+            const y2 = cy + R * Math.sin(endA);
+            const x3 = cx + r * Math.cos(endA);
+            const y3 = cy + r * Math.sin(endA);
+            const x4 = cx + r * Math.cos(startA);
+            const y4 = cy + r * Math.sin(startA);
+            const large = span > Math.PI ? 1 : 0;
+
+            const d = 'M ' + x1.toFixed(2) + ' ' + y1.toFixed(2) +
+              ' A ' + R + ' ' + R + ' 0 ' + large + ' 1 ' + x2.toFixed(2) + ' ' + y2.toFixed(2) +
+              ' L ' + x3.toFixed(2) + ' ' + y3.toFixed(2) +
+              ' A ' + r + ' ' + r + ' 0 ' + large + ' 0 ' + x4.toFixed(2) + ' ' + y4.toFixed(2) + ' Z';
+
+            paths.push('<path d="' + d + '" fill="' + s.color + '" stroke="var(--card, #ffffff)" stroke-width="2.5" class="donut-arc-path" title="' + s.label + ': ' + s.count + ' (' + s.pct.toFixed(1) + '%)" />');
+
+            if (s.pct >= 8) {
+              const midA = startA + span / 2;
+              const tx = cx + rMid * Math.cos(midA);
+              const ty = cy + rMid * Math.sin(midA) + 4;
+              texts.push('<text x="' + tx.toFixed(1) + '" y="' + ty.toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff" pointer-events="none">' + s.pct.toFixed(0) + '%</text>');
+            }
+
+            curAngle = endA;
+          });
+
+          return '<svg class="estate-donut-svg" viewBox="0 0 220 220" width="200" height="200" style="display:block;margin:0 auto;overflow:visible;">' +
+            '<g class="donut-segments">' + paths.join('') + '</g>' +
+            '<g class="donut-labels">' + texts.join('') + '</g>' +
+            '<g class="donut-center" pointer-events="none">' +
+              '<text x="110" y="104" text-anchor="middle" font-size="28" font-weight="800" fill="var(--ink)" letter-spacing="-0.5">' + totEstateDevices + '</text>' +
+              '<text x="110" y="122" text-anchor="middle" font-size="9" font-weight="700" fill="var(--muted)" letter-spacing="0.8">TOTAL FLEET</text>' +
+            '</g>' +
+          '</svg>';
+        })();
 
         return '<div class="blk"><div class="bt"><h2>Estate coverage &amp; infrastructure security</h2><span class="sub">Fleet composition, device connectivity, and endpoint protection health</span></div>' +
           '<section class="card estate-card" aria-label="Estate health and device coverage">' +
-            '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">' +
+            '<div class="estate-card-head">' +
               '<div><span style="font-size:14px;font-weight:700;color:var(--ink)">Device Protection Composition</span><span style="font-size:12px;color:var(--muted);margin-left:8px">' + totEstateDevices + ' total enrolled devices (' + mEnd + ' endpoints + ' + mobEnd + ' mobile VPN)</span></div>' +
-              '<div class="estate-legend">' +
-                '<span><i style="background:#10b981"></i>Fully Healthy (' + pHealthyPct.toFixed(1) + '%)</span>' +
-                '<span><i style="background:#f59e0b"></i>Outdated (' + pOutdatedPct.toFixed(1) + '%)</span>' +
-                '<span><i style="background:#ef4444"></i>Non-Reporting (' + pNotRepPct.toFixed(1) + '%)</span>' +
-              '</div>' +
             '</div>' +
-            '<div class="estate-bar-wrap">' +
-              '<div class="estate-seg-bar" title="Estate: ' + pHealthyPct.toFixed(1) + '% healthy, ' + pOutdatedPct.toFixed(1) + '% outdated, ' + pNotRepPct.toFixed(1) + '% non-reporting">' +
-                '<div class="estate-seg healthy" style="width:' + pHealthyPct.toFixed(1) + '%"></div>' +
-                '<div class="estate-seg warning" style="width:' + pOutdatedPct.toFixed(1) + '%"></div>' +
-                '<div class="estate-seg danger" style="width:' + pNotRepPct.toFixed(1) + '%"></div>' +
+            '<div class="estate-main-grid">' +
+              '<div class="estate-donut-panel">' +
+                '<div class="estate-donut-wrap">' + donutSvg + '</div>' +
+                '<div class="estate-donut-legend-grid">' +
+                  '<div class="donut-legend-item">' +
+                    '<span class="donut-legend-swatch" style="background:#10b981"></span>' +
+                    '<span class="donut-legend-name">Fully Healthy</span>' +
+                    '<span class="donut-legend-val">' + dHealthy + ' <small>(' + pHealthyPct.toFixed(1) + '%)</small></span>' +
+                  '</div>' +
+                  '<div class="donut-legend-item">' +
+                    '<span class="donut-legend-swatch" style="background:#f59e0b"></span>' +
+                    '<span class="donut-legend-name">Outdated Protection</span>' +
+                    '<span class="donut-legend-val">' + dOutdated + ' <small>(' + pOutdatedPct.toFixed(1) + '%)</small></span>' +
+                  '</div>' +
+                  '<div class="donut-legend-item">' +
+                    '<span class="donut-legend-swatch" style="background:#ef4444"></span>' +
+                    '<span class="donut-legend-name">Non-Reporting</span>' +
+                    '<span class="donut-legend-val">' + dNotRep + ' <small>(' + pNotRepPct.toFixed(1) + '%)</small></span>' +
+                  '</div>' +
+                '</div>' +
               '</div>' +
-            '</div>' +
-            '<div class="estate-tiles-grid">' +
-              '<div class="estate-tile"><span class="tl">Managed Endpoints</span><span class="vl">' + mEnd + '</span><span class="sub">' + (delta(fl('Managed endpoints'), m) || 'Estate count') + '</span></div>' +
-              '<div class="estate-tile"><span class="tl">Mobile Devices (VPN)</span><span class="vl">' + mobEnd + '</span><span class="sub">' + (delta(fl('Mobile devices - VPN'), m) || 'MDM enrolled') + '</span></div>' +
-              '<div class="estate-tile"><span class="tl">Outdated Protection</span><span class="vl" style="color:' + (pOutdated > 0.02 ? 'var(--r)' : 'var(--g)') + '">' + pOutdatedPct.toFixed(1) + '%</span><span class="sub">' + dOutdated + ' devices affected</span></div>' +
-              '<div class="estate-tile"><span class="tl">Non-Reporting</span><span class="vl" style="color:' + (pNotRep > 0.02 ? 'var(--r)' : 'var(--g)') + '">' + pNotRepPct.toFixed(1) + '%</span><span class="sub">' + dNotRep + ' devices silent</span></div>' +
+              '<div class="estate-stats-panel">' +
+                '<div class="estate-tiles-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">' +
+                  '<div class="estate-tile"><span class="tl">Managed Endpoints</span><span class="vl">' + mEnd + '</span><span class="sub">' + (delta(fl('Managed endpoints'), m) || 'Estate count') + '</span></div>' +
+                  '<div class="estate-tile"><span class="tl">Mobile Devices (VPN)</span><span class="vl">' + mobEnd + '</span><span class="sub">' + (delta(fl('Mobile devices - VPN'), m) || 'MDM enrolled') + '</span></div>' +
+                  '<div class="estate-tile"><span class="tl">Outdated Protection</span><span class="vl" style="color:' + (pOutdated > 0.02 ? 'var(--r)' : 'var(--g)') + '">' + pOutdatedPct.toFixed(1) + '%</span><span class="sub">' + dOutdated + ' devices affected</span></div>' +
+                  '<div class="estate-tile"><span class="tl">Non-Reporting</span><span class="vl" style="color:' + (pNotRep > 0.02 ? 'var(--r)' : 'var(--g)') + '">' + pNotRepPct.toFixed(1) + '%</span><span class="sub">' + dNotRep + ' devices silent</span></div>' +
+                '</div>' +
+              '</div>' +
             '</div>' +
           '</section>' +
         '</div>';
@@ -11395,7 +11523,7 @@ button.sla-radial-card:hover {
     const slaGapPct = Math.max(0, 100 - slaSuccessPct);
 
     // Target SLA Card values (respects metric comparison direction and vetoes)
-    const targetVal = r.scored ? (r.veto ? '0' : ((r.dir === 'Higher' ? '≥ ' : '≤ ') + target(r))) : 'Monitoring Only';
+    const targetVal = r.scored ? (r.veto ? '0' : target(r)) : 'Monitoring Only';
     const targetSub = r.scored ? (r.veto ? 'Zero Ceiling (Veto)' : (r.dir === 'Higher' ? 'Minimum Target SLA' : 'Maximum Limit SLA')) : 'Informational Only';
 
     // Contractual Standing Card values (aligned with Main Dashboard RAG rules)
@@ -11580,7 +11708,7 @@ button.sla-radial-card:hover {
       const ragI = r.rag[i];
 
       const valStr = typeof valI === 'number' ? fmt(r, valI) : '–';
-      const targetStr = r.scored ? (r.veto ? '0' : ((r.dir === 'Higher' ? '≥ ' : '≤ ') + target(r))) : '–';
+      const targetStr = r.scored ? (r.veto ? '0' : target(r)) : '–';
 
       const stPill = (r.scored && ragI !== null && ragI !== undefined) ?
         '<span class="v-status-pill ' + cls(ragI) + '" style="font-size:10px;padding:2px 7px"><span class="v-status-dot"></span>' + (ragI === 1 ? 'Target Met' : (ragI === 0 ? 'In Tolerance' : 'Breach')) + '</span>' :
@@ -11594,7 +11722,7 @@ button.sla-radial-card:hover {
       '</tr>';
     }).join('');
 
-    const ytdTargetStr = r.scored ? (r.veto ? '0' : ((r.dir === 'Higher' ? '≥ ' : '≤ ') + target(r))) : '–';
+    const ytdTargetStr = r.scored ? (r.veto ? '0' : target(r)) : '–';
     const ytdStPill = (r.scored && r.ytdrag !== null && r.ytdrag !== undefined) ?
       '<span class="v-status-pill ' + cls(r.ytdrag) + '" style="font-size:10px;padding:2px 7px"><span class="v-status-dot"></span>' + (r.ytdrag === 1 ? 'Target Met' : (r.ytdrag === 0 ? 'In Tolerance' : 'Breach')) + '</span>' :
       '<span style="color:#94a3b8;font-size:11px">' + (r.scored ? 'No Telemetry' : 'Monitoring') + '</span>';
