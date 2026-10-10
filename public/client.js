@@ -3466,65 +3466,15 @@
   }
 
   // ==========================================================================
-  // FOOTBAR-INSPIRED SCORECARD LEADERBOARD & EXPORT ENGINE
+  // SCORECARD LEADERBOARD & PDF EXPORT ENGINE (CLIENT PAGE DESIGN SYSTEM)
   // ==========================================================================
 
-  window.exportScorecardCSV = function () {
-    const m = state.m;
-    const headers = [
-      'Rank',
-      'Metric Name',
-      'Pillar',
-      'Weight Tier',
-      'Target SLA',
-      'Direction',
-      'Current Value (' + MON[m] + ' ' + state.year + ')',
-      'Performance Status',
-      'YTD Performance',
-      ...CHART_MONTHS.map(i => MON[i] + ' ' + state.year)
-    ];
-
-    const weightOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 };
-    const sortedScored = [...scored].sort((a, b) => {
-      const wa = weightOrder[a.weight] ?? 9;
-      const wb = weightOrder[b.weight] ?? 9;
-      if (wa !== wb) return wa - wb;
-      return (a.rag[m] ?? 0) - (b.rag[m] ?? 0);
-    });
-
-    const csvRows = [headers.join(',')];
-
-    sortedScored.forEach((r, idx) => {
-      const statusStr = r.rag[m] === 1 ? 'On Target' : (r.rag[m] === 0 ? 'Near Target' : 'Off Target');
-      const row = [
-        idx + 1,
-        '"' + r.name.replace(/"/g, '""') + '"',
-        '"' + (r.sec || '').replace(/"/g, '""') + '"',
-        '"' + (r.veto ? 'Zero Tolerance' : (r.weight || 'Standard')).toUpperCase() + '"',
-        '"' + target(r).replace(/"/g, '""') + '"',
-        '"' + (r.dir || '') + '"',
-        '"' + fmt(r, r.v[m]) + '"',
-        '"' + statusStr + '"',
-        '"' + fmt(r, r.ytd) + '"',
-        ...CHART_MONTHS.map(i => typeof r.v[i] === 'number' ? '"' + fmt(r, r.v[i]) + '"' : '""')
-      ];
-      csvRows.push(row.join(','));
-    });
-
-    const blob = new Blob([csvRows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'Brysa_MSS_KPI_Scorecard_' + FULL[m] + '_' + state.year + '.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  window.printScorecardPDF = function () {
+    window.print();
   };
 
   function scorecard() {
     const m = state.m;
-    const prev = m - 1;
 
     // Filter counts for summary pills
     const totalCount = scored.length;
@@ -3541,37 +3491,13 @@
       return (a.rag[m] ?? 0) - (b.rag[m] ?? 0);
     });
 
-    const getPillarIcon = sec => {
-      const s = (sec || '').toLowerCase();
-      if (s.includes('endpoint') || s.includes('patch')) return '💻';
-      if (s.includes('threat') || s.includes('incident')) return '🛡️';
-      if (s.includes('vulnerab')) return '⚠️';
-      if (s.includes('identity') || s.includes('access') || s.includes('email')) return '🔑';
-      if (s.includes('service') || s.includes('delivery')) return '⚡';
-      if (s.includes('compliance')) return '📋';
-      return '📊';
-    };
-
     const rowsHtml = sortedScored.map((r, idx) => {
       const rank = idx + 1;
       const isTop1 = (rank === 1);
-      const isHighlight = (rank === 3); // Neon laser highlight row matching Reference UI
-
-      // Evolution delta vs previous month
-      let evolHtml = '<span class="sc-evol n" title="Stable vs previous month">= 0</span>';
-      if (prev >= 1 && r.rag[prev] !== null && r.rag[m] !== null) {
-        if (r.rag[m] > r.rag[prev]) {
-          evolHtml = '<span class="sc-evol g" title="Improved status vs previous month">▲ +1</span>';
-        } else if (r.rag[m] < r.rag[prev]) {
-          evolHtml = '<span class="sc-evol r" title="Slipped status vs previous month">▼ -1</span>';
-        }
-      }
-
-      const icon = getPillarIcon(r.sec);
       const currentVal = fmt(r, r.v[m]);
       const statusCls = cls(r.rag[m]);
 
-      // Telemetry mini-metrics (4 recent reporting periods)
+      // Telemetry mini-metrics (4 recent reporting periods with relaxed, free spacing)
       const telemetryMonths = [2, 3, 4, 5];
       const telemetryHtml = telemetryMonths.map(i => {
         const val = typeof r.v[i] === 'number' ? fmt(r, r.v[i]) : '–';
@@ -3583,15 +3509,11 @@
         '</div>';
       }).join('');
 
-      return '<div class="sc-card-row ' + (isHighlight ? 'sc-highlight' : '') + '" data-open="' + r.r + '" data-status="' + r.rag[m] + '" role="button" tabindex="0" title="Click to view full 12-month telemetry audit">' +
+      return '<div class="sc-card-row" data-open="' + r.r + '" data-status="' + r.rag[m] + '" role="button" tabindex="0" title="Click to view full 12-month telemetry audit for ' + r.name + '">' +
         '<div class="sc-row-left">' +
           '<div class="sc-rank-col">' +
             (isTop1 ? '<span class="sc-trophy">🏆</span>' : '') +
             '<span class="sc-rank-num">' + rank + '</span>' +
-          '</div>' +
-          '<div class="sc-evol-col">' + evolHtml + '</div>' +
-          '<div class="sc-avatar-col">' +
-            '<div class="sc-avatar-hex" title="' + (r.sec || 'Metric') + '">' + icon + '</div>' +
           '</div>' +
           '<div class="sc-metric-col">' +
             '<div class="sc-metric-name">' + r.name + '</div>' +
@@ -3625,13 +3547,15 @@
           '<p class="sub" style="margin:0">Ranked performance across all ' + totalCount + ' scored operational & security indicators for ' + FULL[m] + ' ' + state.year + '</p>' +
         '</div>' +
         '<div class="sc-header-actions">' +
-          '<button type="button" class="sc-download-btn" id="sc-export-csv" onclick="exportScorecardCSV()" title="Export complete 12-month scorecard data to CSV">' +
+          '<button type="button" class="sc-download-btn" id="sc-export-pdf" onclick="window.printScorecardPDF()" title="Download or print Scorecard as PDF">' +
             '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
-              '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>' +
-              '<polyline points="7 10 12 15 17 10"/>' +
-              '<line x1="12" y1="15" x2="12" y2="3"/>' +
+              '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' +
+              '<polyline points="14 2 14 8 20 8"/>' +
+              '<line x1="16" y1="13" x2="8" y2="13"/>' +
+              '<line x1="16" y1="17" x2="8" y2="17"/>' +
+              '<polyline points="10 9 9 9 8 9"/>' +
             '</svg>' +
-            '<span>Download Scorecard CSV</span>' +
+            '<span>Download PDF</span>' +
           '</button>' +
         '</div>' +
       '</div>' +
@@ -3657,14 +3581,12 @@
       '<div class="sc-table-heading">' +
         '<div class="sc-th-left">' +
           '<span class="sc-th-rank">RANK</span>' +
-          '<span class="sc-th-evol">TREND</span>' +
-          '<span class="sc-th-avatar">PILLAR</span>' +
           '<span class="sc-th-metric">METRIC &amp; TARGET</span>' +
         '</div>' +
         '<div class="sc-th-right">' +
-          '<span class="sc-th-tele">MONTHLY TELEMETRY (' + MON[2] + ' - ' + MON[5] + ')</span>' +
+          '<span class="sc-th-tele">MONTHLY TELEMETRY (' + MON[2] + ' – ' + MON[5] + ')</span>' +
           '<span class="sc-th-score">SCORE</span>' +
-          '<span class="sc-th-action">VIEW</span>' +
+          '<span class="sc-th-action"></span>' +
         '</div>' +
       '</div>' +
 
