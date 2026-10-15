@@ -5761,15 +5761,82 @@ function renderAuditTableRows(container) {
   });
 }
 
-// ---------- Toast ----------
+// ---------- Toast (Apple-Style Push Notification Animation) ----------
 let toastTimer = null;
 function showToast(msg, kind) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show-' + (kind || 'green');
+  if (!el) return;
+
+  const k = kind || 'green';
+  let title = 'Saved!';
+  let desc = String(msg || '');
+
+  // Smart iOS title & description parsing
+  if (desc.includes('·')) {
+    const parts = desc.split('·');
+    title = parts[0].trim() + '!';
+    desc = parts.slice(1).join('·').trim();
+  } else if (/^saved/i.test(desc)) {
+    title = 'Saved!';
+    desc = desc.replace(/^saved\s*[:-]?\s*/i, '');
+    if (!desc) desc = 'Changes successfully recorded';
+  } else if (/^cleared/i.test(desc)) {
+    title = 'Cleared!';
+    desc = desc.replace(/^cleared\s*[:-]?\s*/i, '');
+  } else if (/^restored/i.test(desc)) {
+    title = 'Restored!';
+  } else if (/^signed in/i.test(desc)) {
+    title = 'Welcome Back!';
+  } else if (/^signed out/i.test(desc)) {
+    title = 'Signed Out';
+  } else if (/^exported/i.test(desc)) {
+    title = 'Export Complete!';
+  } else if (/could not|failed|error|cannot/i.test(desc) || k === 'red') {
+    title = 'Attention';
+  } else if (k === 'amber') {
+    title = 'System Notice';
+  } else if (k === 'blue') {
+    title = 'Information';
+  } else if (k === 'green') {
+    title = 'Success!';
+  }
+
+  el.className = 'toast apple-notif notif-' + k;
+  el.innerHTML = `
+    <div class="apple-notif-badge">
+      <img src="/logo-symbol.png" alt="A0 Logo" class="apple-notif-logo" onerror="this.onerror=null; this.src='/logo.png';">
+    </div>
+    <div class="apple-notif-content">
+      <div class="apple-notif-title">${escapeHTML(title)}</div>
+      <div class="apple-notif-desc" title="${escapeHTML(desc)}">${escapeHTML(desc)}</div>
+    </div>
+    <button type="button" class="apple-notif-close" aria-label="Dismiss">&times;</button>
+  `;
+
   el.hidden = false;
+  el.classList.remove('apple-notif-closing');
+
+  const closeBtn = el.querySelector('.apple-notif-close');
+  if (closeBtn) {
+    closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      clearTimeout(toastTimer);
+      el.classList.add('apple-notif-closing');
+      setTimeout(() => {
+        el.hidden = true;
+        el.classList.remove('apple-notif-closing');
+      }, 240);
+    };
+  }
+
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
+  toastTimer = setTimeout(() => {
+    el.classList.add('apple-notif-closing');
+    setTimeout(() => {
+      el.hidden = true;
+      el.classList.remove('apple-notif-closing');
+    }, 240);
+  }, 3400);
 }
 
 // =========================================================================

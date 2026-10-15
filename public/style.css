@@ -5509,14 +5509,204 @@ textarea.field-readonly {
 .section-heading svg { width: 22px; height: 22px; color: var(--accent); }
 .section-heading h2 { font-size: 16.5px; margin: 0; font-weight: 700; color: var(--text); }
 
+/* ==========================================================================
+   APPLE-STYLE PUSH NOTIFICATION BANNER (Exact Match to Reference)
+   ========================================================================== */
 .toast {
-  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-  background: #111827; border: 1px solid #111827;
-  padding: 10px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15); z-index: 99999;
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 320px;
+  max-width: 460px;
+  padding: 8px 14px 8px 10px;
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 9999px;
+  box-shadow: 
+    0 16px 38px -6px rgba(15, 23, 42, 0.16),
+    0 4px 14px rgba(15, 23, 42, 0.08),
+    inset 0 1px 1.5px rgba(255, 255, 255, 1);
+  z-index: 999999;
+  cursor: default;
+  user-select: none;
+  animation: appleNotifSpring 0.44s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
-.toast.show-green { border-left: 4px solid var(--green); }
-.toast.show-red { border-left: 4px solid var(--red); }
+
+.toast:hover {
+  transform: translateX(-50%) translateY(2px) scale(1.01);
+  box-shadow: 
+    0 20px 42px -6px rgba(15, 23, 42, 0.20),
+    0 6px 18px rgba(15, 23, 42, 0.10);
+}
+
+.toast.apple-notif-closing {
+  animation: appleNotifDismiss 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes appleNotifSpring {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -46px) scale(0.90);
+    filter: blur(6px);
+  }
+  65% {
+    opacity: 1;
+    transform: translate(-50%, 4px) scale(1.02);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes appleNotifDismiss {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -28px) scale(0.92);
+    filter: blur(4px);
+  }
+}
+
+/* Notification Circular Logo Badge (Matching Image 2 Reference) */
+.apple-notif-badge {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #D1FAE5 0%, #BAE6FD 50%, #C7F9E9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.95),
+    0 2px 6px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  position: relative;
+  overflow: hidden;
+}
+
+.toast.notif-green .apple-notif-badge {
+  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 50%, #BAE6FD 100%);
+}
+
+.toast.notif-red .apple-notif-badge {
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+}
+
+.toast.notif-amber .apple-notif-badge {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+}
+
+.apple-notif-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12));
+}
+
+/* Notification Text Content */
+.apple-notif-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5px;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.apple-notif-title {
+  font-family: var(--font-heading, -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', sans-serif);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.toast.notif-red .apple-notif-title {
+  color: #DC2626;
+}
+
+.apple-notif-desc {
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif);
+  font-size: 12px;
+  color: #64748B;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Close/Dismiss Button */
+.apple-notif-close {
+  background: rgba(15, 23, 42, 0.05);
+  border: none;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  color: #94A3B8;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  margin-left: 2px;
+  padding: 0;
+}
+
+.apple-notif-close:hover {
+  background: rgba(15, 23, 42, 0.12);
+  color: #0F172A;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .toast,
+.dark-preview .toast {
+  background: rgba(22, 27, 34, 0.88);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 
+    0 18px 44px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .apple-notif-title,
+.dark-preview .apple-notif-title {
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .apple-notif-desc,
+.dark-preview .apple-notif-desc {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .apple-notif-close,
+.dark-preview .apple-notif-close {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .apple-notif-close:hover,
+.dark-preview .apple-notif-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #F8FAFC;
+}
 
 /* Scope Selector (VPN Only vs VPN + MDM) */
 .scope-selector-wrap {
