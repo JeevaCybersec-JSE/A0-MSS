@@ -5102,54 +5102,301 @@ textarea.field-readonly {
 
 .metric-prev-ref { font-size: 11.5px; font-family: var(--mono); color: var(--text-faint); margin-top: 5px; }
 
-/* History Drawer */
+/* History Drawer — Modern Unified Typography & Sleek Danger Action */
 .history-drawer {
-  background: #F9FAFB;
+  background: #F8FAFC;
   border-top: 1px solid var(--border);
   padding: 14px 20px;
+  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
 }
 .history-header {
-  display: flex; align-items: center; justify-content: space-between;
-  font-size: 11.5px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em;
-  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-heading, 'Plus Jakarta Sans', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim, #475569);
+  text-transform: none;
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+.hist-count-pill {
+  font-family: var(--font-body, 'Inter', sans-serif) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
 }
 .history-list {
-  display: flex; flex-direction: column; gap: 6px; max-height: 190px; overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
 }
 .history-item {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 7px 12px; border-radius: var(--radius-sm); background: #FFFFFF;
-  border: 1px solid var(--border); font-size: 12px; font-family: var(--mono);
-}
-.hist-time { color: var(--text-faint); font-size: 11px; }
-.hist-val { font-weight: 600; color: var(--text); }
-.hist-inputs { color: var(--text-faint); margin-left: 4px; }
-
-.btn-restore {
-  padding: 3px 8px; font-size: 11px; font-weight: 600; border-radius: 4px;
-  background: #FFFFFF; border: 1px solid var(--border); color: var(--text);
-  cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  font-size: 12.5px;
+  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   transition: all 0.15s ease;
+}
+.history-item:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+.hist-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--font-body, 'Inter', sans-serif) !important;
+  color: var(--text, #0F172A);
+  font-size: 12.5px;
+}
+.hist-badge {
+  font-family: var(--font-body, 'Inter', sans-serif) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.04em !important;
+}
+.hist-user {
+  color: var(--text-dim, #64748B);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-body, 'Inter', sans-serif) !important;
+}
+.hist-user strong {
+  color: var(--text, #0F172A);
+  font-weight: 600;
+}
+.hist-time {
+  color: var(--text-faint, #64748B);
+  font-size: 12px;
+  font-family: var(--font-body, 'Inter', sans-serif) !important;
+}
+.hist-val {
+  font-weight: 700;
+  color: var(--text, #0F172A);
+  font-family: var(--font-body, 'Inter', sans-serif) !important;
+}
+.hist-inputs {
+  color: var(--text-dim, #64748B);
+  font-size: 11.5px;
+  background: #F1F5F9;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-family: var(--font-body, 'Inter', sans-serif) !important;
+  border: 1px solid #E2E8F0;
+}
+.hist-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Modern Pill Restore Button */
+.btn-restore {
+  padding: 5px 11px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  color: #1E293B;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 .btn-restore:hover {
-  background: #F9FAFB; border-color: #D1D5DB;
+  background: #F8FAFC;
+  border-color: #94A3B8;
+  color: #0F172A;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
+.btn-restore svg {
+  color: #64748B;
+  transition: color 0.15s ease;
+}
+.btn-restore:hover svg {
+  color: #0F172A;
+}
+
+/* Modern Sleek Delete Button (Red Danger Pill Matching Design System) */
 .btn-delete-hist {
-  padding: 3px 8px; font-size: 11px; font-weight: 600; border-radius: 4px;
-  background: #FFFFFF; border: 1px solid var(--border); color: var(--text-faint);
-  cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
-  transition: all 0.15s ease;
+  padding: 5px 11px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #DC2626;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(220, 38, 38, 0.05);
+}
+.btn-delete-hist svg {
+  color: #DC2626;
+  transition: color 0.15s ease;
 }
 .btn-delete-hist:hover {
-  background: var(--red-soft); border-color: var(--red-border); color: var(--red);
+  background: #DC2626;
+  border-color: #B91C1C;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.28);
 }
+.btn-delete-hist:hover svg {
+  color: #FFFFFF;
+}
+.btn-delete-hist:active {
+  transform: translateY(0);
+}
+
+/* Clear All Past History Button */
 .btn-clear-all-hist {
-  background: #FFFFFF; border: 1px solid var(--border);
-  color: var(--text-faint); padding: 3px 8px; border-radius: 4px;
-  font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #DC2626;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  cursor: pointer;
+  transition: all 0.18s ease;
 }
 .btn-clear-all-hist:hover {
-  background: var(--red-soft); border-color: var(--red-border); color: var(--red);
+  background: #DC2626;
+  border-color: #B91C1C;
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
+}
+
+/* Dark Mode Overrides for History Drawer */
+[data-theme="dark"] .history-drawer,
+.dark-preview .history-drawer {
+  background: #0B1322;
+  border-color: #1E293B;
+}
+
+[data-theme="dark"] .history-header,
+.dark-preview .history-header {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .history-item,
+.dark-preview .history-item {
+  background: #0F1A2E;
+  border-color: #1E293B;
+  color: #F1F5F9;
+}
+
+[data-theme="dark"] .history-item:hover,
+.dark-preview .history-item:hover {
+  border-color: #334155;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .hist-info,
+.dark-preview .hist-info {
+  color: #F1F5F9;
+}
+
+[data-theme="dark"] .hist-user strong,
+.dark-preview .hist-user strong {
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .hist-val,
+.dark-preview .hist-val {
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .hist-inputs,
+.dark-preview .hist-inputs {
+  background: #172033;
+  border-color: #1E293B;
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .btn-restore,
+.dark-preview .btn-restore {
+  background: #172033;
+  border-color: #334155;
+  color: #F1F5F9;
+}
+
+[data-theme="dark"] .btn-restore:hover,
+.dark-preview .btn-restore:hover {
+  background: #1E293B;
+  border-color: #475569;
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .btn-restore svg,
+.dark-preview .btn-restore svg {
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .btn-restore:hover svg,
+.dark-preview .btn-restore:hover svg {
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .btn-delete-hist,
+.dark-preview .btn-delete-hist {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.32);
+  color: #F87171;
+}
+
+[data-theme="dark"] .btn-delete-hist:hover,
+.dark-preview .btn-delete-hist:hover {
+  background: #DC2626;
+  border-color: #B91C1C;
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .btn-delete-hist svg,
+.dark-preview .btn-delete-hist svg {
+  color: #F87171;
+}
+
+[data-theme="dark"] .btn-delete-hist:hover svg,
+.dark-preview .btn-delete-hist:hover svg {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .btn-clear-all-hist,
+.dark-preview .btn-clear-all-hist {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.32);
+  color: #F87171;
+}
+
+[data-theme="dark"] .btn-clear-all-hist:hover,
+.dark-preview .btn-clear-all-hist:hover {
+  background: #DC2626;
+  border-color: #B91C1C;
+  color: #FFFFFF;
 }
 
 /* Trends */

@@ -4305,9 +4305,9 @@ function renderMetricCard(metric) {
     historyList.forEach((h, idx) => {
       const dateStr = new Date(h.timestamp).toLocaleString();
       const valDisplay = h.computed !== undefined && h.computed !== null ? fmtVal(h.computed, metric.unit) : '(Cleared)';
-      const inputsStr = Object.entries(h.inputs || h.previousInputs || {}).map(([k, v]) => `${k}:${v}`).join(', ');
-      const actBadge = h.action === 'clear' ? '<span class="mini-pill red" style="font-size:10px; padding:1px 5px;">CLEAR</span>' : '<span class="mini-pill green" style="font-size:10px; padding:1px 5px;">SAVED</span>';
-      const userTag = h.user ? `<span class="hist-user" style="color:var(--text-dim, #64748b); font-size:11px;">by <strong>@${escapeHTML(h.user)}</strong></span> &middot; ` : '';
+      const inputsStr = Object.entries(h.inputs || h.previousInputs || {}).map(([k, v]) => `${k}: ${v}`).join(', ');
+      const actBadge = h.action === 'clear' ? '<span class="mini-pill red hist-badge">CLEAR</span>' : '<span class="mini-pill green hist-badge">SAVED</span>';
+      const userTag = h.user ? `<span class="hist-user">by <strong>@${escapeHTML(h.user)}</strong></span> &middot; ` : '';
 
       const canRestore = hasPermission('history:restore');
       const canDelete = hasPermission('history:delete');
@@ -4323,13 +4323,13 @@ function renderMetricCard(metric) {
           <div class="hist-btn-group">
             ${canRestore ? `
               <button type="button" class="btn-restore" data-idx="${idx}" title="Restore this past state">
-                <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 8a5.5 5.5 0 101.2-3.4M2.5 3.5v4.5h4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8a5.5 5.5 0 101.2-3.4M2.5 3.5v4.5h4.5"/></svg>
                 <span>Restore</span>
               </button>
             ` : ''}
             ${canDelete ? `
               <button type="button" class="btn-delete-hist" data-idx="${idx}" title="Permanently delete this entry from history">
-                <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4.5h10M6 4.5V3a1 1 0 011-1h2a1 1 0 011 1v1.5M5 4.5v8a1 1 0 001 1h4a1 1 0 001-1v-8" stroke-linecap="round"/></svg>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                 <span>Delete</span>
               </button>
             ` : ''}
@@ -4342,8 +4342,8 @@ function renderMetricCard(metric) {
     drawer.innerHTML = `
       <div class="history-header">
         <div style="display:flex; align-items:center; gap:8px;">
-          <span>Change History &middot; Past Entries for ${metric.label}</span>
-          <span class="mini-pill trend" style="font-size:10.5px;">${historyList.length} records</span>
+          <span>Change History &middot; Past Entries for ${escapeHTML(metric.label)}</span>
+          <span class="mini-pill trend hist-count-pill">${historyList.length} records</span>
         </div>
         ${canClearAll ? `
           <button type="button" class="btn-clear-all-hist" title="Remove all history entries for this metric">
