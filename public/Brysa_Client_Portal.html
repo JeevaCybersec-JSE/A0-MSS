@@ -1575,8 +1575,8 @@ footer {
     'Endpoint protection coverage': {
       name: 'Endpoint protection coverage %',
       domain: 'Endpoint Management',
-      desc: 'Percentage of endpoints with every required defense layer healthy (Sophos, ManageEngine, VPN, MFA).',
-      formula: 'Min(Sophos, ManageEngine, VPN, MFA healthy) ÷ Managed endpoints × 100',
+      desc: 'Endpoints with every required protection layer healthy (Sophos, ManageEngine, VPN client, MFA — the same device must pass all).',
+      formula: 'Endpoints fully protected ÷ Managed endpoints × 100',
       targetStr: 'Contract Target: ≥ 98.0%',
       dir: 'Higher',
       weightStr: 'High (Weight 2.0)',
@@ -1585,8 +1585,8 @@ footer {
     'Endpoint protection coverage %': {
       name: 'Endpoint protection coverage %',
       domain: 'Endpoint Management',
-      desc: 'Percentage of endpoints with every required defense layer healthy (Sophos, ManageEngine, VPN, MFA).',
-      formula: 'Min(Sophos, ManageEngine, VPN, MFA healthy) ÷ Managed endpoints × 100',
+      desc: 'Endpoints with every required protection layer healthy (Sophos, ManageEngine, VPN client, MFA — the same device must pass all).',
+      formula: 'Endpoints fully protected ÷ Managed endpoints × 100',
       targetStr: 'Contract Target: ≥ 98.0%',
       dir: 'Higher',
       weightStr: 'High (Weight 2.0)',
