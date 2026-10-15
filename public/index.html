@@ -6,8 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A0 MSS KPI Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=9.0">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20261014181200">
 </head>
 
 <body>
@@ -17,105 +18,91 @@
   <div id="cursor-glow" class="cursor-glow-aura" aria-hidden="true"></div>
   <div id="cursor-dot" class="cursor-glow-dot" aria-hidden="true"></div>
 
-  <!-- ===================== LOGIN SCREEN ===================== -->
+  <!-- ===================== LOGIN SCREEN (SOFT NEUMORPHIC UI) ===================== -->
   <div id="login-screen" class="login-screen">
-    <!-- Monochrome Dynamic Network Background Canvas -->
+    <!-- Subtle Background Canvas -->
     <canvas id="login-canvas" class="login-canvas"></canvas>
 
-    <!-- Subtle Enterprise Status Edge Markers (Matching Welcome Page) -->
-    <div class="login-status-corner login-corner-tl" aria-hidden="true">
-      <span class="login-status-indicator"></span>
-      <span class="login-status-mono">SYSTEM ONLINE</span>
-    </div>
-    <div class="login-status-corner login-corner-tr" aria-hidden="true">
-      <span class="login-status-mono">SECURE AUTHENTICATION GATEWAY</span>
-    </div>
-    <div class="login-status-corner login-corner-bl" aria-hidden="true">
-      <span class="login-status-mono">MSS PLATFORM</span>
-    </div>
-    <div class="login-status-corner login-corner-br" aria-hidden="true">
-      <span id="login-status-time" class="login-status-mono">A0-CORE // ENCRYPTED</span>
+    <!-- Ambient 3D Neumorphic Background Shapes (Matching Image 1) -->
+    <div class="neumorph-bg-shape shape-tl" aria-hidden="true"></div>
+    <div class="neumorph-bg-shape shape-tr" aria-hidden="true"></div>
+    <div class="neumorph-bg-shape shape-bl" aria-hidden="true"></div>
+    <div class="neumorph-bg-shape shape-br" aria-hidden="true">
+      <div class="shape-br-text">
+        <span>MORE</span>
+        <span>THAN</span>
+        <span>A GAME</span>
+        <div class="shape-br-dash"></div>
+      </div>
     </div>
 
-    <form id="login-form" class="login-card" autocomplete="off">
-      <div class="card-glow-border"></div>
 
-      <!-- Tech HUD Corners -->
-      <div class="tech-corner corner-tl"></div>
-      <div class="tech-corner corner-tr"></div>
-      <div class="tech-corner corner-bl"></div>
-      <div class="tech-corner corner-br"></div>
-
-      <div class="login-badge-row">
-        <span class="cyber-badge"><span class="live-dot"></span> SECURE SOC NODE #A0</span>
-        <span class="cyber-badge secondary">AES-256 GCM</span>
+    <!-- Soft Neumorphic Login Card -->
+    <form id="login-form" class="login-card neumorph-card" autocomplete="off">
+      
+      <!-- Brand Logo in Correct Position -->
+      <div class="login-logo-wrapper">
+        <img src="/logo.png?v=20261014" alt="A0 Cyber Security" class="login-brand-logo" />
       </div>
 
-      <div class="login-mark">
-        <div class="mark-pulse"></div>
-        <div class="mark-scan-ring"></div>
-        <svg viewBox="0 0 40 40" width="38" height="38" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M20 4 L34 10 V19 C34 28 28 34 20 37 C12 34 6 28 6 19 V10 Z" stroke-linejoin="round" />
-          <path d="M14 20 L18 24 L27 14" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </div>
-      <div class="login-title">A0 MSS Dashboard</div>
-      <div class="login-sub">Security Operations Console &middot; Enterprise Security Portal</div>
+      <!-- Headings -->
+      <h2 class="login-title">Welcome Back</h2>
+      <p class="login-sub">Sign in to continue</p>
 
+      <!-- Username or Email Field (Pill Shape) -->
       <div class="input-group">
-        <label class="field-label" for="login-username">Operator Username</label>
-        <div class="input-wrap">
-          <svg class="input-icon" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"
-            stroke-width="1.6">
-            <path d="M16 17v-1.5a3.5 3.5 0 00-3.5-3.5h-5A3.5 3.5 0 004 15.5V17" stroke-linecap="round" />
-            <circle cx="10" cy="6.5" r="3.5" />
-          </svg>
-          <input id="login-username" class="text-input with-icon" type="text" autocomplete="off"
-            placeholder="Enter username" required>
+        <div class="input-wrap neumorph-input-wrap">
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </span>
+          <input id="login-username" class="text-input neumorph-input with-icon" type="text" autocomplete="off" placeholder="Username or Email" required>
         </div>
       </div>
 
+      <!-- Password Field (Pill Shape with Lock & Eye) -->
       <div class="input-group">
-        <label class="field-label" for="login-password">Access Key</label>
-        <div class="input-wrap">
-          <svg class="input-icon" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"
-            stroke-width="1.6">
-            <rect x="4" y="9" width="12" height="8.5" rx="2" />
-            <path d="M7 9V6a3 3 0 016 0v3" stroke-linecap="round" />
-          </svg>
-          <input id="login-password" class="text-input with-icon has-action-btn" type="password" autocomplete="new-password"
-            placeholder="Enter password" required>
-          <button type="button" id="toggle-password-btn" class="btn-input-action" title="Toggle password visibility">
-            <svg id="eye-icon" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M10 4C5 4 1.7 8.3 1.7 10s3.3 6 8.3 6 8.3-4.3 8.3-6-3.3-6-8.3-6z" />
-              <circle cx="10" cy="10" r="2.5" />
+        <div class="input-wrap neumorph-input-wrap">
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </span>
+          <input id="login-password" class="text-input neumorph-input with-icon has-action-btn" type="password" autocomplete="new-password" placeholder="Password" required>
+          <button type="button" id="toggle-password-btn" class="btn-input-action neumorph-eye-btn" title="Toggle password visibility">
+            <svg id="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
             </svg>
           </button>
         </div>
       </div>
 
+      <!-- Remember Me & Forgot Password -->
+      <div class="login-meta-row">
+        <label class="remember-me-label" for="remember-me">
+          <input type="checkbox" id="remember-me" class="custom-checkbox-native" checked>
+          <span class="custom-checkbox-box">
+            <svg viewBox="0 0 20 20" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3">
+              <path d="M4 10l4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="remember-me-text">Remember Me</span>
+        </label>
+        <a href="javascript:void(0)" id="btn-forgot-password" class="forgot-pass-link">Forgot Password?</a>
+      </div>
+
       <div id="login-error" class="login-error" hidden></div>
 
-      <button type="submit" id="login-btn-submit" class="btn btn-primary login-submit">
-        <span>Sign in to Console</span>
-        <svg class="btn-arrow" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"
-          stroke-width="2">
-          <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
+      <!-- Neumorphic Clean Pill Login Button -->
+      <button type="submit" id="login-btn-submit" class="neumorph-login-btn">
+        <span class="login-btn-text">Login</span>
       </button>
 
-      <!-- Quick Demo Login Pill -->
-      <div class="quick-login-box">
-        <span class="quick-login-label">Quick Sign-in:</span>
-        <button type="button" id="quick-demo-login" class="quick-login-chip" title="Click to autofill Operator credentials">
-          <span class="chip-sparkle">⚡</span>
-          <span>Fill Demo Credentials (Jeeva)</span>
-        </button>
-      </div>
 
-      <div class="login-foot">
-        <span class="live-dot"></span> Local encrypted instance &middot; Data persisted on this node
-      </div>
     </form>
   </div>
 
@@ -153,15 +140,9 @@
         </div>
 
         <!-- Center MSS Shield + Wordmark Core -->
-        <div class="wt-logo-shield-container">
-          <svg class="wt-shield-svg" viewBox="0 0 68 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M34 4 L58 14 L58 34 C58 50 47 62 34 68 C21 62 10 50 10 34 L10 14 Z"
-                  stroke="#0f172a" stroke-width="2.2" stroke-linejoin="round" fill="none"/>
-            <path d="M34 10 L52 18.5 L52 34 C52 47 43 57 34 62 C25 57 16 47 16 34 L16 18.5 Z"
-                  stroke="#0f172a" stroke-width="0.8" stroke-linejoin="round" stroke-opacity="0.35" fill="none"/>
-            <path d="M26 35 L31 41 L43 28" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span class="wt-logo-wordmark">MSS</span>
+        <div class="wt-logo-shield-container" style="background:#ffffff; border:none; box-shadow:0 4px 20px -2px rgba(15,23,42,0.12);">
+          <img src="/logo-symbol.png?v=20261014" alt="A0 Cyber Security" style="width:48px; height:48px; object-fit:contain; display:block; margin:0 auto 2px;" />
+          <span class="wt-logo-wordmark">A0 MSS</span>
         </div>
       </div>
 
@@ -195,35 +176,8 @@
 
     <aside id="main-sidebar" class="sidebar">
       <div class="brand">
-        <div class="brand-a0-icon" id="sidebar-brand-a0" title="A0 MSS KPI Console">
-          <div class="brand-atom-ambient-glow"></div>
-          <div class="brand-atom-stage" id="sidebar-brand-atom-stage">
-            <!-- Orbit 1: Electric Blue / Cyan (Slow CW) -->
-            <div class="brand-atom-orbit brand-orbit-1">
-              <div class="brand-orbit-ellipse brand-ellipse-1"></div>
-              <div class="brand-orbit-satellite brand-spin-cw-1">
-                <span class="brand-atom-particle brand-particle-cyan"></span>
-              </div>
-            </div>
-            <!-- Orbit 2: Subtle Violet (Slow CCW) -->
-            <div class="brand-atom-orbit brand-orbit-2">
-              <div class="brand-orbit-ellipse brand-ellipse-2"></div>
-              <div class="brand-orbit-satellite brand-spin-ccw-2">
-                <span class="brand-atom-particle brand-particle-violet"></span>
-              </div>
-            </div>
-            <!-- Orbit 3: Subtle Pink / Purple Highlight (Very Slow CW) -->
-            <div class="brand-atom-orbit brand-orbit-3">
-              <div class="brand-orbit-ellipse brand-ellipse-3"></div>
-              <div class="brand-orbit-satellite brand-spin-cw-3">
-                <span class="brand-atom-particle brand-particle-pink"></span>
-              </div>
-            </div>
-          </div>
-          <!-- Stable Central Nucleus (Does NOT rotate) -->
-          <div class="brand-a0-nucleus">
-            <span class="brand-a0-text">A0</span>
-          </div>
+        <div class="brand-a0-icon" id="sidebar-brand-a0" role="button" tabindex="0" title="Click logo to toggle sidebar" onclick="window.toggleSidebar && window.toggleSidebar(event)">
+          <img src="/logo-symbol.png?v=20261014" alt="A0 Cyber Security" class="brand-a0-img" />
         </div>
         <div class="brand-text">
           <div class="brand-title">A0 MSS KPI</div>
@@ -239,8 +193,14 @@
       <div class="sidebar-nav-scroll">
         <nav id="nav-primary" class="nav-group">
           <div class="nav-label">Monitor</div>
-          <button class="nav-item" data-view="overview">
-            <span class="nav-icon" data-icon="grid"></span><span>Overview</span>
+          <button class="nav-item active" data-view="overview" style="--item-active-color: #ef4444;" title="Overview">
+            <div class="nav-icon-bubble">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M3 9.5L10 3l7 6.5V17a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M7 18v-6h6v6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="nav-text">Overview</span>
           </button>
         </nav>
 
@@ -251,48 +211,56 @@
 
         <nav class="nav-group">
           <div class="nav-label">Report</div>
-          <button class="nav-item" data-view="exec">
-            <span class="nav-icon" data-icon="file"></span><span>Executive Summary</span>
+          <button class="nav-item" data-view="exec" style="--item-active-color: #3b82f6;" title="Executive Summary">
+            <div class="nav-icon-bubble">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M5 3h10a1 1 0 011 1v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z" stroke-linecap="round"/>
+                <path d="M8 7h4M8 10h4M8 13h2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <span class="nav-text">Executive Summary</span>
           </button>
         </nav>
 
         <!-- Administration: visible only to Super Admin (controlled by app.js updateUserBadge) -->
         <nav id="nav-admin" class="nav-group" style="display:none;">
           <div class="nav-label">Administration</div>
-          <button class="nav-item" data-view="users">
-            <span class="nav-icon">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M10 3a4 4 0 100 8 4 4 0 000-8z" stroke-linecap="round"/>
-                <path d="M4 17a6 6 0 0112 0" stroke-linecap="round"/>
+          <button class="nav-item" data-view="users" style="--item-active-color: #f59e0b;" title="Settings">
+            <div class="nav-icon-bubble">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="10" cy="10" r="3" stroke-linecap="round"/>
+                <path d="M8.5 2.5h3l.5 2.1a6.9 6.9 0 011.6.9l2-1 2.1 2.1-1 2c.4.5.7 1 .9 1.6l2.1.5v3l-2.1.5a6.9 6.9 0 01-.9 1.6l1 2-2.1 2.1-2-1a6.9 6.9 0 01-1.6.9l-.5 2.1h-3l-.5-2.1a6.9 6.9 0 01-1.6-.9l-2 1-2.1-2.1 1-2a6.9 6.9 0 01-.9-1.6l-2.1-.5v-3l2.1-.5a6.9 6.9 0 01.9-1.6l-1-2 2.1-2.1 2 1a6.9 6.9 0 011.6-.9l.5-2.1z" stroke-linejoin="round"/>
               </svg>
-            </span>
-            <span>User Management</span>
+            </div>
+            <span class="nav-text">Settings</span>
           </button>
-          <button class="nav-item" data-view="audit">
-            <span class="nav-icon">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+          <button class="nav-item" data-view="audit" style="--item-active-color: #06b6d4;" title="Audit Logs">
+            <div class="nav-icon-bubble">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-            </span>
-            <span>Audit Logs</span>
+            </div>
+            <span class="nav-text">Audit Logs</span>
           </button>
         </nav>
       </div>
 
       <div class="sidebar-foot">
-        <div class="user-chip">
-          <span class="user-dot"></span>
+        <div class="user-chip" title="Operator Profile">
+          <div class="user-avatar-wrap">
+            <span class="avatar-initials">J</span>
+          </div>
           <div class="user-meta">
             <span id="user-name">Jeeva</span>
             <span id="user-role-badge" class="user-role-badge superadmin">Super Admin</span>
           </div>
         </div>
         <button id="logout-btn" class="btn-sidebar-logout" title="Sign out of account">
-          <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M7 16H4.5a1.5 1.5 0 01-1.5-1.5V5.5A1.5 1.5 0 014.5 4H7" stroke-linecap="round" />
             <path d="M12 14l4-4-4-4M16 10H7" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          <span>Sign Out</span>
+          <span>Logout</span>
         </button>
       </div>
     </aside>
@@ -300,47 +268,18 @@
     <div class="main-col">
       <header class="topbar">
         <div class="topbar-left">
-          <!-- Ultra-Dynamic A0 Signature Menu Button (Matching Brand A0) -->
-          <button id="sidebar-toggle-a0" class="btn-a0-toggle" onclick="window.toggleSidebar && window.toggleSidebar(event)" title="Toggle Navigation Sidebar (A0)">
-            <div class="a0-btn-icon-wrap" aria-hidden="true">
-              <div class="a0-atom-box" id="a0-atom-container">
-                <div class="a0-atom-ambient-glow"></div>
-                <div class="a0-atom-stage">
-                  <!-- Orbit 1: Electric Blue / Cyan (Slow CW) -->
-                  <div class="a0-atom-orbit orbit-1">
-                    <div class="a0-orbit-ellipse ellipse-1"></div>
-                    <div class="a0-orbit-satellite spin-cw-1">
-                      <span class="a0-atom-particle particle-cyan"></span>
-                    </div>
-                  </div>
-                  <!-- Orbit 2: Violet / Deep Blue (Slow CCW) -->
-                  <div class="a0-atom-orbit orbit-2">
-                    <div class="a0-orbit-ellipse ellipse-2"></div>
-                    <div class="a0-orbit-satellite spin-ccw-2">
-                      <span class="a0-atom-particle particle-violet"></span>
-                    </div>
-                  </div>
-                  <!-- Orbit 3: Subtle Magenta / Purple (Extremely Slow CW) -->
-                  <div class="a0-atom-orbit orbit-3">
-                    <div class="a0-orbit-ellipse ellipse-3"></div>
-                    <div class="a0-orbit-satellite spin-cw-3">
-                      <span class="a0-atom-particle particle-pink"></span>
-                    </div>
-                  </div>
-                  <!-- Central Stable Nucleus -->
-                  <div class="a0-atom-nucleus">
-                    <span class="a0-btn-icon-text">A0</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="a0-btn-info">
-              <div class="a0-btn-title-row">
-                <span class="a0-btn-title">A0 MENU</span>
-                <span class="a0-btn-live-dot"></span>
-              </div>
-              <span class="a0-btn-sub">Ops Console</span>
-            </div>
+          <!-- Mobile-only Brand Logo Toggle (Desktop toggles from the sidebar rail logo) -->
+          <button id="mobile-brand-toggle" class="brand-a0-icon mobile-brand-toggle" onclick="window.toggleSidebar && window.toggleSidebar(event)" title="Toggle Navigation Sidebar" aria-label="Toggle Navigation Sidebar">
+            <img src="/logo-symbol.png?v=20261014" alt="A0 Cyber Security" class="brand-a0-img" />
+          </button>
+          <!-- Legacy Toggle button kept hidden for script safety -->
+          <button id="sidebar-toggle-a0" class="sidebar-toggle-square" onclick="window.toggleSidebar && window.toggleSidebar(event)" title="Toggle Navigation Sidebar" style="display:none !important;" aria-hidden="true" tabindex="-1">
+            <svg class="toggle-icon-bars" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <path d="M4 6h12M4 10h12M4 14h12"/>
+            </svg>
+            <svg class="toggle-icon-close" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="display:none;">
+              <path d="M5 5l10 10M15 5L5 15"/>
+            </svg>
           </button>
 
           <div class="topbar-title">
@@ -350,24 +289,69 @@
         </div>
 
         <div class="topbar-controls">
-          <div class="month-selector-group">
-            <button id="prev-month-btn" class="btn-icon-nav" title="Previous Month">
+          <div class="month-selector-group" id="month-selector-container">
+            <button id="prev-month-btn" class="btn-icon-nav" title="Previous Month" type="button">
               <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </button>
-            <label class="month-picker" title="Reporting month">
+            <button type="button" class="month-picker" id="month-picker-trigger" title="Select Reporting Month">
               <svg class="month-picker-cal-icon" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
                 <rect x="3" y="4" width="14" height="13" rx="1.5"/>
                 <path d="M3 8h14M7 2.3v3M13 2.3v3" stroke-linecap="round"/>
               </svg>
-              <input id="month-input" type="month">
-            </label>
-            <button id="next-month-btn" class="btn-icon-nav" title="Next Month">
+              <span id="month-display-text" class="month-display-text">February 2026</span>
+              <svg class="month-picker-caret" viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 8l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input id="month-input" type="hidden">
+            </button>
+            <button id="next-month-btn" class="btn-icon-nav" title="Next Month" type="button">
               <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M7.5 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </button>
+
+            <!-- Custom Ultra-Modern Dark Glow Calendar Widget (Matching Reference UI) -->
+            <div id="custom-calendar-popup" class="cal-card-popup" style="display: none;" role="dialog" aria-label="Calendar month picker">
+              <!-- Top Violet Glowing Notch Bar & Arch Cutout -->
+              <div class="cal-top-notch-wrap">
+                <div class="cal-top-notch-bar"></div>
+                <div class="cal-top-notch-arch"></div>
+              </div>
+
+              <!-- Ambient Glow Spotlight -->
+              <div class="cal-ambient-glow"></div>
+
+              <!-- Header: Chevron Left, Month Year, Chevron Right -->
+              <div class="cal-header">
+                <button type="button" id="cal-nav-prev" class="cal-nav-btn" title="Previous Month" aria-label="Previous Month">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18l-6-6 6-6"/>
+                  </svg>
+                </button>
+                <div id="cal-month-title" class="cal-month-title">Feb 2026</div>
+                <button type="button" id="cal-nav-next" class="cal-nav-btn" title="Next Month" aria-label="Next Month">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Year Scroll & Selector Ribbon (Scroll wheel / chevrons) -->
+              <div class="cal-year-scroll-wrapper" id="cal-year-scroll-container" title="Scroll mouse wheel to change year">
+                <button type="button" id="cal-year-scroll-prev" class="cal-year-nav-btn" title="Previous Year" aria-label="Previous Year">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13L5 8L10 3"/></svg>
+                </button>
+                <div class="cal-year-track" id="cal-year-track"></div>
+                <button type="button" id="cal-year-scroll-next" class="cal-year-nav-btn" title="Next Year" aria-label="Next Year">
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3L11 8L6 13"/></svg>
+                </button>
+              </div>
+
+              <!-- 12-Month Selection Grid (JAN to DEC) -->
+              <div id="cal-months-grid" class="cal-months-grid"></div>
+            </div>
           </div>
 
           <!-- Share Client Report Button (SuperAdmin / Admin only) -->
@@ -382,7 +366,7 @@
           </button>
 
           <!-- Direct Client Portal View Link -->
-          <a href="/client.html" target="_blank" class="btn btn-secondary btn-share-topbar" id="view-client-topbar-btn" title="Open Executive Client Report in new tab" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+          <a href="/client.html" target="_blank" class="btn btn-share-topbar" id="view-client-topbar-btn" title="Open Executive Client Report in new tab">
             <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M11 3h6v6M10 10l7-7M16 11v6a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1h6" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -525,7 +509,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="app.js?v=9.0"></script>
+  <script src="app.js?v=20261014144000"></script>
 </body>
 
 </html>

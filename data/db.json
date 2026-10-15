@@ -27,11 +27,6 @@
           "computed": null,
           "rag": null
         },
-        "devices_not_reporting_pct": {
-          "inputs": {},
-          "computed": null,
-          "rag": null
-        },
         "endpoint_protection_coverage_pct": {
           "inputs": {},
           "computed": null,
@@ -247,6 +242,16 @@
           "computed": null,
           "rag": null
         },
+        "devices_not_reporting_pct": {
+          "inputs": {
+            "num": null,
+            "den": null,
+            "devices_not_reporting": null,
+            "managed_endpoints": null
+          },
+          "computed": null,
+          "rag": null
+        },
         "patch_deployment_success_rate_pct": {
           "inputs": {},
           "computed": null,
@@ -302,14 +307,6 @@
           },
           "computed": 1,
           "rag": null
-        },
-        "devices_not_reporting_pct": {
-          "inputs": {
-            "num": 1,
-            "den": 36
-          },
-          "computed": 2.78,
-          "rag": "red"
         },
         "endpoint_protection_coverage_pct": {
           "inputs": {
@@ -629,6 +626,16 @@
           "computed": 0,
           "rag": "green"
         },
+        "devices_not_reporting_pct": {
+          "inputs": {
+            "num": 1,
+            "den": 36,
+            "devices_not_reporting": 1,
+            "managed_endpoints": 36
+          },
+          "computed": 2.78,
+          "rag": "red"
+        },
         "patch_deployment_success_rate_pct": {
           "inputs": {
             "successful": 8,
@@ -690,14 +697,6 @@
           },
           "computed": 0,
           "rag": null
-        },
-        "devices_not_reporting_pct": {
-          "inputs": {
-            "num": 0,
-            "den": 37
-          },
-          "computed": 0,
-          "rag": "green"
         },
         "endpoint_protection_coverage_pct": {
           "inputs": {
@@ -1017,6 +1016,16 @@
           "computed": 0,
           "rag": "green"
         },
+        "devices_not_reporting_pct": {
+          "inputs": {
+            "num": 0,
+            "den": 37,
+            "devices_not_reporting": 0,
+            "managed_endpoints": 37
+          },
+          "computed": 0,
+          "rag": "green"
+        },
         "patch_deployment_success_rate_pct": {
           "inputs": {
             "successful": 20,
@@ -1078,14 +1087,6 @@
           },
           "computed": 2,
           "rag": null
-        },
-        "devices_not_reporting_pct": {
-          "inputs": {
-            "num": 2,
-            "den": 37
-          },
-          "computed": 5.41,
-          "rag": "red"
         },
         "endpoint_protection_coverage_pct": {
           "inputs": {
@@ -1405,6 +1406,16 @@
           "computed": 0,
           "rag": "green"
         },
+        "devices_not_reporting_pct": {
+          "inputs": {
+            "num": 2,
+            "den": 37,
+            "devices_not_reporting": 2,
+            "managed_endpoints": 37
+          },
+          "computed": 5.41,
+          "rag": "red"
+        },
         "patch_deployment_success_rate_pct": {
           "inputs": {
             "successful": 10,
@@ -1466,14 +1477,6 @@
           },
           "computed": 0,
           "rag": null
-        },
-        "devices_not_reporting_pct": {
-          "inputs": {
-            "num": 0,
-            "den": 38
-          },
-          "computed": 0,
-          "rag": "green"
         },
         "endpoint_protection_coverage_pct": {
           "inputs": {
@@ -1793,6 +1796,16 @@
           "computed": 0,
           "rag": "green"
         },
+        "devices_not_reporting_pct": {
+          "inputs": {
+            "num": 0,
+            "den": 38,
+            "devices_not_reporting": 0,
+            "managed_endpoints": 38
+          },
+          "computed": 0,
+          "rag": "green"
+        },
         "patch_deployment_success_rate_pct": {
           "inputs": {
             "successful": 30,
@@ -1811,9 +1824,11 @@
         }
       },
       "narrative": {
-        "risks": "",
-        "improvements": "",
-        "actions": ""
+        "topRisks": "How is it ?\n",
+        "improvements": "Good or Nice ",
+        "plannedActions": "Any changes u want ?\n",
+        "updatedAt": "2026-10-12T13:37:01.467Z",
+        "updatedBy": "Jeeva"
       }
     },
     "2026-06": {
@@ -1839,11 +1854,6 @@
           "rag": null
         },
         "devices_not_reporting": {
-          "inputs": {},
-          "computed": null,
-          "rag": null
-        },
-        "devices_not_reporting_pct": {
           "inputs": {},
           "computed": null,
           "rag": null
@@ -2060,6 +2070,16 @@
         },
         "policy_exceptions_open": {
           "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "devices_not_reporting_pct": {
+          "inputs": {
+            "num": null,
+            "den": null,
+            "devices_not_reporting": null,
+            "managed_endpoints": null
+          },
           "computed": null,
           "rag": null
         },
@@ -2107,11 +2127,6 @@
           "computed": null,
           "rag": null
         },
-        "devices_not_reporting_pct": {
-          "inputs": {},
-          "computed": null,
-          "rag": null
-        },
         "endpoint_protection_coverage_pct": {
           "inputs": {},
           "computed": null,
@@ -2324,6 +2339,16 @@
         },
         "policy_exceptions_open": {
           "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "devices_not_reporting_pct": {
+          "inputs": {
+            "num": null,
+            "den": null,
+            "devices_not_reporting": null,
+            "managed_endpoints": null
+          },
           "computed": null,
           "rag": null
         },
@@ -2371,11 +2396,6 @@
           "computed": null,
           "rag": null
         },
-        "devices_not_reporting_pct": {
-          "inputs": {},
-          "computed": null,
-          "rag": null
-        },
         "endpoint_protection_coverage_pct": {
           "inputs": {},
           "computed": null,
@@ -2588,6 +2608,16 @@
         },
         "policy_exceptions_open": {
           "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "devices_not_reporting_pct": {
+          "inputs": {
+            "num": null,
+            "den": null,
+            "devices_not_reporting": null,
+            "managed_endpoints": null
+          },
           "computed": null,
           "rag": null
         },
@@ -2635,10 +2665,299 @@
           "computed": null,
           "rag": null
         },
-        "devices_not_reporting_pct": {
+        "endpoint_protection_coverage_pct": {
           "inputs": {},
           "computed": null,
           "rag": null
+        },
+        "patch_compliance_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "critical_patches_outstanding": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "high_patches_outstanding": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "failed_patch_deployments": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "successful_patch_deployments": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "avg_days_to_critical_patch": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "threats_blocked": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "malware_detections": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "ransomware_detections": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "policy_violations": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "devices_outdated_protection": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "devices_outdated_protection_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "security_incidents_raised": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "p1_security_incidents": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "mttd_hours": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "mttr_hours": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "critical_vulns_open": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "high_vulns_open": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "medium_vulns_open": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "vulns_remediated": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "mttr_critical_days": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "open_gt30_sla": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "open_gt60_sla": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "open_gt90_sla": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "mfa_coverage_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "risky_sign_ins": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "user_reported_phishing": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "support_requests": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "incidents_resolved": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "first_time_fix_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "reopened_incidents": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "open_ticket_backlog": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "p1_response_sla_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "p2_response_sla_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "resolution_sla_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "onboarding_completed": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "offboarding_completed": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "iso_evidence_completed": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "config_changes": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "security_recommendations_raised": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "recommendations_completed": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "policy_exceptions_open": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "devices_not_reporting_pct": {
+          "inputs": {
+            "num": null,
+            "den": null,
+            "devices_not_reporting": null,
+            "managed_endpoints": null
+          },
+          "computed": null,
+          "rag": null
+        },
+        "patch_deployment_success_rate_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "recommendations_completion_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        }
+      },
+      "narrative": {
+        "risks": "",
+        "improvements": "",
+        "actions": ""
+      }
+    },
+    "2026-10": {
+      "metrics": {
+        "managed_endpoints": {
+          "inputs": {
+            "value": 15
+          },
+          "computed": 15,
+          "rag": null,
+          "history": [
+            {
+              "timestamp": "2026-10-12T08:20:32.322Z",
+              "action": "clear",
+              "user": "Jeeva",
+              "previousInputs": {
+                "value": 5
+              },
+              "previousComputed": 5,
+              "previousRAG": null
+            }
+          ]
+        },
+        "mobile_devices": {
+          "inputs": {
+            "a": null,
+            "b": null,
+            "choice": "vpn_only"
+          },
+          "computed": null,
+          "rag": null,
+          "history": []
+        },
+        "new_endpoints": {
+          "inputs": {
+            "value": null
+          },
+          "computed": null,
+          "rag": null,
+          "history": []
+        },
+        "removed_endpoints": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "devices_not_reporting": {
+          "inputs": {
+            "value": 4
+          },
+          "computed": 4,
+          "rag": null,
+          "history": []
         },
         "endpoint_protection_coverage_pct": {
           "inputs": {},
@@ -2855,6 +3174,16 @@
           "computed": null,
           "rag": null
         },
+        "devices_not_reporting_pct": {
+          "inputs": {
+            "num": 4,
+            "den": 15,
+            "devices_not_reporting": 4,
+            "managed_endpoints": 15
+          },
+          "computed": 26.67,
+          "rag": "red"
+        },
         "patch_deployment_success_rate_pct": {
           "inputs": {},
           "computed": null,
@@ -2872,7 +3201,7 @@
         "actions": ""
       }
     },
-    "2026-10": {
+    "2026-11": {
       "metrics": {
         "managed_endpoints": {
           "inputs": {},
@@ -2899,7 +3228,271 @@
           "computed": null,
           "rag": null
         },
+        "endpoint_protection_coverage_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "patch_compliance_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "critical_patches_outstanding": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "high_patches_outstanding": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "failed_patch_deployments": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "successful_patch_deployments": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "avg_days_to_critical_patch": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "threats_blocked": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "malware_detections": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "ransomware_detections": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "policy_violations": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "devices_outdated_protection": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "devices_outdated_protection_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "security_incidents_raised": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "p1_security_incidents": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "mttd_hours": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "mttr_hours": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "critical_vulns_open": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "high_vulns_open": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "medium_vulns_open": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "vulns_remediated": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "mttr_critical_days": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "open_gt30_sla": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "open_gt60_sla": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "open_gt90_sla": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "mfa_coverage_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "risky_sign_ins": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "user_reported_phishing": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "support_requests": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "incidents_resolved": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "first_time_fix_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "reopened_incidents": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "open_ticket_backlog": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "p1_response_sla_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "p2_response_sla_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "resolution_sla_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "onboarding_completed": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "offboarding_completed": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "iso_evidence_completed": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "config_changes": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "security_recommendations_raised": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "recommendations_completed": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "policy_exceptions_open": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
         "devices_not_reporting_pct": {
+          "inputs": {
+            "num": null,
+            "den": null,
+            "devices_not_reporting": null,
+            "managed_endpoints": null
+          },
+          "computed": null,
+          "rag": null
+        },
+        "patch_deployment_success_rate_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "recommendations_completion_pct": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        }
+      },
+      "narrative": {
+        "risks": "",
+        "improvements": "",
+        "actions": ""
+      }
+    },
+    "2026-12": {
+      "metrics": {
+        "managed_endpoints": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "mobile_devices": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "new_endpoints": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "removed_endpoints": {
+          "inputs": {},
+          "computed": null,
+          "rag": null
+        },
+        "devices_not_reporting": {
           "inputs": {},
           "computed": null,
           "rag": null
@@ -3119,6 +3712,16 @@
           "computed": null,
           "rag": null
         },
+        "devices_not_reporting_pct": {
+          "inputs": {
+            "num": null,
+            "den": null,
+            "devices_not_reporting": null,
+            "managed_endpoints": null
+          },
+          "computed": null,
+          "rag": null
+        },
         "patch_deployment_success_rate_pct": {
           "inputs": {},
           "computed": null,
@@ -3130,22 +3733,6 @@
           "rag": null
         }
       },
-      "narrative": {
-        "risks": "",
-        "improvements": "",
-        "actions": ""
-      }
-    },
-    "2026-11": {
-      "metrics": {},
-      "narrative": {
-        "risks": "",
-        "improvements": "",
-        "actions": ""
-      }
-    },
-    "2026-12": {
-      "metrics": {},
       "narrative": {
         "risks": "",
         "improvements": "",

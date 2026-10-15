@@ -86,6 +86,7 @@ const ROLES = {
       'history:clear_all',
       'narrative:write',
       'users:manage',
+      'audit:delete',
     ],
   },
   admin: {
@@ -409,6 +410,11 @@ function getSession(req) {
     sessions.delete(token);
     return null;
   }
+  if (user.role && ROLES[user.role]) {
+    session.permissions = ROLES[user.role].permissions;
+    session.role = user.role;
+    session.roleLabel = ROLES[user.role].label;
+  }
   return session;
 }
 
@@ -437,6 +443,11 @@ const MIME = {
   '.js': 'application/javascript; charset=utf-8',
   '.svg': 'image/svg+xml; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
 };
 
 function serveStatic(req, res, pathname) {
@@ -1094,6 +1105,42 @@ const server = http.createServer(async (req, res) => {
         }
       }
       return sendJSON(res, 200, { events });
+    }
+
+    // Delete a single audit log entry by ID (Super Admin only via RBAC)
+    if (pathname.startsWith('/api/audit/') && req.method === 'DELETE') {
+      const session = requirePermission(req, res, 'audit:delete');
+      if (!session) return;
+      const targetId = decodeURIComponent(pathname.slice('/api/audit/'.length).trim());
+      const auditDB = loadAudit();
+      const initialCount = (auditDB.events || []).length;
+      auditDB.events = (auditDB.events || []).filter(e => e.id !== targetId);
+      if (auditDB.events.length === initialCount) {
+        return sendJSON(res, 404, { error: 'Audit event not found' });
+      }
+      try {
+        fs.writeFileSync(AUDIT_PATH, JSON.stringify(auditDB, null, 2), 'utf8');
+      } catch (err) {
+        return sendJSON(res, 500, { error: 'Failed to update audit datastore' });
+      }
+      recordAudit(session.username, 'AUDIT_LOG_DELETED', targetId, 'SUCCESS', { deletedId: targetId });
+      return sendJSON(res, 200, { ok: true, deletedId: targetId });
+    }
+
+    // Clear all audit logs (Super Admin only via RBAC)
+    if ((pathname === '/api/audit' || pathname === '/api/audit/clear') && (req.method === 'DELETE' || req.method === 'POST')) {
+      const session = requirePermission(req, res, 'audit:delete');
+      if (!session) return;
+      const auditDB = loadAudit();
+      const clearedCount = (auditDB.events || []).length;
+      auditDB.events = [];
+      try {
+        fs.writeFileSync(AUDIT_PATH, JSON.stringify(auditDB, null, 2), 'utf8');
+      } catch (err) {
+        return sendJSON(res, 500, { error: 'Failed to clear audit datastore' });
+      }
+      recordAudit(session.username, 'AUDIT_LOGS_PURGED', 'ALL', 'SUCCESS', { clearedCount });
+      return sendJSON(res, 200, { ok: true, clearedCount });
     }
 
     // ---- LIST months with overall RAG and metric breakdowns (for trends / history) ----

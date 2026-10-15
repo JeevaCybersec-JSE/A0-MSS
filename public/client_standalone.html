@@ -94,15 +94,15 @@
 }
 
 [data-theme="dark"] {
-  --bg: #070d18;
-  --bg-subtle: #0b1322;
-  --surface: #0e172a;
-  --surface-glass: rgba(14, 23, 42, 0.88);
-  --surface-card: #0f1a2e;
-  --surface-card-hover: #14223b;
-  --surface-inner: #0a1221;
-  --line: #1e293b;
-  --line-subtle: #172033;
+  --bg: #090c12;
+  --bg-subtle: #0d1118;
+  --surface: #10141d;
+  --surface-glass: rgba(16, 20, 29, 0.88);
+  --surface-card: #121620;
+  --surface-card-hover: #161c28;
+  --surface-inner: #0b0f16;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-subtle: rgba(255, 255, 255, 0.05);
   
   --tx: #f1f5f9;
   --tx-heading: #ffffff;
@@ -118,7 +118,7 @@
   --a-soft: rgba(245, 158, 11, 0.16);
   --r-soft: rgba(239, 68, 68, 0.18);
   --n-soft: rgba(148, 163, 184, 0.14);
-  --line-soft: #1e293b;
+  --line-soft: rgba(255, 255, 255, 0.07);
   --s1: #3b82f6;
   --s2: #60a5fa;
   --s3: #f87171;
@@ -682,11 +682,11 @@ body {
 }
 
 .st {
-  background: var(--surface-card);
-  border-radius: var(--radius-md);
-  padding: 18px 20px;
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-md);
+  background: var(--surface-card, #ffffff);
+  border-radius: 22px;
+  padding: 22px 24px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1);
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -706,8 +706,20 @@ body {
 
 .st:hover {
   transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: 0 24px 48px -8px rgba(15, 23, 42, 0.1), 0 6px 16px -2px rgba(15, 23, 42, 0.04);
+  border-color: rgba(37, 99, 235, 0.25);
+}
+
+[data-theme="dark"] .st {
+  background: linear-gradient(145deg, #151a24 0%, #0d1117 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 36px -4px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .st:hover {
+  transform: translateY(-3px);
+  border-color: rgba(52, 211, 153, 0.4);
+  box-shadow: 0 18px 42px -4px rgba(0, 0, 0, 0.75), 0 0 20px rgba(16, 185, 129, 0.12);
 }
 
 .st small {
@@ -907,17 +919,30 @@ nav.sticky-tabs {
 
 .card {
   background: var(--surface-card, #ffffff);
-  border: 1px solid var(--line, #e2e8f0);
-  border-radius: var(--radius-md, 14px);
-  padding: 22px 24px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 22px;
+  padding: 24px 26px;
   min-width: 0;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
 }
 
 .card:hover {
-  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
-  border-color: rgba(37, 99, 235, 0.3);
+  box-shadow: 0 24px 48px -8px rgba(15, 23, 42, 0.1);
+  border-color: rgba(37, 99, 235, 0.25);
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .card {
+  background: linear-gradient(145deg, #151a24 0%, #0d1117 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 36px -4px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .card:hover {
+  border-color: rgba(52, 211, 153, 0.35);
+  box-shadow: 0 18px 44px -4px rgba(0, 0, 0, 0.75), 0 0 24px rgba(16, 185, 129, 0.1);
+  transform: translateY(-2px);
 }
 
 .exec-hero {
@@ -1433,13 +1458,15 @@ button.exec-kpi-card:hover {
 }
 
 .estate-tile {
-  background: var(--bg);
-  border: 1px solid var(--line-soft);
-  border-radius: 6px;
-  padding: 10px 12px;
+  background: var(--surface-card, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
 }
 
 .estate-tile .tl {
@@ -1459,6 +1486,24 @@ button.exec-kpi-card:hover {
 .estate-tile .sub {
   font-size: 11px;
   color: var(--muted);
+}
+
+[data-theme="dark"] .estate-tile {
+  background: linear-gradient(145deg, #151a24 0%, #0d1117 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .estate-tile .tl {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .estate-tile .vl {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .estate-tile .sub {
+  color: #94a3b8;
 }
 
 /* 2. Security Activity Heatmap Matrix */
@@ -2055,33 +2100,92 @@ button.exec-kpi-card:hover {
 }
 
 .stat {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 16px 18px;
+  background: var(--surface-card, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+  padding: 22px 24px;
   min-width: 0;
-  box-shadow: none;
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1);
   text-align: left;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background: linear-gradient(90deg, var(--brand, #3b82f6), #60a5fa);
+  opacity: 0.9;
+}
+
+.stat:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 48px -8px rgba(15, 23, 42, 0.1), 0 6px 16px -2px rgba(15, 23, 42, 0.04);
+  border-color: rgba(37, 99, 235, 0.25);
 }
 
 .stat .t {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tx-muted, #64748b);
+  margin-bottom: 6px;
 }
 
 .stat .v {
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: -.01em;
-  line-height: 1.2;
+  display: block;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
-  color: var(--ink);
+  color: var(--tx-heading, #0f172a);
+  margin-bottom: 6px;
 }
 
 .stat .d {
+  font-style: normal;
   font-size: 12px;
-  color: var(--muted);
+  font-weight: 600;
+  color: var(--tx-muted, #64748b);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+[data-theme="dark"] .stat {
+  background: linear-gradient(145deg, #151a24 0%, #0d1117 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 14px 36px -4px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .stat:hover {
+  transform: translateY(-3px);
+  border-color: rgba(52, 211, 153, 0.4) !important;
+  box-shadow: 0 18px 42px -4px rgba(0, 0, 0, 0.75), 0 0 20px rgba(16, 185, 129, 0.12) !important;
+}
+
+[data-theme="dark"] .stat .t {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .stat .v {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .stat .d {
+  color: #94a3b8 !important;
 }
 
 /* ============================================================
@@ -2210,21 +2314,61 @@ table.sc {
 }
 
 .mc {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 16px 18px;
+  background: var(--surface-card, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+  padding: 22px 24px;
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   min-width: 0;
-  box-shadow: none;
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1);
   overflow: hidden;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.mc::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background: linear-gradient(90deg, var(--brand, #3b82f6), #60a5fa);
+  opacity: 0.9;
 }
 
 .mc:hover {
-  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 24px 48px -8px rgba(15, 23, 42, 0.1), 0 6px 16px -2px rgba(15, 23, 42, 0.04);
+  border-color: rgba(37, 99, 235, 0.25);
+}
+
+[data-theme="dark"] .mc {
+  background: linear-gradient(145deg, #151a24 0%, #0d1117 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 14px 36px -4px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .mc:hover {
+  transform: translateY(-3px);
+  border-color: rgba(52, 211, 153, 0.4) !important;
+  box-shadow: 0 18px 42px -4px rgba(0, 0, 0, 0.75), 0 0 20px rgba(16, 185, 129, 0.12) !important;
+}
+
+[data-theme="dark"] .mc .val {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .mc .nm {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .mc .row span {
+  color: #94a3b8 !important;
 }
 
 .mc .hd {
@@ -3797,12 +3941,12 @@ table.mini {
 
 .card {
   padding: 28px 32px !important;
-  border-radius: 16px !important;
+  border-radius: 20px !important;
 }
 
 .mc, .stat {
   padding: 22px 26px !important;
-  border-radius: 14px !important;
+  border-radius: 20px !important;
   min-height: 116px !important;
 }
 
@@ -5745,14 +5889,20 @@ button.sla-radial-card:hover {
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
-  background: var(--card);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-lg);
-  padding: 18px 22px;
-  box-shadow: var(--shadow-sm);
+  background: var(--card, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 22px;
+  padding: 22px 26px;
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
-/* Chrome UI Metallic Silver Pill Buttons with Purple Glow Shadow (Download & Print) */
+[data-theme="dark"] .sc-header-bar {
+  background: linear-gradient(145deg, #151a24 0%, #0d1117 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 36px -4px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Chrome UI Metallic Silver Pill Buttons with Subtle Ambient Shadow (Download & Print) */
 .sc-download-btn,
 .chrome-pill-btn,
 #print-portal-btn {
@@ -5777,8 +5927,8 @@ button.sla-radial-card:hover {
   box-shadow:
     inset 0 1.5px 1.5px rgba(255, 255, 255, 0.95),
     inset 0 -1.5px 2px rgba(70, 75, 90, 0.25),
-    0 10px 26px -2px rgba(139, 92, 246, 0.52),
-    0 4px 12px rgba(124, 58, 237, 0.35);
+    0 4px 12px -2px rgba(139, 92, 246, 0.16),
+    0 2px 6px rgba(15, 23, 42, 0.08);
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -5791,8 +5941,8 @@ button.sla-radial-card:hover {
   box-shadow:
     inset 0 1.5px 1.5px rgba(255, 255, 255, 0.95),
     inset 0 -1.5px 2px rgba(70, 75, 90, 0.25),
-    0 6px 18px -2px rgba(139, 92, 246, 0.48),
-    0 3px 8px rgba(124, 58, 237, 0.3);
+    0 3px 8px -2px rgba(139, 92, 246, 0.14),
+    0 1px 4px rgba(15, 23, 42, 0.08);
 }
 
 .sc-download-btn:hover,
@@ -5805,8 +5955,8 @@ button.sla-radial-card:hover {
   box-shadow:
     inset 0 1.5px 1.5px rgba(255, 255, 255, 1),
     inset 0 -1.5px 2px rgba(70, 75, 90, 0.25),
-    0 14px 34px -2px rgba(139, 92, 246, 0.68),
-    0 6px 16px rgba(124, 58, 237, 0.45);
+    0 6px 16px -2px rgba(139, 92, 246, 0.24),
+    0 2px 6px rgba(15, 23, 42, 0.1);
 }
 
 .sc-download-btn:active,
@@ -5816,7 +5966,7 @@ button.sla-radial-card:hover {
   box-shadow:
     inset 0 1px 1px rgba(255, 255, 255, 0.75),
     inset 0 2px 3px rgba(0, 0, 0, 0.25),
-    0 6px 16px -2px rgba(139, 92, 246, 0.42);
+    0 2px 6px -1px rgba(139, 92, 246, 0.15);
 }
 
 [data-theme="dark"] .sc-download-btn,
@@ -5828,8 +5978,16 @@ button.sla-radial-card:hover {
   box-shadow:
     inset 0 1.5px 1.5px rgba(255, 255, 255, 0.85),
     inset 0 -1.5px 2px rgba(30, 35, 45, 0.4),
-    0 12px 32px -2px rgba(168, 85, 247, 0.6),
-    0 4px 14px rgba(139, 92, 246, 0.4);
+    0 4px 14px -2px rgba(168, 85, 247, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] #print-portal-btn {
+  box-shadow:
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.85),
+    inset 0 -1.5px 2px rgba(30, 35, 45, 0.4),
+    0 3px 10px -2px rgba(168, 85, 247, 0.15),
+    0 2px 5px rgba(0, 0, 0, 0.45);
 }
 
 [data-theme="dark"] .sc-download-btn:hover,
@@ -5839,8 +5997,8 @@ button.sla-radial-card:hover {
   box-shadow:
     inset 0 1.5px 1.5px rgba(255, 255, 255, 0.95),
     inset 0 -1.5px 2px rgba(30, 35, 45, 0.4),
-    0 16px 38px -2px rgba(168, 85, 247, 0.75),
-    0 6px 18px rgba(139, 92, 246, 0.5);
+    0 6px 18px -2px rgba(168, 85, 247, 0.25),
+    0 3px 8px rgba(0, 0, 0, 0.6);
 }
 
 .sc-controls-bar {
@@ -6015,27 +6173,34 @@ button.sla-radial-card:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--card);
+  background: var(--card, #ffffff);
   color: var(--ink);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-md, 8px);
-  padding: 12px 18px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  padding: 14px 20px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 .sc-card-row:hover {
-  transform: translateY(-1px);
-  background: var(--surface-card-hover, #fcfdfe);
-  border-color: var(--line, #cbd5e1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+  background: #ffffff;
+  border-color: rgba(37, 99, 235, 0.25);
+  box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="dark"] .sc-card-row {
+  background: linear-gradient(145deg, #131722 0%, #0d1017 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.06);
 }
 
 [data-theme="dark"] .sc-card-row:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(145deg, #161c28 0%, #0f131c 100%);
+  border-color: rgba(52, 211, 153, 0.35);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(16, 185, 129, 0.08);
+  transform: translateY(-2px);
 }
 
 .sc-row-left {
@@ -6250,6 +6415,12 @@ button.sla-radial-card:hover {
   <!-- Top Executive Strip -->
   <header class="top-strip">
     <div class="top-strip-inner">
+      <div class="top-strip-left">
+        <div class="brand-monogram-badge" style="display:inline-flex; align-items:center; gap:10px; background:transparent; border:none; box-shadow:none; padding:0;">
+          <img src="/logo-symbol.png?v=20261014" alt="A0 Cyber Security" class="brand-a0-img" style="width:28px; height:28px; object-fit:contain; display:block; filter:drop-shadow(0 0 1.5px rgba(255,255,255,0.85));" />
+          <span style="font-weight:750; font-size:14px; letter-spacing:0.05em; color:#ffffff;">A0 MSS</span>
+        </div>
+      </div>
       <div class="top-actions">
         <!-- Year Selector -->
         <div class="period-control-group" title="Select Reporting Year">
@@ -10035,7 +10206,9 @@ button.sla-radial-card:hover {
       ?? (hasEpc && hasMe ? Math.round(epc.v[m] * totalAssessed) : (hasMe && hasDnr ? Math.max(0, totalAssessed - dnr.v[m]) : null));
     const dopNum = (state.data?.monthData?.devices_outdated_protection_pct?.inputs?.num)
       ?? (hasDop ? dop.v[m] : null);
-    const dnrNum = (state.data?.monthData?.devices_not_reporting_pct?.inputs?.num)
+    const dnrNum = (state.data?.monthData?.devices_not_reporting?.computed)
+      ?? (state.data?.monthData?.devices_not_reporting?.inputs?.value)
+      ?? (state.data?.monthData?.devices_not_reporting_pct?.inputs?.num)
       ?? (hasDnr ? dnr.v[m] : null);
 
     const protCount = epcNum;

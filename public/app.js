@@ -169,6 +169,7 @@ async function boot() {
   initSidebarBrandAtom();
   initLoginControls();
   initShareModal();
+  initCustomCalendar();
 
   if (state.token) {
     try { await initApp(); return; } catch (e) { /* fall through to login */ }
@@ -177,14 +178,27 @@ async function boot() {
 }
 
 // ---------- Sidebar Toggle ("A0" Brand Button) ----------
+// ---------- Sidebar Toggle & Reference Style Rail Navigation ----------
 window.toggleSidebar = function(e) {
   if (e) {
     if (typeof e.preventDefault === 'function') e.preventDefault();
     if (typeof e.stopPropagation === 'function') e.stopPropagation();
   }
+  const sidebar = document.getElementById('main-sidebar');
   const app = document.getElementById('app');
-  if (app) {
-    app.classList.toggle('sidebar-active');
+  if (window.innerWidth < 900) {
+    if (app) app.classList.toggle('sidebar-active');
+  } else {
+    if (sidebar) {
+      sidebar.classList.toggle('collapsed');
+      const isCollapsed = sidebar.classList.contains('collapsed');
+      document.querySelectorAll('.toggle-icon-bars').forEach(el => el.style.display = isCollapsed ? 'block' : 'none');
+      document.querySelectorAll('.toggle-icon-close').forEach(el => el.style.display = isCollapsed ? 'none' : 'block');
+      const brandLogo = document.getElementById('sidebar-brand-a0');
+      if (brandLogo) {
+        brandLogo.setAttribute('title', isCollapsed ? 'Click logo to expand sidebar' : 'Click logo to collapse sidebar');
+      }
+    }
   }
 };
 
@@ -204,28 +218,58 @@ function initSidebarToggle() {
   const closeBtn = document.getElementById('sidebar-close-btn');
   const overlay = document.getElementById('sidebar-overlay');
   const app = document.getElementById('app');
+  const brandLogo = document.getElementById('sidebar-brand-a0');
+  const brandContainer = document.querySelector('.sidebar .brand');
+  const mobileBrandToggle = document.getElementById('mobile-brand-toggle');
 
   if (toggleBtn) {
     toggleBtn.onclick = window.toggleSidebar;
   }
 
+  // Clicking the A0 Logo toggles the sidebar
+  if (brandLogo) {
+    brandLogo.onclick = window.toggleSidebar;
+    brandLogo.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        window.toggleSidebar(e);
+      }
+    });
+  }
+
+  // When sidebar is collapsed rail, clicking anywhere on the brand header expands it
+  if (brandContainer) {
+    brandContainer.addEventListener('click', (e) => {
+      const sidebar = document.getElementById('main-sidebar');
+      if (sidebar && sidebar.classList.contains('collapsed')) {
+        if (e.target !== brandLogo && !brandLogo.contains(e.target)) {
+          window.toggleSidebar(e);
+        }
+      }
+    });
+  }
+
+  if (mobileBrandToggle) {
+    mobileBrandToggle.onclick = window.toggleSidebar;
+  }
+
   if (closeBtn) {
-    closeBtn.onclick = window.closeSidebar;
+    closeBtn.onclick = window.toggleSidebar;
   }
 
   if (overlay) {
     overlay.onclick = window.closeSidebar;
   }
 
-  // Close sidebar on nav-item click
+  // Only close on mobile screen nav-item click
   document.addEventListener('click', (e) => {
     const isNavClick = e.target.closest('.nav-item');
-    if (isNavClick && app) {
+    if (isNavClick && app && window.innerWidth < 900) {
       app.classList.remove('sidebar-active');
     }
   });
 
-  // ESC key dismisses sidebar drawer
+  // ESC key dismisses mobile sidebar drawer
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && app && app.classList.contains('sidebar-active')) {
       app.classList.remove('sidebar-active');
@@ -275,21 +319,81 @@ function initLoginControls() {
     });
   }
 
+  // Helper to fill credentials with visual feedback
+  function fillCredentials(user, pass, label) {
+    const userInp = document.getElementById('login-username');
+    const passInp = document.getElementById('login-password');
+    if (userInp) userInp.value = user;
+    if (passInp) passInp.value = pass;
+    showToast(`Autofilled ${label} credentials (${user})`, 'green');
+    const submitBtn = document.getElementById('login-btn-submit');
+    if (submitBtn) {
+      submitBtn.focus();
+      submitBtn.classList.add('pulse-glow');
+      setTimeout(() => submitBtn.classList.remove('pulse-glow'), 1200);
+    }
+  }
+
   const quickLoginBtn = document.getElementById('quick-demo-login');
   if (quickLoginBtn) {
     quickLoginBtn.addEventListener('click', () => {
-      const userInp = document.getElementById('login-username');
-      const passInp = document.getElementById('login-password');
-      if (userInp) userInp.value = 'Jeeva';
-      if (passInp) passInp.value = '0123';
-      showToast('Operator credentials autofilled (Jeeva)', 'green');
-      const submitBtn = document.getElementById('login-btn-submit');
-      if (submitBtn) {
-        submitBtn.focus();
-        submitBtn.classList.add('pulse-glow');
-        setTimeout(() => submitBtn.classList.remove('pulse-glow'), 1200);
+      fillCredentials('Jeeva', '0123', 'Super Admin');
+    });
+  }
+
+  // Social Login Pill Buttons (Quick Role Selectors from Image 1)
+  const googleBtn = document.getElementById('btn-social-google');
+  if (googleBtn) {
+    googleBtn.addEventListener('click', () => {
+      fillCredentials('Jeeva', '0123', 'Google Auth (Super Admin)');
+    });
+  }
+
+  const discordBtn = document.getElementById('btn-social-discord');
+  if (discordBtn) {
+    discordBtn.addEventListener('click', () => {
+      fillCredentials('admin', 'admin123', 'Discord Auth (Admin)');
+    });
+  }
+
+  const fbBtn = document.getElementById('btn-social-facebook');
+  if (fbBtn) {
+    fbBtn.addEventListener('click', () => {
+      fillCredentials('editor', 'editor123', 'Meta Auth (SecOps)');
+    });
+  }
+
+  // Forgot password helper
+  const forgotBtn = document.getElementById('btn-forgot-password');
+  if (forgotBtn) {
+    forgotBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showToast('Demo Credentials: Jeeva / 0123 (Super Admin), admin / admin123, editor / editor123', 'blue');
+    });
+  }
+
+  // Theme toggle button on top right of neumorphic screen
+  const themeToggleBtn = document.getElementById('login-theme-toggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const loginScreen = document.getElementById('login-screen');
+      if (loginScreen) {
+        loginScreen.classList.toggle('dark-preview');
+        const isDark = loginScreen.classList.contains('dark-preview');
+        themeToggleBtn.style.transform = 'scale(0.92) rotate(180deg)';
+        setTimeout(() => { themeToggleBtn.style.transform = ''; }, 300);
+        showToast(isDark ? 'Neumorphic High-Contrast Dark mode active' : 'Neumorphic Clean Light shade active', 'blue');
       }
     });
+  }
+
+  // Remember me initial load
+  const rememberCb = document.getElementById('remember-me');
+  const savedUser = localStorage.getItem('mss_saved_username');
+  if (rememberCb && savedUser) {
+    rememberCb.checked = true;
+    const userInp = document.getElementById('login-username');
+    if (userInp && !userInp.value) userInp.value = savedUser;
   }
 }
 
@@ -350,6 +454,15 @@ async function onLoginSubmit(e) {
     localStorage.setItem('mss_role', state.role);
     localStorage.setItem('mss_role_label', state.roleLabel);
     localStorage.setItem('mss_permissions', JSON.stringify(state.permissions));
+
+    // Handle Remember Me persistence
+    const rememberCb = document.getElementById('remember-me');
+    if (rememberCb && rememberCb.checked) {
+      localStorage.setItem('mss_saved_username', state.username);
+    } else {
+      localStorage.removeItem('mss_saved_username');
+    }
+
     stopLoginCanvasAnimation();
     // Show premium welcome transition, then reveal dashboard
     await showWelcomeTransition(state.username, async () => {
@@ -437,9 +550,30 @@ async function initApp() {
   if (monthInput && state.month) {
     monthInput.value = state.month;
   }
+  updateMonthDisplayLabel();
+  syncCalendarToStateMonth();
   await loadMonthData();
   setView('overview');
 }
+
+const SECTION_COLORS = {
+  'overview': '#ef4444',
+  'exec': '#3b82f6',
+  'users': '#f59e0b',
+  'audit': '#06b6d4',
+  'section:endpoint': '#10b981',
+  'section:endpoints': '#10b981',
+  'section:patch': '#8b5cf6',
+  'section:patching': '#8b5cf6',
+  'section:protection': '#0ea5e9',
+  'section:secops': '#ec4899',
+  'section:vuln': '#f97316',
+  'section:vulnerabilities': '#f97316',
+  'section:identity': '#6366f1',
+  'section:email': '#14b8a6',
+  'section:service': '#3b82f6',
+  'section:compliance': '#10b981'
+};
 
 function buildSectionNav() {
   const nav = document.getElementById('nav-sections');
@@ -448,7 +582,11 @@ function buildSectionNav() {
     const btn = document.createElement('button');
     btn.className = 'nav-item';
     btn.dataset.view = 'section:' + sec.id;
-    btn.innerHTML = `<span class="nav-icon">${ICONS[sec.icon] || ICONS.grid}</span><span>${sec.name}</span><span class="nav-item-dot" id="dot-${sec.id}"></span>`;
+    btn.title = sec.name;
+    const viewKey = 'section:' + sec.id;
+    const color = SECTION_COLORS[viewKey] || '#8b5cf6';
+    btn.style.setProperty('--item-active-color', color);
+    btn.innerHTML = `<div class="nav-icon-bubble">${ICONS[sec.icon] || ICONS.grid}</div><span class="nav-text">${sec.name}</span><span class="nav-item-dot" id="dot-${sec.id}"></span>`;
     btn.addEventListener('click', () => setView('section:' + sec.id));
     nav.appendChild(btn);
   });
@@ -466,8 +604,276 @@ async function loadMonthData() {
   updateSectionDots();
 }
 
+// ---------- Ultra-Modern Dark Glow Calendar Controller (Year Scroll & Month Picker) ----------
+let calViewYear = 2026;
+let calViewMonth = 5; // 1-12
+
+function updateMonthDisplayLabel() {
+  const label = document.getElementById('month-display-text');
+  if (label && state.month) {
+    label.textContent = formatMonthHuman(state.month);
+  }
+}
+
+function syncCalendarToStateMonth() {
+  if (!state.month) return;
+  const parts = state.month.split('-');
+  if (parts.length >= 2) {
+    calViewYear = parseInt(parts[0], 10);
+    calViewMonth = parseInt(parts[1], 10);
+  }
+  renderCustomCalendar();
+}
+
+function initCustomCalendar() {
+  const trigger = document.getElementById('month-picker-trigger');
+  const popup = document.getElementById('custom-calendar-popup');
+  const prevMonthBtn = document.getElementById('cal-nav-prev');
+  const nextMonthBtn = document.getElementById('cal-nav-next');
+  const prevYearBtn = document.getElementById('cal-year-scroll-prev');
+  const nextYearBtn = document.getElementById('cal-year-scroll-next');
+  const yearScrollBox = document.getElementById('cal-year-scroll-container');
+
+  if (state.month) {
+    const parts = state.month.split('-');
+    if (parts.length >= 2) {
+      calViewYear = parseInt(parts[0], 10);
+      calViewMonth = parseInt(parts[1], 10);
+    }
+  }
+
+  updateMonthDisplayLabel();
+  renderCustomCalendar();
+
+  if (trigger && popup) {
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCustomCalendar();
+    });
+  }
+
+  if (prevMonthBtn) {
+    prevMonthBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navigateCalendarMonth(-1);
+    });
+  }
+
+  if (nextMonthBtn) {
+    nextMonthBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navigateCalendarMonth(1);
+    });
+  }
+
+  if (prevYearBtn) {
+    prevYearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navigateCalendarYear(-1);
+    });
+  }
+
+  if (nextYearBtn) {
+    nextYearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navigateCalendarYear(1);
+    });
+  }
+
+  // Interactive mouse wheel scrolling & swipe gestures for years (Fix bi-directional scroll)
+  if (yearScrollBox) {
+    let lastWheelTime = 0;
+    yearScrollBox.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const now = Date.now();
+      if (now - lastWheelTime < 130) return;
+
+      const absX = Math.abs(e.deltaX);
+      const absY = Math.abs(e.deltaY);
+
+      let delta = 0;
+      if (absX > absY && absX > 2) {
+        // Horizontal scroll: scroll right (deltaX > 0) moves forward (+1)
+        // scroll left (deltaX < 0) moves backward (-1)
+        delta = e.deltaX > 0 ? 1 : -1;
+      } else if (absY > 2) {
+        // Vertical wheel: scroll down (deltaY > 0) moves forward (+1)
+        // scroll up (deltaY < 0) moves backward (-1)
+        delta = e.deltaY > 0 ? 1 : -1;
+      }
+
+      if (delta !== 0) {
+        lastWheelTime = now;
+        navigateCalendarYear(delta);
+      }
+    }, { passive: false });
+
+    // Touch & pointer drag swipe support for year ribbon
+    let startX = 0;
+    let isDragging = false;
+    yearScrollBox.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.cal-year-nav-btn')) return;
+      startX = e.clientX;
+      isDragging = true;
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const diffX = e.clientX - startX;
+      if (Math.abs(diffX) > 28) {
+        isDragging = false;
+        // Dragging left moves forward (+1), dragging right moves backward (-1)
+        navigateCalendarYear(diffX < 0 ? 1 : -1);
+      }
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDragging = false;
+    });
+  }
+
+  // Dismiss calendar popup when clicking outside
+  document.addEventListener('click', (e) => {
+    if (popup && popup.style.display !== 'none') {
+      if (!popup.contains(e.target) && !trigger?.contains(e.target)) {
+        closeCustomCalendar();
+      }
+    }
+  });
+
+  // Dismiss calendar popup on ESC
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeCustomCalendar();
+    }
+  });
+}
+
+function toggleCustomCalendar() {
+  const popup = document.getElementById('custom-calendar-popup');
+  const trigger = document.getElementById('month-picker-trigger');
+  if (!popup) return;
+
+  const isOpen = popup.style.display !== 'none';
+  if (isOpen) {
+    closeCustomCalendar();
+  } else {
+    if (state.month) {
+      const parts = state.month.split('-');
+      if (parts.length >= 2) {
+        calViewYear = parseInt(parts[0], 10);
+        calViewMonth = parseInt(parts[1], 10);
+      }
+    }
+    renderCustomCalendar();
+    popup.style.display = 'block';
+    if (trigger) trigger.classList.add('active');
+  }
+}
+
+function closeCustomCalendar() {
+  const popup = document.getElementById('custom-calendar-popup');
+  const trigger = document.getElementById('month-picker-trigger');
+  if (popup) popup.style.display = 'none';
+  if (trigger) trigger.classList.remove('active');
+}
+
+function navigateCalendarMonth(delta) {
+  calViewMonth += delta;
+  if (calViewMonth < 1) {
+    calViewMonth = 12;
+    calViewYear--;
+  } else if (calViewMonth > 12) {
+    calViewMonth = 1;
+    calViewYear++;
+  }
+  renderCustomCalendar();
+}
+
+function navigateCalendarYear(delta) {
+  calViewYear += delta;
+  renderCustomCalendar();
+}
+
+function renderCustomCalendar() {
+  const titleEl = document.getElementById('cal-month-title');
+  const yearTrack = document.getElementById('cal-year-track');
+  const monthsGrid = document.getElementById('cal-months-grid');
+  if (!titleEl && !monthsGrid) return;
+
+  const monthDate = new Date(calViewYear, calViewMonth - 1, 1);
+  const monthNameLong = monthDate.toLocaleString('en-US', { month: 'long' });
+  if (titleEl) {
+    titleEl.textContent = `${monthNameLong} ${calViewYear}`;
+  }
+
+  // 1. Render Year Scroll Track with active highlight & quick jump
+  if (yearTrack) {
+    yearTrack.innerHTML = '';
+    for (let y = calViewYear - 1; y <= calViewYear + 1; y++) {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'cal-year-chip' + (y === calViewYear ? ' active' : '');
+      chip.textContent = y;
+      chip.title = `Switch to year ${y}`;
+      chip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        calViewYear = y;
+        renderCustomCalendar();
+      });
+      yearTrack.appendChild(chip);
+    }
+  }
+
+  // 2. Render 12 Months Grid (JAN through DEC)
+  if (monthsGrid) {
+    monthsGrid.innerHTML = '';
+    const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const [selectedY, selectedM] = (state.month || currentMonthStr()).split('-').map(Number);
+
+    MONTHS_SHORT.forEach((mName, idx) => {
+      const mNum = idx + 1;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cal-month-cell';
+      if (calViewYear === selectedY && mNum === selectedM) {
+        btn.classList.add('selected');
+      }
+      btn.textContent = mName;
+      btn.title = `Select ${mName} ${calViewYear}`;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectCalendarMonth(calViewYear, mNum);
+      });
+      monthsGrid.appendChild(btn);
+    });
+  }
+}
+
+async function selectCalendarMonth(y, m) {
+  calViewYear = y;
+  calViewMonth = m;
+  const monthStr = `${y}-${String(m).padStart(2, '0')}`;
+  state.month = monthStr;
+
+  const monthInput = document.getElementById('month-input');
+  if (monthInput) monthInput.value = state.month;
+
+  updateMonthDisplayLabel();
+  renderCustomCalendar();
+  closeCustomCalendar();
+
+  await loadMonthData();
+  await loadMonthsHistory();
+  renderView();
+  broadcastMainUpdate(state.month);
+}
+
 async function onMonthChange(e) {
   state.month = e.target.value || currentMonthStr();
+  updateMonthDisplayLabel();
+  syncCalendarToStateMonth();
   await loadMonthData();
   await loadMonthsHistory();
   renderView();
@@ -483,6 +889,8 @@ async function shiftMonth(delta) {
   state.month = `${y}-${String(m).padStart(2, '0')}`;
   const monthInput = document.getElementById('month-input');
   if (monthInput) monthInput.value = state.month;
+  updateMonthDisplayLabel();
+  syncCalendarToStateMonth();
   await loadMonthData();
   await loadMonthsHistory();
   renderView();
@@ -826,8 +1234,8 @@ function renderView() {
     subEl.textContent = 'Roll-up for ' + state.month + (!hasPermission('narrative:write') ? ' • Read-Only' : '');
     root.appendChild(renderExecSummary());
   } else if (state.view === 'users') {
-    titleEl.textContent = 'User Management & Access Control';
-    subEl.textContent = 'Role-Based Access Control (RBAC) Administration';
+    titleEl.textContent = 'Settings & Access Control';
+    subEl.textContent = 'System Preferences, User Management & Role-Based Access Control';
     root.appendChild(renderUserManagement());
   } else if (state.view === 'audit') {
     titleEl.textContent = 'System Audit Logs';
@@ -1290,18 +1698,6 @@ let overviewJellyfishField = null;
 
 function initOverviewBgAnimation(container, canvas) {
   stopOverviewBgAnimation();
-  if (!container || !canvas) return;
-  overviewJellyfishField = new OrganicJellyfishField(canvas, {
-    densityDivisor: 22000,
-    minParticles: 36,
-    maxParticles: 70,
-    speedMultiplier: 0.85,
-    baseColor: '51, 65, 85',
-    strokeColor: '71, 85, 105',
-    tendrilColor: '100, 116, 139',
-    container: container
-  });
-  overviewJellyfishField.start();
 }
 
 function stopOverviewBgAnimation() {
@@ -1311,7 +1707,7 @@ function stopOverviewBgAnimation() {
   }
 }
 
-// ---------- Interactive Executive Posture Navigator & Status History Component ----------
+// ---------- Interactive Executive Posture Navigator & Status History Component (Reference-Inspired 3-Card Carousel) ----------
 function buildInteractiveStatusHistoryPanel() {
   const panel = document.createElement('div');
   panel.className = 'panel interactive-history-panel';
@@ -1371,36 +1767,13 @@ function buildInteractiveStatusHistoryPanel() {
     inspectedMonthKey = months[months.length - 1].month;
   }
 
-  let currentView = 'cards'; // 'cards' | 'trajectory' | 'delta'
+  // Carousel Active Index: 0 = SLA Metrics (Left), 1 = Trajectory (Center - Default), 2 = MoM Delta (Right)
+  let activeIndex = 1;
 
   panel.innerHTML = `
-    <div class="ih-header">
-      <div class="ih-title-group">
-        <div class="ih-title-row">
-          <div class="ih-title-icon">
-            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 15l4.5-5 3 3L17 5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M12.5 5H17v4.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <span class="ih-title">Status History &amp; SLA Performance</span>
-        </div>
-        <p class="ih-subtitle">Multi-period posture tracker &middot; Click any month to inspect &middot; 1-click dashboard sync</p>
-      </div>
-      <div class="ih-view-tabs">
-        <button type="button" class="ih-view-tab active" data-view="cards">
-          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5"/></svg>
-          <span>SLA Matrix</span>
-        </button>
-        <button type="button" class="ih-view-tab" data-view="trajectory">
-          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 13l4-5 3 3 5-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>Trajectory</span>
-        </button>
-        <button type="button" class="ih-view-tab" data-view="delta">
-          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v12M3 7l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>MoM Delta</span>
-        </button>
-      </div>
+    <div class="ih-top-center">
+      <h2 class="ih-main-title">Status History &amp; SLA Performance</h2>
+      <p class="ih-main-subtitle">Multi-period posture tracker &bull; Click any month or curve point to inspect</p>
     </div>
 
     <!-- Sleek Timeline Ribbon Track -->
@@ -1408,22 +1781,58 @@ function buildInteractiveStatusHistoryPanel() {
       <div class="ih-ribbon-track" id="ih-ribbon-track"></div>
     </div>
 
-    <!-- Active View Content Container -->
-    <div class="ih-stage-container" id="ih-stage-container"></div>
+    <!-- 3D Interactive Carousel Container -->
+    <div class="ih-carousel-wrapper">
+      <button type="button" class="ih-nav-btn left" id="ih-nav-prev" aria-label="Previous Card">
+        <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4">
+          <path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <div class="ih-carousel-track" id="ih-carousel-track">
+        <!-- Card 0: SLA Metrics -->
+        <div class="ih-carousel-card" id="ih-card-sla" data-card-idx="0">
+          <div id="ih-card-sla-content" class="ih-card-inner"></div>
+        </div>
+
+        <!-- Card 1: Trajectory (Center / Featured) -->
+        <div class="ih-carousel-card" id="ih-card-traj" data-card-idx="1">
+          <div id="ih-card-traj-content" class="ih-card-inner"></div>
+        </div>
+
+        <!-- Card 2: MoM Delta -->
+        <div class="ih-carousel-card" id="ih-card-delta" data-card-idx="2">
+          <div id="ih-card-delta-content" class="ih-card-inner"></div>
+        </div>
+      </div>
+
+      <button type="button" class="ih-nav-btn right" id="ih-nav-next" aria-label="Next Card">
+        <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4">
+          <path d="M7.5 15l5-5-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Carousel Indicators (Pill Dots) -->
+    <div class="ih-indicators" id="ih-indicators">
+      <div class="ih-dot" data-dot-idx="0" title="SLA Metrics"></div>
+      <div class="ih-dot active" data-dot-idx="1" title="Trajectory"></div>
+      <div class="ih-dot" data-dot-idx="2" title="MoM Delta"></div>
+    </div>
+
+    <!-- Bottom Sync / Dashboard Action (Reference-inspired pill) -->
+    <div class="ih-bottom-action-wrap">
+      <button type="button" class="ih-pill-action" id="ih-sync-cta"></button>
+    </div>
   `;
 
   const ribbon = panel.querySelector('#ih-ribbon-track');
-  const stage = panel.querySelector('#ih-stage-container');
-
-  // Tab switching
-  panel.querySelectorAll('.ih-view-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      panel.querySelectorAll('.ih-view-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentView = tab.dataset.view;
-      renderCurrentView();
-    });
-  });
+  const cardSla = panel.querySelector('#ih-card-sla');
+  const cardTraj = panel.querySelector('#ih-card-traj');
+  const cardDelta = panel.querySelector('#ih-card-delta');
+  const navPrev = panel.querySelector('#ih-nav-prev');
+  const navNext = panel.querySelector('#ih-nav-next');
+  const syncBtn = panel.querySelector('#ih-sync-cta');
 
   function getMonthObj(mKey) {
     return months.find(x => x.month === mKey) || months[months.length - 1] || null;
@@ -1459,15 +1868,10 @@ function buildInteractiveStatusHistoryPanel() {
 
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = `ih-ribbon-btn ${isInspected ? 'is-active' : ''}`;
+      btn.className = `m-pill ih-ribbon-btn ${isInspected ? 'active is-active' : ''}`;
       btn.dataset.month = m.month;
-
-      btn.innerHTML = `
-        <span class="ih-ribbon-dot ${color}"></span>
-        <span class="ih-ribbon-text">${mName} '${yearShort}</span>
-        <span class="ih-ribbon-badge ${color}">${hasVeto ? 'VETO' : color.toUpperCase()}</span>
-        ${isDashboardCur ? `<span class="ih-ribbon-cur" title="Currently selected in dashboard">Active</span>` : ''}
-      `;
+      btn.title = `${mName} 20${yearShort}${color !== 'none' ? ` (${hasVeto ? 'VETO' : color.toUpperCase()})` : ''}`;
+      btn.textContent = mName;
 
       btn.addEventListener('click', async () => {
         inspectedMonthKey = m.month;
@@ -1479,7 +1883,7 @@ function buildInteractiveStatusHistoryPanel() {
           renderView();
         } else {
           renderTimelineRibbon();
-          renderCurrentView();
+          renderAllCards();
         }
       });
 
@@ -1487,65 +1891,12 @@ function buildInteractiveStatusHistoryPanel() {
     });
   }
 
-  // Render Cockpit Action Header
-  function buildCockpitHeader(m) {
-    if (!m) return '';
-    const isCur = m.month === state.month;
-    const color = m.overallRAG || 'none';
-    const statusText = color === 'green' ? 'COMPLIANT' : (color === 'amber' ? 'TOLERANCE' : (color === 'red' ? 'BREACHED' : 'NO DATA'));
-    const ovDetails = m.overallDetails || {};
-    const vetoBreaches = ovDetails.vetoBreaches || [];
-    const weightedScore = ovDetails.weightedScore;
-
-    let scoreHtml = '';
-    if (vetoBreaches.length > 0) {
-      scoreHtml = `
-        <div class="ih-cockpit-pill veto" title="${vetoBreaches.join(', ')}">
-          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2l6 11H2L8 2zM8 6v3M8 11.5v.5" stroke-linecap="round"/></svg>
-          <span>VETO: ${vetoBreaches.length} Breach${vetoBreaches.length > 1 ? 'es' : ''}</span>
-        </div>
-      `;
-    } else if (weightedScore !== null && weightedScore !== undefined) {
-      const sCls = weightedScore > 0 ? 'score-green' : (weightedScore < 0 ? 'score-red' : 'score-amber');
-      scoreHtml = `
-        <div class="ih-cockpit-pill score ${sCls}">
-          <span>Score:</span>
-          <strong>${weightedScore > 0 ? '+' : ''}${weightedScore}</strong>
-        </div>
-      `;
-    }
-
-    return `
-      <div class="ih-cockpit-header">
-        <div class="ih-cockpit-left">
-          <div class="ih-cockpit-period">
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
-              <rect x="2" y="3" width="12" height="11" rx="1.5"/>
-              <path d="M2 6.5h12M5 1.5v3M11 1.5v3" stroke-linecap="round"/>
-            </svg>
-            <span>${getMonthLabel(m.month)}</span>
-          </div>
-          <div class="ih-cockpit-rag ${color}">
-            <span class="status-indicator-dot ${color}"></span>
-            <span>${color.toUpperCase()} &middot; ${statusText}</span>
-          </div>
-          ${scoreHtml}
-        </div>
-        <div class="ih-cockpit-right">
-          <button type="button" class="ih-sync-btn ${isCur ? 'is-active-period' : ''}" data-target-month="${m.month}">
-            ${isCur 
-              ? `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5l3.5 3.5 6.5-7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Currently Active</span>`
-              : `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Load ${getMonthLabel(m.month)}</span>`}
-          </button>
-        </div>
-      </div>
-    `;
-  }
-
-  // View 1: 4 SLA Cards Matrix (pixel-perfect matching media_1790846426163.png)
-  function renderCardsView(m) {
+  // Render Card 0: SLA Metrics Content
+  function renderSlaCardContent(m) {
+    const target = panel.querySelector('#ih-card-sla-content');
+    if (!target) return;
     if (!m) {
-      stage.innerHTML = `<div class="empty-note">No monthly data available.</div>`;
+      target.innerHTML = '<div class="empty-note">No monthly data available.</div>';
       return;
     }
     const g = m.green || 0;
@@ -1556,170 +1907,255 @@ function buildInteractiveStatusHistoryPanel() {
     const gPct = Math.round((g / slaTotal) * 100);
     const aPct = Math.round((a / slaTotal) * 100);
     const rPct = Math.round((r / slaTotal) * 100);
+    const color = m.overallRAG || 'none';
 
-    stage.innerHTML = `
-      ${buildCockpitHeader(m)}
-      <div class="ih-quad-grid">
-        <!-- Within Target (Green) -->
-        <div class="ih-quad-card green" role="button" tabindex="0">
-          <div class="ih-quad-accent green"></div>
+    target.innerHTML = `
+      <div class="ih-card-header">
+        <div class="ih-badge-row">
+          <span class="ih-card-tag">SLA MATRIX</span>
+          <span class="ih-card-period-tag ${color}">${getMonthLabel(m.month)} &bull; ${color.toUpperCase()}</span>
+        </div>
+        <div class="ih-card-title">Core SLA Metrics Distribution</div>
+        <div class="ih-card-desc">Evaluated breakdown across all monitored target endpoints</div>
+      </div>
+
+      <div class="ih-quad-grid-compact">
+        <div class="ih-quad-item green">
           <div class="ih-quad-num green">${g}</div>
-          <div class="ih-quad-info">
-            <div class="ih-quad-title">Within Target</div>
-            <div class="ih-quad-sub">${g} of ${slaTotal} SLA targets (${gPct}%)</div>
+          <div class="ih-quad-meta">
+            <div class="ih-quad-lbl">Within Target</div>
+            <div class="ih-quad-sub">${gPct}% of evaluated</div>
           </div>
-          <div class="ih-quad-dot green"></div>
         </div>
-
-        <!-- Attention Required (Amber) -->
-        <div class="ih-quad-card amber" role="button" tabindex="0">
-          <div class="ih-quad-accent amber"></div>
+        <div class="ih-quad-item amber">
           <div class="ih-quad-num amber">${a}</div>
-          <div class="ih-quad-info">
-            <div class="ih-quad-title">Attention Required</div>
-            <div class="ih-quad-sub">${a} of ${slaTotal} SLA targets (${aPct}%)</div>
+          <div class="ih-quad-meta">
+            <div class="ih-quad-lbl">Attention Required</div>
+            <div class="ih-quad-sub">${aPct}% of evaluated</div>
           </div>
-          <div class="ih-quad-dot amber"></div>
         </div>
-
-        <!-- Critical Remediation (Red) -->
-        <div class="ih-quad-card red" role="button" tabindex="0">
-          <div class="ih-quad-accent red"></div>
+        <div class="ih-quad-item red">
           <div class="ih-quad-num red">${r}</div>
-          <div class="ih-quad-info">
-            <div class="ih-quad-title">Critical Remediation</div>
-            <div class="ih-quad-sub">${r} of ${slaTotal} SLA targets (${rPct}%)</div>
+          <div class="ih-quad-meta">
+            <div class="ih-quad-lbl">Critical Remediation</div>
+            <div class="ih-quad-sub">${rPct}% of evaluated</div>
           </div>
-          <div class="ih-quad-dot red"></div>
         </div>
-
-        <!-- Operational Telemetry (Purple) -->
-        <div class="ih-quad-card purple" role="button" tabindex="0">
-          <div class="ih-quad-accent purple"></div>
+        <div class="ih-quad-item purple">
           <div class="ih-quad-num purple">${t}</div>
-          <div class="ih-quad-info">
-            <div class="ih-quad-title">Operational Telemetry</div>
-            <div class="ih-quad-sub">${t} continuous activity &amp; volume trackers</div>
+          <div class="ih-quad-meta">
+            <div class="ih-quad-lbl">Operational Telemetry</div>
+            <div class="ih-quad-sub">${t} active trackers</div>
           </div>
-          <div class="ih-quad-dot purple"></div>
+        </div>
+      </div>
+
+      <div class="ih-metrics-footer-row">
+        <div class="ih-stat-col">
+          <div class="ih-stat-val">${slaTotal}</div>
+          <div class="ih-stat-lbl">Total Targets</div>
+        </div>
+        <div class="ih-stat-col">
+          <div class="ih-stat-val val-green">${gPct}%</div>
+          <div class="ih-stat-lbl">Compliance</div>
+        </div>
+        <div class="ih-stat-col">
+          <div class="ih-stat-val ${r > 0 ? 'val-red' : ''}">${r}</div>
+          <div class="ih-stat-lbl">Critical Breaches</div>
         </div>
       </div>
     `;
-
-    bindActionButtons();
   }
 
-  // View 2: Trajectory Chart View (Smooth Cyber Wave)
-  function renderTrajectoryView(m) {
+  // Render Card 1: Trajectory Content (Reference-Inspired Analytic Bar Card)
+  function renderTrajectoryCardContent(m) {
+    const target = panel.querySelector('#ih-card-traj-content');
+    if (!target) return;
     if (!months.length) {
-      stage.innerHTML = `<div class="empty-note">No monthly data available.</div>`;
+      target.innerHTML = '<div class="empty-note">No monthly data available.</div>';
       return;
     }
 
-    const w = 580;
-    const h = 185;
-    const padL = 40;
-    const padR = 24;
-    const padT = 24;
-    const padB = 30;
+    const w = 680;
+    const h = 230;
+    const padL = 20;
+    const padR = 20;
+    const baselineY = 186;
+    const minH = 34;
+    const maxH = 136;
     const plotW = w - padL - padR;
-    const plotH = h - padT - padB;
     const n = months.length;
+    const colW = n > 0 ? plotW / n : plotW;
+    const barW = Math.min(32, Math.max(22, colW * 0.58));
 
-    let svg = `<svg class="ih-chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">`;
+    // Calculate rates for each month
+    const pts = months.map((item, i) => {
+      const cx = padL + i * colW + colW / 2;
+      const x = cx - barW / 2;
+      const totalSLA = (item.green || 0) + (item.amber || 0) + (item.red || 0);
+      const rate = totalSLA > 0 ? (item.green || 0) / totalSLA : 0.5;
+      const ratePct = Math.round(rate * 100);
+      // Normalized height between minH and maxH
+      const barH = minH + (ratePct / 100) * (maxH - minH);
+      const y = baselineY - barH;
+      const parts = item.month.split('-');
+      const mNum = parseInt(parts[1], 10);
+      const mShort = monthNames[mNum - 1] || parts[1];
+      const mUpper = mShort.toUpperCase();
+      return { x, y, cx, barH, item, ratePct, mShort, mUpper };
+    });
+
+    const curPt = pts.find(p => p.item.month === inspectedMonthKey) || pts[pts.length - 1];
+    const curRate = curPt ? curPt.ratePct : 0;
+    const fullActiveMonthLabel = getMonthLabel(m ? m.month : inspectedMonthKey);
+
+    let svg = `<svg viewBox="0 0 ${w} ${h}">`;
     svg += `
       <defs>
-        <linearGradient id="ihAreaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#2563eb" stop-opacity="0.28"/>
-          <stop offset="70%" stop-color="#2563eb" stop-opacity="0.04"/>
-          <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0"/>
+        <!-- Inactive Bar Gradient (Clean Slate Light Theme Capsule) -->
+        <linearGradient id="ihInactiveBarGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e2e8f0" stop-opacity="0.95"/>
+          <stop offset="60%" stop-color="#cbd5e1" stop-opacity="0.80"/>
+          <stop offset="100%" stop-color="#94a3b8" stop-opacity="0.45"/>
         </linearGradient>
+
+        <!-- Active Bar Gradient (Vibrant Radiant Orange) -->
+        <linearGradient id="ihActiveBarGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff7326"/>
+          <stop offset="60%" stop-color="#f97316"/>
+          <stop offset="100%" stop-color="#ea580c"/>
+        </linearGradient>
+
+        <!-- Floating Card Gradient (Crisp Elevated Glass Card) -->
+        <linearGradient id="ihFloatCardGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.98"/>
+          <stop offset="100%" stop-color="#f8fafc" stop-opacity="0.98"/>
+        </linearGradient>
+
+        <!-- Glow filter for Active Bar -->
+        <filter id="ihOrangeGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="6" result="blur"/>
+          <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+        </filter>
       </defs>
     `;
 
-    // 90% SLA Target guideline
-    const targetY = padT + (1 - 0.90) * plotH;
-    svg += `
-      <line x1="${padL}" y1="${targetY}" x2="${w - padR}" y2="${targetY}" stroke="#10b981" stroke-width="1.2" stroke-dasharray="4 3" opacity="0.85"/>
-      <text x="${w - padR}" y="${targetY - 5}" font-size="9.5" font-weight="700" fill="#059669" text-anchor="end">90% Target</text>
-    `;
-
-    // 50% guideline
-    const midY = padT + 0.5 * plotH;
-    svg += `
-      <line x1="${padL}" y1="${midY}" x2="${w - padR}" y2="${midY}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3 3"/>
-      <text x="${padL - 6}" y="${midY + 3}" font-size="9" fill="#94a3b8" text-anchor="end">50%</text>
-    `;
-
-    // Calculate curve points
-    const pts = months.map((item, i) => {
-      const x = n === 1 ? padL + plotW / 2 : padL + (i / (n - 1)) * plotW;
-      const totalSLA = (item.green || 0) + (item.amber || 0) + (item.red || 0);
-      const rate = totalSLA > 0 ? (item.green || 0) / totalSLA : 0.5;
-      const y = padT + (1 - rate) * plotH;
-      return { x, y, item, rate: Math.round(rate * 100) };
-    });
-
-    // Build smooth cubic bezier curve
-    let linePath = `M ${pts[0].x} ${pts[0].y}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p0 = pts[i];
-      const p1 = pts[i + 1];
-      const cx = (p0.x + p1.x) / 2;
-      linePath += ` C ${cx} ${p0.y}, ${cx} ${p1.y}, ${p1.x} ${p1.y}`;
-    }
-
-    const bottomY = padT + plotH;
-    const areaPath = `${linePath} L ${pts[pts.length - 1].x} ${bottomY} L ${pts[0].x} ${bottomY} Z`;
-
-    svg += `<path d="${areaPath}" fill="url(#ihAreaGrad)" />`;
-    svg += `<path d="${linePath}" fill="none" stroke="#2563eb" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />`;
-
-    // Data points & nodes
-    pts.forEach((pt, idx) => {
+    // Render bars
+    pts.forEach((pt) => {
       const isInspected = pt.item.month === inspectedMonthKey;
-      const parts = pt.item.month.split('-');
-      const mNum = parseInt(parts[1], 10);
-      const mName = monthNames[mNum - 1] || parts[1];
-      const color = pt.item.overallRAG === 'green' ? '#10b981' : (pt.item.overallRAG === 'amber' ? '#f59e0b' : (pt.item.overallRAG === 'red' ? '#ef4444' : '#94a3b8'));
 
-      // Vertical guide
-      svg += `<line x1="${pt.x}" y1="${padT}" x2="${pt.x}" y2="${bottomY}" stroke="${isInspected ? '#2563eb' : '#e2e8f0'}" stroke-width="${isInspected ? '1.5' : '1'}" stroke-dasharray="${isInspected ? 'none' : '2 2'}"/>`;
+      if (!isInspected) {
+        // Inactive glossy light slate pill bar
+        svg += `
+          <g class="ih-bar-col" style="cursor:pointer;">
+            <rect x="${pt.x}" y="${pt.y}" width="${barW}" height="${pt.barH}" rx="${barW / 2}" 
+                  fill="url(#ihInactiveBarGrad)" stroke="#cbd5e1" stroke-width="1" />
+          </g>
+        `;
+      } else {
+        // Active glowing vibrant orange bar
+        svg += `
+          <g class="ih-bar-col active-bar" style="cursor:pointer;">
+            <!-- Outer Glow Aura -->
+            <rect x="${pt.x - 2}" y="${pt.y - 2}" width="${barW + 4}" height="${pt.barH + 4}" rx="${(barW + 4) / 2}" 
+                  fill="#ff5e1a" opacity="0.22" filter="url(#ihOrangeGlow)" />
+            
+            <!-- Main Glowing Radiant Orange Pill -->
+            <rect x="${pt.x}" y="${pt.y}" width="${barW}" height="${pt.barH}" rx="${barW / 2}" 
+                  fill="url(#ihActiveBarGrad)" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1.2" 
+                  style="filter: drop-shadow(0 4px 14px rgba(249, 115, 22, 0.45));" />
 
-      // Pulsing orbit for inspected month
-      if (isInspected) {
-        svg += `<circle cx="${pt.x}" cy="${pt.y}" r="11" fill="none" stroke="#2563eb" stroke-width="1.8" opacity="0.6"/>`;
+            <!-- Vertical Center Highlight Line -->
+            <line x1="${pt.cx}" y1="${pt.y + 14}" x2="${pt.cx}" y2="${baselineY - 14}" 
+                  stroke="rgba(255, 255, 255, 0.75)" stroke-width="1.5" stroke-linecap="round" />
+
+            <!-- Top Circular Checkmark Pin Badge -->
+            <circle cx="${pt.cx}" cy="${pt.y}" r="11" fill="#ff5e1a" stroke="#ffffff" stroke-width="2.4" 
+                    style="filter: drop-shadow(0 2px 6px rgba(249, 115, 22, 0.35));" />
+            <path d="M ${pt.cx - 3.5} ${pt.y} L ${pt.cx - 1} ${pt.y + 3} L ${pt.cx + 4} ${pt.y - 2.5}" 
+                  fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </g>
+        `;
       }
 
-      // Outer & inner circle
-      svg += `<circle cx="${pt.x}" cy="${pt.y}" r="${isInspected ? '6' : '4.5'}" fill="${color}" stroke="#ffffff" stroke-width="2.5" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.15));"/>`;
+      // Bottom Month Labels
+      if (isInspected) {
+        svg += `
+          <text x="${pt.cx}" y="${baselineY + 24}" font-size="11.5" font-weight="800" fill="#ff5e1a" text-anchor="middle" 
+                style="letter-spacing: 0.04em;">${pt.mUpper}</text>
+        `;
+      } else {
+        svg += `
+          <text x="${pt.cx}" y="${baselineY + 24}" font-size="10.5" font-weight="600" fill="#64748b" text-anchor="middle" 
+                style="letter-spacing: 0.04em;">${pt.mUpper}</text>
+        `;
+      }
 
-      // Percentage label above
-      svg += `<text x="${pt.x}" y="${pt.y - 10}" font-size="10" font-weight="700" fill="${isInspected ? '#2563eb' : '#0f172a'}" text-anchor="middle">${pt.rate}%</text>`;
-
-      // Month label below axis
-      svg += `<text x="${pt.x}" y="${h - 8}" font-size="10.5" font-weight="${isInspected ? '800' : '600'}" fill="${isInspected ? '#2563eb' : '#64748b'}" text-anchor="middle">${mName}</text>`;
-
-      // Hover zone
-      const colW = n > 1 ? plotW / (n - 1) : plotW;
-      svg += `<rect class="ih-traj-zone" data-month="${pt.item.month}" x="${pt.x - colW / 2}" y="${padT}" width="${colW}" height="${plotH + 25}" fill="transparent" style="cursor:pointer;"/>`;
+      // Transparent clickable hit zone
+      svg += `
+        <rect class="ih-traj-zone" data-month="${pt.item.month}" x="${pt.cx - colW / 2}" y="0" width="${colW}" height="${h}" 
+              fill="transparent" style="cursor:pointer;" />
+      `;
     });
+
+    // Render Floating Tooltip Card over active month
+    if (curPt) {
+      const curIdx = pts.findIndex(p => p.item.month === inspectedMonthKey);
+      const tw = 142;
+      const th = 64;
+      // Position to right if in left half, else to left of bar
+      let tx = (curIdx < n - 3) ? (curPt.cx + 18) : (curPt.cx - tw - 18);
+      tx = Math.max(12, Math.min(w - tw - 12, tx));
+      const ty = Math.max(10, Math.min(curPt.y - 24, baselineY - th - 20));
+
+      const monthTitle = `${curPt.mShort}, 20${curPt.item.month.split('-')[0].slice(2)}`;
+
+      svg += `
+        <g class="ih-floating-tooltip" style="pointer-events:none;">
+          <!-- Card Body with Glass Elevation -->
+          <rect x="${tx}" y="${ty}" width="${tw}" height="${th}" rx="12" 
+                fill="url(#ihFloatCardGrad)" stroke="#e2e8f0" stroke-width="1.2" 
+                style="filter: drop-shadow(0 8px 22px rgba(15, 23, 42, 0.12));" />
+          
+          <!-- Month Title -->
+          <text x="${tx + 12}" y="${ty + 18}" font-size="11.5" font-weight="750" fill="#0f172a" letter-spacing="-0.01em">${monthTitle}</text>
+          
+          <!-- Row 1: Overall / Compliance -->
+          <text x="${tx + 12}" y="${ty + 37}" font-size="10" font-weight="500" fill="#64748b">Overall</text>
+          <text x="${tx + tw - 12}" y="${ty + 37}" font-size="12" font-weight="800" fill="#0f172a" text-anchor="end">${curRate}%</text>
+
+          <!-- Row 2: Target / Benchmark -->
+          <text x="${tx + 12}" y="${ty + 52}" font-size="10" font-weight="500" fill="#64748b">Benchmark</text>
+          <text x="${tx + tw - 12}" y="${ty + 52}" font-size="11" font-weight="700" fill="#059669" text-anchor="end">&ge; 90%</text>
+        </g>
+      `;
+    }
 
     svg += `</svg>`;
 
-    stage.innerHTML = `
-      ${buildCockpitHeader(m)}
-      <div class="ih-chart-stage-wrap">
-        ${svg}
+    target.innerHTML = `
+      <div class="ih-analytic-header">
+        <div class="ih-analytic-title-col">
+          <div class="ih-analytic-subtitle">Posture Trajectory</div>
+          <div class="ih-analytic-main-val">${curRate}%</div>
+        </div>
+        <div class="ih-analytic-badge-col">
+          <div class="ih-analytic-pill">
+            <span class="ih-analytic-pill-dot"></span>
+            <span>Monthly</span>
+          </div>
+          <div class="ih-analytic-date-sub">${fullActiveMonthLabel}</div>
+        </div>
       </div>
-      <div style="font-size:11px; color:var(--text-faint); display:flex; justify-content:space-between; align-items:center; padding:4px 8px;">
-        <span>Interactive SLA Performance Curve &bull; Click any point to inspect</span>
-        <span>Target: <strong style="color:#059669;">&ge; 90% SLA Compliance</strong></span>
+
+      <div class="ih-analytic-chart-stage">
+        ${svg}
       </div>
     `;
 
-    stage.querySelectorAll('.ih-traj-zone').forEach(zone => {
-      zone.addEventListener('click', async () => {
+    target.querySelectorAll('.ih-traj-zone').forEach(zone => {
+      zone.addEventListener('click', async (e) => {
+        e.stopPropagation();
         const targetM = zone.dataset.month;
         inspectedMonthKey = targetM;
         if (state.month !== targetM) {
@@ -1730,95 +2166,299 @@ function buildInteractiveStatusHistoryPanel() {
           renderView();
         } else {
           renderTimelineRibbon();
-          renderTrajectoryView(getMonthObj(inspectedMonthKey));
+          renderAllCards();
         }
       });
     });
-
-    bindActionButtons();
   }
 
-  // View 3: MoM Delta View
-  function renderDeltaView(m) {
+  // Render Card 2: MoM Delta Content
+  function renderDeltaCardContent(m) {
+    const target = panel.querySelector('#ih-card-delta-content');
+    if (!target) return;
     if (!m) {
-      stage.innerHTML = `<div class="empty-note">No monthly data available.</div>`;
+      target.innerHTML = '<div class="empty-note">No monthly data available.</div>';
       return;
     }
     const idx = months.findIndex(x => x.month === m.month);
     const prev = idx > 0 ? months[idx - 1] : null;
 
     let deltaHtml = '';
+    let prevScore = 0;
+    let curScore = 0;
+    let scoreDiffStr = '0.00';
+
     if (!prev) {
-      deltaHtml = `<div class="empty-note" style="padding:16px;">This is the earliest recorded month in history (${getMonthLabel(m.month)}). Prior comparison not available.</div>`;
+      deltaHtml = `
+        <div class="ih-delta-empty-state">
+          <div style="font-weight:700; font-size:13px; color:#0f172a; margin-bottom:4px;">Earliest Historical Milestone</div>
+          <div style="font-size:11.5px; color:#64748b;">${getMonthLabel(m.month)} represents the origin cycle in security archives. Prior period comparison baseline is not available.</div>
+        </div>
+      `;
     } else {
       const gDiff = (m.green || 0) - (prev.green || 0);
       const rDiff = (m.red || 0) - (prev.red || 0);
-      const aDiff = (m.amber || 0) - (prev.amber || 0);
 
-      const mScore = m.overallDetails && m.overallDetails.weightedScore !== undefined ? m.overallDetails.weightedScore : 0;
-      const pScore = prev.overallDetails && prev.overallDetails.weightedScore !== undefined ? prev.overallDetails.weightedScore : 0;
-      const scoreDiff = (mScore - pScore).toFixed(4);
+      curScore = m.overallDetails && m.overallDetails.weightedScore !== undefined ? m.overallDetails.weightedScore : 0;
+      prevScore = prev.overallDetails && prev.overallDetails.weightedScore !== undefined ? prev.overallDetails.weightedScore : 0;
+      const scoreDiff = (curScore - prevScore).toFixed(2);
+      scoreDiffStr = scoreDiff > 0 ? '+' + scoreDiff : scoreDiff;
 
       deltaHtml = `
-        <div class="ih-delta-grid">
-          <div class="ih-delta-card">
-            <div class="ih-delta-lbl">Prior Period</div>
-            <div class="ih-delta-val">${getMonthLabel(prev.month)}</div>
-            <div class="ih-delta-sub">RAG: <strong>${(prev.overallRAG || 'N/A').toUpperCase()}</strong></div>
+        <div class="ih-delta-grid-compact">
+          <div class="ih-delta-item ${gDiff >= 0 ? 'good' : 'bad'}">
+            <div class="ih-delta-item-header">
+              <span class="ih-delta-item-title">SLA Compliance Shift</span>
+              <span class="ih-delta-item-val">${gDiff >= 0 ? '+' + gDiff : gDiff}</span>
+            </div>
+            <div class="ih-delta-item-sub">${gDiff >= 0 ? '▲ Positive SLA Gain' : '▼ Regressed SLA Target'}</div>
           </div>
-          <div class="ih-delta-card">
-            <div class="ih-delta-lbl">Inspected Period</div>
-            <div class="ih-delta-val">${getMonthLabel(m.month)}</div>
-            <div class="ih-delta-sub">RAG: <strong>${(m.overallRAG || 'N/A').toUpperCase()}</strong></div>
-          </div>
-          <div class="ih-delta-card ${gDiff >= 0 ? 'good' : 'bad'}">
-            <div class="ih-delta-lbl">SLA Compliant (Green)</div>
-            <div class="ih-delta-val">${gDiff >= 0 ? '+' + gDiff : gDiff}</div>
-            <div class="ih-delta-sub">${gDiff >= 0 ? '▲ Improved SLA' : '▼ Regressed SLA'}</div>
-          </div>
-          <div class="ih-delta-card ${rDiff <= 0 ? 'good' : 'bad'}">
-            <div class="ih-delta-lbl">Critical Breaches (Red)</div>
-            <div class="ih-delta-val">${rDiff > 0 ? '+' + rDiff : rDiff}</div>
-            <div class="ih-delta-sub">${rDiff <= 0 ? '▼ Breaches Reduced' : '▲ Breaches Increased'}</div>
+          <div class="ih-delta-item ${rDiff <= 0 ? 'good' : 'bad'}">
+            <div class="ih-delta-item-header">
+              <span class="ih-delta-item-title">Critical Breaches Delta</span>
+              <span class="ih-delta-item-val">${rDiff > 0 ? '+' + rDiff : rDiff}</span>
+            </div>
+            <div class="ih-delta-item-sub">${rDiff <= 0 ? '▼ Breaches Reduced' : '▲ Breaches Increased'}</div>
           </div>
         </div>
       `;
     }
 
-    stage.innerHTML = `
-      ${buildCockpitHeader(m)}
+    const curColor = m.overallRAG || 'none';
+
+    target.innerHTML = `
+      <div class="ih-card-header">
+        <div class="ih-badge-row">
+          <span class="ih-card-tag">MOM DELTA</span>
+          <span class="ih-card-period-tag ${curColor}">${getMonthLabel(m.month)} &bull; ${curColor.toUpperCase()}</span>
+        </div>
+        <div class="ih-card-title">Month-over-Month Shift</div>
+        <div class="ih-card-desc">Comparative audit analytics versus preceding cycle</div>
+      </div>
+
       ${deltaHtml}
+
+      <div class="ih-metrics-footer-row">
+        <div class="ih-stat-col">
+          <div class="ih-stat-val">${prev ? getMonthLabel(prev.month) : 'None'}</div>
+          <div class="ih-stat-lbl">Prior Cycle</div>
+        </div>
+        <div class="ih-stat-col">
+          <div class="ih-stat-val">${getMonthLabel(m.month)}</div>
+          <div class="ih-stat-lbl">Inspected Cycle</div>
+        </div>
+        <div class="ih-stat-col">
+          <div class="ih-stat-val ${parseFloat(scoreDiffStr) >= 0 ? 'val-green' : 'val-red'}">${prev ? scoreDiffStr : 'Baseline'}</div>
+          <div class="ih-stat-lbl">Score Delta</div>
+        </div>
+      </div>
     `;
-
-    bindActionButtons();
   }
 
-  function renderCurrentView() {
-    const curObj = getMonthObj(inspectedMonthKey);
-    if (currentView === 'cards') {
-      renderCardsView(curObj);
-    } else if (currentView === 'trajectory') {
-      renderTrajectoryView(curObj);
+  // Update Bottom Action Button
+  function updateSyncButton(m) {
+    if (!m) return;
+    const isCur = m.month === state.month;
+    if (isCur) {
+      syncBtn.className = 'ih-pill-action active-period';
+      syncBtn.innerHTML = `
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 8.5l3.5 3.5 6.5-7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Currently Active: ${getMonthLabel(m.month)}</span>
+      `;
     } else {
-      renderDeltaView(curObj);
+      syncBtn.className = 'ih-pill-action';
+      syncBtn.innerHTML = `
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Load &amp; Sync ${getMonthLabel(m.month)} to Dashboard</span>
+      `;
     }
   }
 
-  function bindActionButtons() {
-    const btn = stage.querySelector('.ih-sync-btn:not(.is-active-period)');
-    if (btn) {
-      btn.addEventListener('click', async () => {
-        state.month = btn.dataset.targetMonth;
-        const monthInput = document.getElementById('month-input');
-        if (monthInput) monthInput.value = state.month;
-        await loadMonthData();
-        renderView();
-      });
-    }
+  // Render all cards data for current inspected month
+  function renderAllCards() {
+    const curObj = getMonthObj(inspectedMonthKey);
+    renderSlaCardContent(curObj);
+    renderTrajectoryCardContent(curObj);
+    renderDeltaCardContent(curObj);
+    updateSyncButton(curObj);
   }
 
+  // Update 3D card layout & indicators based on activeIndex
+  function updateCarouselPositions() {
+    const cards = [cardSla, cardTraj, cardDelta];
+    const dots = panel.querySelectorAll('.ih-dot');
+
+    cards.forEach((c, idx) => {
+      if (!c) return;
+      c.classList.remove('pos-center', 'pos-left', 'pos-right');
+      const offset = (idx - activeIndex + 3) % 3;
+      if (offset === 0) {
+        c.classList.add('pos-center');
+      } else if (offset === 1) {
+        c.classList.add('pos-right');
+      } else if (offset === 2) {
+        c.classList.add('pos-left');
+      }
+    });
+
+    dots.forEach((dot, idx) => {
+      if (idx === activeIndex) {
+        dot.classList.add('active');
+      } else {
+        dot.classList.remove('active');
+      }
+    });
+  }
+
+  function goToCard(idx) {
+    if (idx < 0) idx = 0;
+    if (idx > 2) idx = 2;
+    if (activeIndex === idx) return;
+    activeIndex = idx;
+    updateCarouselPositions();
+  }
+
+  // Navigation handlers
+  navPrev.addEventListener('click', (e) => {
+    e.stopPropagation();
+    activeIndex = (activeIndex - 1 + 3) % 3;
+    updateCarouselPositions();
+  });
+
+  navNext.addEventListener('click', (e) => {
+    e.stopPropagation();
+    activeIndex = (activeIndex + 1) % 3;
+    updateCarouselPositions();
+  });
+
+  // Mouse Wheel / Trackpad Scroll Support
+  const carouselWrapper = panel.querySelector('.ih-carousel-wrapper');
+  let isWheelCooldown = false;
+  if (carouselWrapper) {
+    carouselWrapper.addEventListener('wheel', (e) => {
+      const dx = e.deltaX;
+      const dy = e.deltaY;
+      if (Math.abs(dx) > 15 || Math.abs(dy) > 25) {
+        e.preventDefault();
+        if (isWheelCooldown) return;
+        isWheelCooldown = true;
+        setTimeout(() => { isWheelCooldown = false; }, 420);
+
+        if (dx > 15 || dy > 25) {
+          activeIndex = (activeIndex + 1) % 3; // Scroll right/down -> next
+        } else {
+          activeIndex = (activeIndex - 1 + 3) % 3; // Scroll left/up -> prev
+        }
+        updateCarouselPositions();
+      }
+    }, { passive: false });
+
+    // Touch Swipe Support (Mobile & Trackpad touch)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchMoved = false;
+
+    carouselWrapper.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchMoved = false;
+      }
+    }, { passive: true });
+
+    carouselWrapper.addEventListener('touchmove', (e) => {
+      touchMoved = true;
+    }, { passive: true });
+
+    carouselWrapper.addEventListener('touchend', (e) => {
+      if (!touchMoved) return;
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX < 0) {
+          activeIndex = (activeIndex + 1) % 3; // Swipe left -> next
+        } else {
+          activeIndex = (activeIndex - 1 + 3) % 3; // Swipe right -> prev
+        }
+        updateCarouselPositions();
+      }
+    }, { passive: true });
+
+    // Mouse Drag Support
+    let isMouseDown = false;
+    let dragStartX = 0;
+    let dragDistance = 0;
+
+    carouselWrapper.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.ih-nav-btn, .ih-traj-zone')) return;
+      isMouseDown = true;
+      dragStartX = e.clientX;
+      dragDistance = 0;
+      carouselWrapper.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
+      dragDistance = e.clientX - dragStartX;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isMouseDown) return;
+      isMouseDown = false;
+      carouselWrapper.style.cursor = '';
+      if (Math.abs(dragDistance) > 40) {
+        if (dragDistance < 0) {
+          activeIndex = (activeIndex + 1) % 3;
+        } else {
+          activeIndex = (activeIndex - 1 + 3) % 3;
+        }
+        updateCarouselPositions();
+      }
+    });
+  }
+
+  // Clicking cards directly transitions them to center
+  cardSla.addEventListener('click', () => {
+    if (activeIndex !== 0) goToCard(0);
+  });
+  cardTraj.addEventListener('click', () => {
+    if (activeIndex !== 1) goToCard(1);
+  });
+  cardDelta.addEventListener('click', () => {
+    if (activeIndex !== 2) goToCard(2);
+  });
+
+  // Indicator dot clicks
+  panel.querySelectorAll('.ih-dot').forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const targetIdx = parseInt(dot.dataset.dotIdx, 10);
+      goToCard(targetIdx);
+    });
+  });
+
+  // Sync button action
+  syncBtn.addEventListener('click', async () => {
+    if (state.month !== inspectedMonthKey) {
+      state.month = inspectedMonthKey;
+      const monthInput = document.getElementById('month-input');
+      if (monthInput) monthInput.value = state.month;
+      await loadMonthData();
+      renderView();
+    }
+  });
+
+  // Initialize
   renderTimelineRibbon();
-  renderCurrentView();
+  renderAllCards();
+  updateCarouselPositions();
 
   return panel;
 }
@@ -1869,7 +2509,7 @@ function renderOverview() {
   const amberPct = Math.round((amber / totalSLA) * 100);
   const redPct = Math.round((red / totalSLA) * 100);
 
-  const statusHeadline = rag === 'green' ? 'COMPLIANT' : (rag === 'amber' ? 'IN TOLERANCE' : (rag === 'red' ? (vetoBreaches.length > 0 ? 'VETO BREACH' : 'SLA BREACHED') : 'NO DATA'));
+  const statusHeadline = rag === 'green' ? 'COMPLIANT' : (rag === 'amber' ? 'TOLERANCE' : (rag === 'red' ? 'CRITICAL' : 'NO DATA'));
   const statusSubLabel = rag === 'green' ? 'Optimal Posture' : (rag === 'amber' ? 'Tolerance Watch' : (rag === 'red' ? 'Critical Action Required' : 'Standby'));
 
   let vetoDetailsHtml = '';
@@ -1879,9 +2519,9 @@ function renderOverview() {
       return found ? found.label : id;
     });
     vetoDetailsHtml = `
-      <div class="sc-veto-tag" title="${vetoNames.join(', ')}">
-        <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 2l6 11H2L8 2zM8 6v3M8 11.5v.5" stroke-linecap="round"/></svg>
-        <span>VETO: ${vetoNames.join(', ')}</span>
+      <div class="sc-veto-tag" title="VETO: ${vetoNames.join(', ')}">
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 2l6 11H2L8 2zM8 6v3M8 11.5v.5" stroke-linecap="round"/></svg>
+        <span class="sc-veto-text">VETO: ${vetoNames.join(', ')}</span>
       </div>
     `;
   }
@@ -1894,17 +2534,15 @@ function renderOverview() {
     <!-- Col 1: Overall Posture -->
     <div class="hud-col hud-col-posture">
       <div class="hud-th">
-        <span class="hud-live-dot rag-${rag || 'none'}"></span>
         <span>SECURITY POSTURE</span>
         <span class="hud-th-sep">&bull;</span>
         <span class="hud-th-period">${state.month}</span>
       </div>
       <div class="hud-td hud-td-posture">
         <span class="hud-posture-title rag-${rag || 'none'}">${statusHeadline}</span>
-        <span class="hud-status-badge rag-${rag || 'none'}">${statusSubLabel}</span>
       </div>
       <div class="hud-sub hud-sub-posture">
-        ${vetoDetailsHtml ? vetoDetailsHtml : `<span class="hud-sub-text">Continuous SOC Posture Audit</span>`}
+        ${vetoDetailsHtml ? vetoDetailsHtml : `<span class="hud-sub-text ${rag === 'red' ? 'sub-warn' : ''}">${statusSubLabel} &bull; SOC Audit</span>`}
       </div>
     </div>
 
@@ -1928,7 +2566,6 @@ function renderOverview() {
     <!-- Col 3: Green / Compliant -->
     <div class="hud-col hud-col-kpi">
       <div class="hud-th th-green">
-        <span class="hud-dot dot-green"></span>
         <span>COMPLIANT</span>
       </div>
       <div class="hud-td">
@@ -1944,7 +2581,6 @@ function renderOverview() {
     <!-- Col 4: Amber / Tolerance -->
     <div class="hud-col hud-col-kpi">
       <div class="hud-th th-amber">
-        <span class="hud-dot dot-amber"></span>
         <span>TOLERANCE</span>
       </div>
       <div class="hud-td">
@@ -1960,7 +2596,6 @@ function renderOverview() {
     <!-- Col 5: Red / Critical -->
     <div class="hud-col hud-col-kpi">
       <div class="hud-th th-red">
-        <span class="hud-dot dot-red"></span>
         <span>CRITICAL</span>
       </div>
       <div class="hud-td">
@@ -1976,7 +2611,6 @@ function renderOverview() {
     <!-- Col 6: Trend Trackers -->
     <div class="hud-col hud-col-kpi">
       <div class="hud-th th-trend">
-        <span class="hud-dot dot-trend"></span>
         <span>OBSERVATION</span>
       </div>
       <div class="hud-td">
@@ -2008,7 +2642,10 @@ function renderOverview() {
   banner.querySelector('#btn-download-status-report').addEventListener('click', downloadStatusReport);
   frag.appendChild(banner);
 
-  // 2. Section cards
+  // 2. Overview Top Row: Section Cards (3x3 Grid) + RAG Distribution (Right Side)
+  const topSectionsRow = document.createElement('div');
+  topSectionsRow.className = 'overview-sections-rag-row';
+
   const grid = document.createElement('div');
   grid.className = 'section-grid';
   state.sections.forEach(sec => {
@@ -2020,32 +2657,72 @@ function renderOverview() {
       if (entry.rag === 'green') g++; else if (entry.rag === 'amber') a++; else if (entry.rag === 'red') r++; else if (m.direction === 'trend') t++;
     });
     const worst = sectionWorstRAG(sec.id);
+    const evaluatedTotal = g + a + r + t;
+    const targetBearing = g + a + r;
+    const slaPct = targetBearing > 0 ? Math.round((g / targetBearing) * 100) + '%' : null;
+
+    let statusClass = 'none';
+    let statusBadgeText = 'NO DATA';
+    let statusSub = 'Pending entry';
+
+    if (targetBearing > 0) {
+      if (r > 0) {
+        statusClass = 'red';
+        statusBadgeText = r === 1 ? '1 ACTION' : `${r} ACTIONS`;
+        statusSub = `${g}/${targetBearing} Targets Met`;
+      } else if (a > 0) {
+        statusClass = 'amber';
+        statusBadgeText = 'TOLERANCE';
+        statusSub = `${g}/${targetBearing} Targets Met`;
+      } else if (g > 0) {
+        statusClass = 'green';
+        statusBadgeText = 'COMPLIANT';
+        statusSub = 'All Targets Met';
+      }
+    } else if (t > 0) {
+      statusClass = 'trend';
+      statusBadgeText = 'TRACKING';
+      statusSub = `${t} Trend Trackers`;
+    }
+
     const card = document.createElement('div');
     card.className = 'section-card' + (worst ? ' rag-' + worst : '');
     card.innerHTML = `
-      <div class="section-card-head">${ICONS[sec.icon] || ''}<span class="section-card-name">${sec.name}</span></div>
-      <div class="section-card-pills">
-        ${g ? `<span class="mini-pill green">${g} OK</span>` : ''}
-        ${a ? `<span class="mini-pill amber">${a} AMBER</span>` : ''}
-        ${r ? `<span class="mini-pill red">${r} RED</span>` : ''}
-        ${t ? `<span class="mini-pill trend">${t} trend</span>` : ''}
-        ${!g && !a && !r && !t ? `<span class="mini-pill trend" style="opacity:.6">No data</span>` : ''}
+      <div class="sec-card-body">
+        <div class="sec-card-left">
+          <div class="sec-icon-box">
+            ${ICONS[sec.icon] || ''}
+          </div>
+          <div class="sec-text-col">
+            <span class="sec-title" title="${escapeHTML(sec.name)}">${escapeHTML(sec.name)}</span>
+            <span class="sec-subtitle">${secMetrics.length} metrics &bull; ${statusSub}</span>
+          </div>
+        </div>
+
+        <div class="sec-card-right">
+          <span class="sec-kpi-value ${statusClass}">${slaPct !== null ? slaPct : (t > 0 ? 'Trend' : '–')}</span>
+        </div>
       </div>
     `;
     card.addEventListener('click', () => setView('section:' + sec.id));
     grid.appendChild(card);
   });
-  frag.appendChild(grid);
-
-  // 3. RAG Distribution & Interactive Cyber Posture Wave History
-  const row = document.createElement('div');
-  row.className = 'chart-row';
 
   const ragPanel = buildRAGDistributionPanel(green, amber, red, trend);
+  topSectionsRow.appendChild(grid);
+  topSectionsRow.appendChild(ragPanel);
+  frag.appendChild(topSectionsRow);
+
+  // Dynamic Glassmorphic Segment Detail Card Slot (Reference Inspired)
+  const detailSlot = document.createElement('div');
+  detailSlot.id = 'overview-pie-detail-card-slot';
+  detailSlot.style.display = 'none';
+  frag.appendChild(detailSlot);
+
+  // 3. Status History & SLA Performance (Full Width)
   const histPanel = buildInteractiveStatusHistoryPanel();
-  row.appendChild(ragPanel);
-  row.appendChild(histPanel);
-  frag.appendChild(row);
+  histPanel.style.marginTop = '22px';
+  frag.appendChild(histPanel);
 
   // 4. Executive Summary Highlights on Overview
   const nar = state.monthData.narrative || {};
@@ -2072,21 +2749,18 @@ function renderOverview() {
       <div class="overview-exec-grid">
         <div class="overview-exec-snippet risk">
           <div class="snip-head">
-            <span class="snip-dot red"></span>
             <span class="snip-label">TOP RISKS</span>
           </div>
           <div class="snip-text">${nar.topRisks && nar.topRisks.trim() ? escapeHTML(nar.topRisks) : '<span class="snip-empty">No critical risks recorded for this period.</span>'}</div>
         </div>
         <div class="overview-exec-snippet improvement">
           <div class="snip-head">
-            <span class="snip-dot green"></span>
             <span class="snip-label">DELIVERED IMPROVEMENTS</span>
           </div>
           <div class="snip-text">${nar.improvements && nar.improvements.trim() ? escapeHTML(nar.improvements) : '<span class="snip-empty">No delivered improvements recorded.</span>'}</div>
         </div>
         <div class="overview-exec-snippet action">
           <div class="snip-head">
-            <span class="snip-dot blue"></span>
             <span class="snip-label">PLANNED NEXT ACTIONS</span>
           </div>
           <div class="snip-text">${nar.plannedActions && nar.plannedActions.trim() ? escapeHTML(nar.plannedActions) : '<span class="snip-empty">No planned actions specified.</span>'}</div>
@@ -2114,6 +2788,9 @@ function renderOverview() {
 
   requestAnimationFrame(() => {
     initOverviewBgAnimation(container, canvas);
+    if (activePieDetailCategory) {
+      openRAGSegmentDetailCard(activePieDetailCategory);
+    }
   });
 
   return container;
@@ -2135,12 +2812,11 @@ function buildRAGDistributionPanel(g, a, r, t) {
   panel.className = 'panel rag-distribution-card';
   const total = g + a + r + t;
 
-  // â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Header
   const titleRow = document.createElement('div');
-  titleRow.className = 'panel-title';
-  titleRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;';
+  titleRow.className = 'rag-card-header';
   titleRow.innerHTML = `
-    <span>RAG distribution</span>
+    <span class="rag-title">RAG Distribution</span>
     <span class="rag-live-indicator"><span class="rag-orbit-dot"></span>LIVE</span>
   `;
   panel.appendChild(titleRow);
@@ -2153,16 +2829,41 @@ function buildRAGDistributionPanel(g, a, r, t) {
     return panel;
   }
 
-  // â”€â”€ SVG constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const VB = 180;             // viewBox square size
-  const CX = 90, CY = 90;    // centre point
-  const R  = 68;              // ring radius
-  const SW = 15;              // ring stroke-width
-  const GAP_DEG = 3.2;        // gap between segments (degrees)
-  const CIRC = 2 * Math.PI * R;
+  // Category definitions with exact counts
+  const ALL_CATS = [
+    { key: 'red',   label: 'Critical Breaches', short: 'Critical', v: r, color: '#ef4444', textColor: '#ffffff' },
+    { key: 'trend', label: 'Trend Trackers',    short: 'Trend',    v: t, color: '#18181b', textColor: '#ffffff' },
+    { key: 'amber', label: 'Tolerance Watch',   short: 'Tolerance',v: a, color: '#f59e0b', textColor: '#ffffff' },
+    { key: 'green', label: 'Targets Met',       short: 'Compliant',v: g, color: '#10b981', textColor: '#ffffff' }
+  ];
+
+  const valid = ALL_CATS.filter(s => s.v > 0);
+
+  // Top-Right Legend with exact counts & percentages
+  const legend = document.createElement('div');
+  legend.className = 'rag-top-legend';
+  legend.innerHTML = valid.map((s, idx) => {
+    const pct = Math.round((s.v / total) * 100);
+    return `
+      <div class="legend-row" data-key="${s.key}" data-idx="${idx}" style="cursor:pointer;">
+        <span class="legend-dot" style="background:${s.color};"></span>
+        <span class="legend-name">${s.label}</span>
+        <span class="legend-count">${s.v} <span style="color:#94a3b8; font-weight:500; font-size:10px;">(${pct}%)</span></span>
+      </div>
+    `;
+  }).join('');
+  panel.appendChild(legend);
+
+  // SVG Geometry (100% mathematically exact proportional donut)
+  const size = 210;
+  const CX = size / 2;
+  const CY = size / 2;
+  const Ro = 86;
+  const Ri = 52;
+  const Rm = (Ro + Ri) / 2;
+  const padAngle = valid.length > 1 ? 0.025 : 0; // ~1.4deg clean separation
   const NS = 'http://www.w3.org/2000/svg';
 
-  /** Create an SVG element with attributes */
   function E(tag, attrs = {}) {
     const e = document.createElementNS(NS, tag);
     for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
@@ -2170,404 +2871,608 @@ function buildRAGDistributionPanel(g, a, r, t) {
   }
 
   const svg = E('svg', {
-    viewBox: `0 0 ${VB} ${VB}`,
-    width: '180', height: '180',
+    viewBox: `0 0 ${size} ${size}`,
+    width: String(size),
+    height: String(size),
     class: 'rag-donut-svg',
     role: 'img',
     'aria-label': `RAG distribution: ${g} OK, ${a} Amber, ${r} Red, ${t} Trend`,
-    style: 'overflow:visible',
   });
 
-  // â”€â”€ Static layer ”” NEVER rotates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const staticG = E('g', { class: 'rag-static' });
-
-  // Track (background ring)
-  staticG.appendChild(E('circle', {
-    cx: CX, cy: CY, r: R,
-    fill: 'none', stroke: '#F1F5F9', 'stroke-width': SW,
-  }));
-  // Outer dashed guide ring
-  staticG.appendChild(E('circle', {
-    cx: CX, cy: CY, r: R + SW / 2 + 7,
-    fill: 'none', stroke: '#E5E7EB',
-    'stroke-width': '0.75', 'stroke-dasharray': '2 8', opacity: '0.65',
-  }));
-  // Inner solid guide ring
-  staticG.appendChild(E('circle', {
-    cx: CX, cy: CY, r: R - SW / 2 - 6,
-    fill: 'none', stroke: '#E5E7EB',
-    'stroke-width': '0.5', opacity: '0.5',
+  // Soft center circle base
+  svg.appendChild(E('circle', {
+    cx: CX, cy: CY, r: Ri - 1, fill: '#f8fafc'
   }));
 
-  // Centre ”” total number (always visible by default)
+  const segG = E('g', { class: 'rag-yinyang-group' });
+  const lblG = E('g', { class: 'rag-yinyang-labels', style: 'pointer-events:none;' });
+
+  // Center text elements
+  const centerG = E('g', { class: 'rag-center-info', style: 'pointer-events:none;' });
   const numEl = E('text', {
-    x: CX, y: CY - 5,
+    x: CX, y: CY - 3,
     'text-anchor': 'middle',
-    'font-family': 'var(--mono)',
-    'font-size': '26', 'font-weight': '800',
-    fill: '#111827', class: 'rag-ctr-num',
+    'font-family': "'JetBrains Mono', monospace",
+    'font-size': '22',
+    'font-weight': '800',
+    fill: '#0f172a',
+    class: 'rag-center-num'
   });
   numEl.textContent = total;
 
   const lblEl = E('text', {
     x: CX, y: CY + 13,
     'text-anchor': 'middle',
-    'font-family': 'var(--sans, Inter, sans-serif)',
-    'font-size': '10', 'font-weight': '500',
-    fill: '#94A3B8', 'letter-spacing': '0.06em',
-    class: 'rag-ctr-lbl',
+    'font-family': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    'font-size': '8.5',
+    'font-weight': '700',
+    fill: '#94a3b8',
+    'letter-spacing': '0.08em',
+    class: 'rag-center-sub'
   });
-  lblEl.textContent = 'metrics';
+  lblEl.textContent = 'METRICS';
 
-  // Hover overlays ”” shown when a segment is highlighted
-  const hvNumEl = E('text', {
-    x: CX, y: CY - 5,
-    'text-anchor': 'middle',
-    'font-family': 'var(--mono)',
-    'font-size': '26', 'font-weight': '800',
-    fill: '#111827', opacity: '0', class: 'rag-hv-num',
-  });
-  const hvLblEl = E('text', {
-    x: CX, y: CY + 13,
-    'text-anchor': 'middle',
-    'font-family': 'var(--sans, Inter, sans-serif)',
-    'font-size': '10', 'font-weight': '500',
-    fill: '#94A3B8', 'letter-spacing': '0.06em',
-    opacity: '0', class: 'rag-hv-lbl',
-  });
+  centerG.appendChild(numEl);
+  centerG.appendChild(lblEl);
 
-  staticG.appendChild(numEl);
-  staticG.appendChild(lblEl);
-  staticG.appendChild(hvNumEl);
-  staticG.appendChild(hvLblEl);
-  svg.appendChild(staticG);
+  function resetCenter() {
+    numEl.textContent = total;
+    numEl.setAttribute('fill', '#0f172a');
+    lblEl.textContent = 'METRICS';
+    lblEl.setAttribute('fill', '#94a3b8');
+  }
 
-  // â”€â”€ Unified rotating ring group â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const ringG = E('g', { class: 'rag-ring-group', id: 'rag-unified-ring' });
+  function setCenter(s) {
+    const pct = Math.round((s.v / total) * 100);
+    numEl.textContent = s.v;
+    numEl.setAttribute('fill', s.color);
+    lblEl.textContent = `${s.short.toUpperCase()} (${pct}%)`;
+    lblEl.setAttribute('fill', s.color);
+  }
 
-  // baseG: rotates -90° so segments start at 12 o'clock (top)
-  const baseG = E('g', { transform: `rotate(-90 ${CX} ${CY})` });
+  // Draw exact mathematically proportional slices
+  let currentAngle = -Math.PI / 2; // Start from 12 o'clock
+  const segElements = [];
 
-  // Segment definitions
-  const SEG_DEFS = [
-    { v: g, color: '#15803D', colorHover: '#16A34A', label: 'OK',    key: 'green' },
-    { v: a, color: '#B45309', colorHover: '#D97706', label: 'Amber',  key: 'amber' },
-    { v: r, color: '#B91C1C', colorHover: '#DC2626', label: 'Red',    key: 'red'   },
-    { v: t, color: '#64748B', colorHover: '#475569', label: 'Trend',  key: 'trend' },
-  ].filter(s => s.v > 0);
+  valid.forEach((s, idx) => {
+    const frac = s.v / total;
+    const angleSpan = frac * 2 * Math.PI;
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + angleSpan;
+    currentAngle = endAngle;
 
-  let accDeg = 0;
-  const segMeta = [];
+    const st = startAngle + padAngle / 2;
+    const en = endAngle - padAngle / 2;
+    const span = Math.max(0.001, en - st);
+    const largeArc = span > Math.PI ? 1 : 0;
 
-  SEG_DEFS.forEach(s => {
-    const spanDeg  = (s.v / total) * 360;
-    // Offset start by half-gap, shorten arc by full gap → clean rounded tips
-    const startFrac = (accDeg + GAP_DEG / 2) / 360;
-    const lenFrac   = Math.max((spanDeg - GAP_DEG) / 360, 0.003);
-    const dashLen   = lenFrac * CIRC;
-    const dashOff   = -(startFrac * CIRC);
+    const cosS = Math.cos(st), sinS = Math.sin(st);
+    const cosE = Math.cos(en), sinE = Math.sin(en);
 
-    const circle = E('circle', {
-      cx: CX, cy: CY, r: R,
-      fill: 'none',
-      stroke: s.color,
-      'stroke-width': SW,
-      'stroke-dasharray': `${dashLen.toFixed(2)} ${CIRC.toFixed(2)}`,
-      'stroke-dashoffset': dashOff.toFixed(2),
-      'stroke-linecap': 'round',
-      opacity: '0.92',
-      class: 'rag-seg',
+    const x1 = (CX + Ro * cosS).toFixed(2);
+    const y1 = (CY + Ro * sinS).toFixed(2);
+    const x2 = (CX + Ro * cosE).toFixed(2);
+    const y2 = (CY + Ro * sinE).toFixed(2);
+    const x3 = (CX + Ri * cosE).toFixed(2);
+    const y3 = (CY + Ri * sinE).toFixed(2);
+    const x4 = (CX + Ri * cosS).toFixed(2);
+    const y4 = (CY + Ri * sinS).toFixed(2);
+
+    let pathD;
+    if (valid.length === 1) {
+      pathD = `M ${CX} ${CY - Ro} A ${Ro} ${Ro} 0 1 1 ${CX} ${CY + Ro} A ${Ro} ${Ro} 0 1 1 ${CX} ${CY - Ro} M ${CX} ${CY - Ri} A ${Ri} ${Ri} 0 1 0 ${CX} ${CY + Ri} A ${Ri} ${Ri} 0 1 0 ${CX} ${CY - Ri} Z`;
+    } else {
+      pathD = `M ${x1} ${y1} A ${Ro} ${Ro} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${Ri} ${Ri} 0 ${largeArc} 0 ${x4} ${y4} Z`;
+    }
+
+    const pathEl = E('path', {
+      d: pathD,
+      fill: s.color,
+      class: 'rag-donut-slice',
+      'data-key': s.key,
+      'data-idx': String(idx),
+      style: `cursor:pointer; transform-origin:${CX}px ${CY}px; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, filter 0.2s ease;`
     });
-    baseG.appendChild(circle);
 
-    // Boundary dot at segment start (white notch between segments)
-    const bRad = (accDeg - 90) * Math.PI / 180;
-    baseG.appendChild(E('circle', {
-      cx: (CX + R * Math.cos(bRad)).toFixed(2),
-      cy: (CY + R * Math.sin(bRad)).toFixed(2),
-      r: '2', fill: '#FFFFFF', opacity: '0.8',
-    }));
+    pathEl.addEventListener('mouseenter', () => {
+      segElements.forEach((el, i) => {
+        if (i === idx) {
+          el.style.transform = 'scale(1.035)';
+          el.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.18))';
+          el.style.opacity = '1';
+        } else {
+          el.style.opacity = '0.55';
+          el.style.transform = 'scale(1)';
+          el.style.filter = 'none';
+        }
+      });
+      setCenter(s);
+    });
 
-    segMeta.push({ ...s, startDeg: accDeg, endDeg: accDeg + spanDeg, el: circle });
-    accDeg += spanDeg;
+    pathEl.addEventListener('mouseleave', () => {
+      segElements.forEach(el => {
+        el.style.transform = 'scale(1)';
+        el.style.filter = 'none';
+        el.style.opacity = '1';
+      });
+      resetCenter();
+    });
+
+    segG.appendChild(pathEl);
+    segElements.push(pathEl);
+
+    // Click handler for pie chart slice
+    pathEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectSlice(s.key);
+    });
+
+    // Percentage inside slice if arc width is >= 7%
+    const pct = Math.round(frac * 100);
+    if (pct >= 7) {
+      const midA = (st + en) / 2;
+      const lx = (CX + Rm * Math.cos(midA)).toFixed(2);
+      const ly = (CY + Rm * Math.sin(midA)).toFixed(2);
+      const textEl = E('text', {
+        x: lx,
+        y: ly,
+        fill: '#ffffff',
+        'font-family': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        'font-size': '11',
+        'font-weight': '700',
+        'text-anchor': 'middle',
+        'dominant-baseline': 'central',
+        style: 'pointer-events:none; user-select:none;'
+      });
+      textEl.textContent = `${pct}%`;
+      lblG.appendChild(textEl);
+    }
   });
 
-  ringG.appendChild(baseG);
+  function selectSlice(sKey) {
+    segElements.forEach((el) => {
+      if (el.getAttribute('data-key') === sKey) {
+        el.classList.add('is-selected-slice');
+      } else {
+        el.classList.remove('is-selected-slice');
+      }
+    });
+    legend.querySelectorAll('.legend-row').forEach(r => {
+      if (r.getAttribute('data-key') === sKey) {
+        r.classList.add('is-selected-legend');
+      } else {
+        r.classList.remove('is-selected-legend');
+      }
+    });
+    openRAGSegmentDetailCard(sKey);
+  }
 
-  // Orbit marker dot at 12 o'clock on the outer edge ”” rotates with ring
-  ringG.appendChild(E('circle', {
-    cx: CX, cy: CY - R - SW / 2 - 4,
-    r: '2.5', fill: '#CBD5E1', class: 'rag-orbit-marker',
-  }));
+  // Link legend hover & click to slices
+  legend.querySelectorAll('.legend-row').forEach(row => {
+    const idx = parseInt(row.dataset.idx, 10);
+    const s = valid[idx];
+    if (!s) return;
+    row.addEventListener('mouseenter', () => {
+      segElements.forEach((el, i) => {
+        if (i === idx) {
+          el.style.transform = 'scale(1.035)';
+          el.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.18))';
+          el.style.opacity = '1';
+        } else {
+          el.style.opacity = '0.55';
+          el.style.transform = 'scale(1)';
+          el.style.filter = 'none';
+        }
+      });
+      setCenter(s);
+    });
+    row.addEventListener('mouseleave', () => {
+      segElements.forEach(el => {
+        el.style.transform = 'scale(1)';
+        el.style.filter = 'none';
+        el.style.opacity = '1';
+      });
+      resetCenter();
+    });
+    row.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectSlice(s.key);
+    });
+  });
 
-  svg.appendChild(ringG);
+  svg.appendChild(segG);
+  svg.appendChild(lblG);
+  svg.appendChild(centerG);
 
-  // â”€â”€ Assemble panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const stage = document.createElement('div');
-  stage.className = 'rag-ring-stage';
-  stage.appendChild(svg);
-  panel.appendChild(stage);
+  const chartWrap = document.createElement('div');
+  chartWrap.className = 'rag-donut-wrap';
+  chartWrap.style.display = 'flex';
+  chartWrap.style.justifyContent = 'center';
+  chartWrap.style.alignItems = 'center';
+  chartWrap.style.position = 'relative';
+  chartWrap.appendChild(svg);
 
-  // Legend pills
-  const legend = document.createElement('div');
-  legend.style.cssText = 'display:flex;justify-content:center;gap:10px;margin-top:14px;flex-wrap:wrap;';
-  legend.innerHTML = [
-    { label: 'OK', count: g, cls: 'green' },
-    { label: 'Amber', count: a, cls: 'amber' },
-    { label: 'Red',   count: r, cls: 'red'   },
-    { label: 'Trend', count: t, cls: 'trend' },
-  ].filter(l => l.count > 0)
-   .map(l => `<span class="mini-pill ${l.cls}">${l.count} ${l.label}</span>`)
-   .join('');
-  panel.appendChild(legend);
+  panel.appendChild(chartWrap);
 
-  // Boot physics after first paint (panel must be in DOM)
-  requestAnimationFrame(() =>
-    initRAGRingInteraction(panel, ringG, svg, segMeta, CX, CY, R, SW, VB,
-                           numEl, lblEl, hvNumEl, hvLblEl)
-  );
+  if (activePieDetailCategory) {
+    requestAnimationFrame(() => {
+      selectSlice(activePieDetailCategory);
+    });
+  }
 
   return panel;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   initRAGRingInteraction ”” Single-Ring Angular Physics Engine
-
-   States:
-     IDLE     → slow continuous idle rotation
-     ENTERING → smoothly return to angle 0, then → CURSOR
-     CURSOR   → cursor angular velocity drives the whole ring
-     LEAVING  → smoothly return to angle 0, then → IDLE
-
-   The centre label group is never rotated.
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-function initRAGRingInteraction(panel, ringG, svg, segMeta, CX, CY, R, SW, VB,
-                                 numEl, lblEl, hvNumEl, hvLblEl) {
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if (!panel || !panel.isConnected) return;
-
-  // â”€â”€ State constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const S = { IDLE: 0, ENTERING: 1, CURSOR: 2, LEAVING: 3 };
-  let state = S.IDLE;
-
-  // â”€â”€ Motion variables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  let angle       = 0;    // current ring rotation (degrees, accumulating)
-  let vel         = 0;    // angular velocity (deg / frame)
-  let curVel      = 0;    // velocity component contributed by cursor
-  let prevCursDeg = null; // cursor angle from last frame
-  let activeSegIdx = -1;  // currently highlighted segment (-1 = none)
-  let alive       = true;
-
-  // â”€â”€ Physics constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const IDLE_SPD    = 0.19;   // Phase7: idle deg/frame ≈ 1 revolution / 32 s at 60fps (boosted 35%)
-  const IDLE_RAMP   = 0.022;  // how fast we accelerate to idle speed
-  const MAX_CURS    = 1.2;    // max cursor-induced speed (deg/frame)
-  const MAX_RET     = 2.2;    // max return-to-0 speed (deg/frame)
-  const FRICTION    = 0.92;   // velocity decay per frame
-  const CURS_LERP   = 0.20;   // cursor velocity blend-in rate
-  const RING_DRAG   = 0.96;   // slight drag in cursor mode
-  const RET_SPRING  = 0.11;   // spring strength for return-to-0
-  const SNAP_DEG    = 2.0;    // angle (°) threshold → snap to 0
-  const SNAP_VEL    = 0.08;   // velocity threshold → snap to 0
-
-  // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  /** SVG centre in screen pixels + scale factor */
-  function svgCtr() {
-    const rect = svg.getBoundingClientRect();
-    const sc = rect.width / VB;
-    return { x: rect.left + CX * sc, y: rect.top + CY * sc, sc };
-  }
-
-  /** Shortest delta from current angle to nearest 0° (nearest full rotation) */
-  function returnDelta() {
-    const norm = ((angle % 360) + 360) % 360;   // 0…360
-    return norm <= 180 ? -norm : 360 - norm;    // negative = go back, positive = go forward
-  }
-
-  /** Apply animation rotation to ring group */
-  function setAngle(a) {
-    angle = a;
-    ringG.setAttribute('transform', `rotate(${a.toFixed(3)} ${CX} ${CY})`);
-  }
-
-  // â”€â”€ Segment hover â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function initRAGYinYangInteraction(panel, segMeta, legend, numEl, lblEl, total, isSingle) {
   function setActive(idx) {
-    if (idx === activeSegIdx) return;
-    activeSegIdx = idx;
-    const hasActive = idx >= 0;
-
-    segMeta.forEach((s, i) => {
-      if (i === idx) {
-        s.el.setAttribute('stroke-width', String(SW + 3));
-        s.el.setAttribute('stroke',       s.colorHover);
-        s.el.setAttribute('opacity',      '1');
-      } else {
-        s.el.setAttribute('stroke-width', String(SW));
-        s.el.setAttribute('stroke',       s.color);
-        s.el.setAttribute('opacity',      hasActive ? '0.42' : '0.92');
-      }
-    });
-
-    // Swap centre text
-    if (hasActive) {
-      const s = segMeta[idx];
-      numEl.setAttribute('opacity',   '0');
-      lblEl.setAttribute('opacity',   '0');
-      hvNumEl.textContent = s.v;
-      hvLblEl.textContent = s.label;
-      hvNumEl.setAttribute('opacity', '1');
-      hvLblEl.setAttribute('opacity', '1');
-    } else {
-      numEl.setAttribute('opacity',   '1');
-      lblEl.setAttribute('opacity',   '1');
-      hvNumEl.setAttribute('opacity', '0');
-      hvLblEl.setAttribute('opacity', '0');
-    }
-  }
-
-  // â”€â”€ Pointer events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  function onMove(e) {
-    const c = svgCtr();
-    const dx = e.clientX - c.x;
-    const dy = e.clientY - c.y;
-
-    // --- Cursor angular velocity ---
-    if (state === S.CURSOR || state === S.ENTERING) {
-      const cursDeg = Math.atan2(dy, dx) * 180 / Math.PI;
-      if (prevCursDeg !== null) {
-        let delta = cursDeg - prevCursDeg;
-        if (delta >  180) delta -= 360;
-        if (delta < -180) delta += 360;
-        // Proximity factor: nearer to ring → stronger response
-        const dist   = Math.sqrt(dx * dx + dy * dy);
-        const prox   = Math.min(1.5, 1.0 / (1 + dist / (c.sc * R) * 0.55));
-        const target = Math.max(-MAX_CURS, Math.min(MAX_CURS, delta * prox * 0.38));
-        curVel += (target - curVel) * CURS_LERP;
-      }
-      prevCursDeg = cursDeg;
-    }
-
-    // --- Segment hover (only in CURSOR state, only over the ring band) ---
-    if (state === S.CURSOR) {
-      const dist     = Math.sqrt(dx * dx + dy * dy);
-      const innerPx  = (R - SW / 2) * c.sc;
-      const outerPx  = (R + SW / 2) * c.sc;
-      if (dist >= innerPx - 5 && dist <= outerPx + 5) {
-        // Map cursor to segment-space angle (undo ring rotation)
-        const svgDeg   = Math.atan2(dy, dx) * 180 / Math.PI;
-        const clockDeg = ((svgDeg + 90) + 3600) % 360;          // 0=top, CW
-        const normAng  = ((angle % 360) + 360) % 360;
-        const segDeg   = ((clockDeg - normAng) + 3600) % 360;   // segment-space
-
-        let found = -1;
-        for (let i = 0; i < segMeta.length; i++) {
-          if (segDeg >= segMeta[i].startDeg && segDeg < segMeta[i].endDeg) {
-            found = i; break;
-          }
+    if (idx < 0 || idx >= segMeta.length) {
+      numEl.textContent = total;
+      lblEl.textContent = isSingle ? 'METRICS (100%)' : 'METRICS';
+      segMeta.forEach(s => {
+        if (s.el) {
+          s.el.style.filter = 'none';
+          s.el.style.stroke = s.color;
+          s.el.style.strokeWidth = '0.5';
         }
-        setActive(found);
-      } else {
-        setActive(-1);
-      }
-    }
-  }
-
-  function onEnter() {
-    state = S.ENTERING;
-    prevCursDeg = null;
-    panel.classList.add('rag-rotating-active');
-  }
-
-  function onLeave() {
-    state = S.LEAVING;
-    prevCursDeg = null;
-    curVel = 0;
-    setActive(-1);
-    panel.classList.remove('rag-rotating-active');
-  }
-
-  panel.addEventListener('pointermove',  onMove,  { passive: true });
-  panel.addEventListener('pointerenter', onEnter, { passive: true });
-  panel.addEventListener('pointerleave', onLeave, { passive: true });
-
-  // â”€â”€ Animation loop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  function tick() {
-    if (!alive || !panel.isConnected) {
-      panel.removeEventListener('pointermove',  onMove);
-      panel.removeEventListener('pointerenter', onEnter);
-      panel.removeEventListener('pointerleave', onLeave);
+      });
+      legend.querySelectorAll('.legend-row').forEach(row => {
+        row.classList.remove('active');
+        row.style.opacity = '1';
+      });
       return;
     }
 
-    switch (state) {
+    const activeSeg = segMeta[idx];
+    numEl.textContent = activeSeg.v;
+    lblEl.textContent = `${activeSeg.short.toUpperCase()} (${activeSeg.truePct}%)`;
 
-      case S.IDLE: {
-        // Ramp smoothly up to idle speed
-        vel += (IDLE_SPD - vel) * IDLE_RAMP;
-        setAngle(angle + vel);
-        break;
-      }
-
-      case S.ENTERING: {
-        // Spring back to angle 0, then hand off to CURSOR
-        const d = returnDelta();
-        if (Math.abs(d) < SNAP_DEG && Math.abs(vel) < SNAP_VEL) {
-          vel = 0;
-          setAngle(Math.round(angle / 360) * 360);
-          state = S.CURSOR;
-          prevCursDeg = null;
+    segMeta.forEach((s, i) => {
+      if (s.el) {
+        if (i === idx) {
+          s.el.style.filter = 'brightness(1.12) saturate(1.1)';
+          s.el.style.stroke = '#ffffff';
+          s.el.style.strokeWidth = '2';
         } else {
-          const target = Math.max(-MAX_RET, Math.min(MAX_RET, d * RET_SPRING));
-          vel += (target - vel) * 0.18;
-          vel *= FRICTION;
-          setAngle(angle + vel);
+          s.el.style.filter = 'brightness(0.88) saturate(0.85)';
+          s.el.style.stroke = s.color;
+          s.el.style.strokeWidth = '0.5';
         }
-        break;
       }
+    });
 
-      case S.CURSOR: {
-        // Cursor drives ring velocity with inertia + slight drag
-        vel += (curVel - vel) * 0.14;
-        curVel *= FRICTION;
-        vel   *= RING_DRAG;
-        vel    = Math.max(-MAX_CURS, Math.min(MAX_CURS, vel));
-        setAngle(angle + vel);
-        break;
+    legend.querySelectorAll('.legend-row').forEach((row, i) => {
+      if (i === idx) {
+        row.classList.add('active');
+        row.style.opacity = '1';
+      } else {
+        row.classList.remove('active');
+        row.style.opacity = '0.55';
       }
-
-      case S.LEAVING: {
-        // Spring back to angle 0, then hand off to IDLE
-        const d = returnDelta();
-        if (Math.abs(d) < SNAP_DEG && Math.abs(vel) < SNAP_VEL) {
-          vel = 0;
-          setAngle(Math.round(angle / 360) * 360);
-          state = S.IDLE;
-        } else {
-          const target = Math.max(-MAX_RET, Math.min(MAX_RET, d * RET_SPRING));
-          vel += (target - vel) * 0.15;
-          vel *= FRICTION;
-          setAngle(angle + vel);
-        }
-        break;
-      }
-    }
-
-    requestAnimationFrame(tick);
+    });
   }
 
-  // Observe DOM removal (view navigation wipes the panel)
-  const obs = new MutationObserver(() => {
-    if (!panel.isConnected) { alive = false; obs.disconnect(); }
+  // Segment hover
+  segMeta.forEach((s, idx) => {
+    if (s.el) {
+      s.el.addEventListener('mouseenter', () => setActive(idx));
+      s.el.addEventListener('mouseleave', () => setActive(-1));
+    }
   });
-  obs.observe(document.getElementById('view-root') || document.body,
-              { childList: true, subtree: true });
 
-  requestAnimationFrame(tick);
+  // Legend hover
+  legend.querySelectorAll('.legend-row').forEach(row => {
+    const idx = parseInt(row.getAttribute('data-idx'), 10);
+    row.addEventListener('mouseenter', () => setActive(idx));
+    row.addEventListener('mouseleave', () => setActive(-1));
+  });
 }
-
-// Legacy alias ”” keeps any stray callers from throwing
 function donutSVG(g, a, r, t) {
   return buildRAGDistributionPanel(g, a, r, t).outerHTML;
+}
+
+// =========================================================================
+// GLASSMORPHIC PIE / DONUT SEGMENT DETAIL CARD (DYNAMIC DRILLDOWN)
+// =========================================================================
+let activePieDetailCategory = null;
+let activeFloatingCard = null;
+let activeFloatingBackdrop = null;
+let activeFloatingCleanup = null;
+
+function positionFloatingCardCenter(card) {
+  if (!card) return;
+  card.style.position = 'fixed';
+  card.style.top = '50%';
+  card.style.left = '50%';
+  card.style.zIndex = '10050';
+}
+const positionFloatingCardAbove = positionFloatingCardCenter;
+
+function renderGlassSegmentDetailCard(opts) {
+  const {
+    targetContainer,
+    anchorElement = null,
+    title,
+    category = 'trend',
+    categoryLabel = 'SEGMENT',
+    sourceLabel = 'EVALUATED DATASET',
+    totalCount = 0,
+    records = [],
+    month = state.month,
+    onClose = null
+  } = opts;
+
+  // Hide any legacy in-flow slot so it never pushes layout down
+  if (targetContainer) {
+    targetContainer.style.display = 'none';
+    targetContainer.innerHTML = '';
+  }
+
+  // If another floating card is already active, remove it cleanly
+  if (activeFloatingCard && activeFloatingCard.parentNode) {
+    activeFloatingCard.parentNode.removeChild(activeFloatingCard);
+    activeFloatingCard = null;
+  }
+  if (activeFloatingBackdrop && activeFloatingBackdrop.parentNode) {
+    activeFloatingBackdrop.parentNode.removeChild(activeFloatingBackdrop);
+    activeFloatingBackdrop = null;
+  }
+  if (activeFloatingCleanup) {
+    activeFloatingCleanup();
+    activeFloatingCleanup = null;
+  }
+
+  let isExpanded = false;
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'glass-detail-backdrop';
+  backdrop.setAttribute('aria-hidden', 'true');
+
+  const card = document.createElement('div');
+  card.className = 'glass-segment-detail-card';
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-modal', 'true');
+  card.setAttribute('aria-label', `${title} Detail List`);
+
+  function render() {
+    card.innerHTML = '';
+    card.classList.toggle('is-expanded', isExpanded);
+
+    // Header with close button
+    const head = document.createElement('div');
+    head.className = 'glass-detail-head';
+    head.innerHTML = `
+      <div class="glass-detail-head-left">
+        <div class="glass-detail-badge-row">
+          <span class="glass-category-pill ${category}">${escapeHTML(categoryLabel)}</span>
+          <span class="glass-source-pill">${escapeHTML(sourceLabel)}</span>
+        </div>
+        <h3 class="glass-detail-title">${escapeHTML(title)}</h3>
+        <div class="glass-detail-subtitle">
+          <span class="glass-detail-meta-total">Total: ${totalCount}</span>
+          <span>&bull;</span>
+          <span>Reporting Period: ${escapeHTML(month)}</span>
+        </div>
+      </div>
+      <button type="button" class="glass-detail-close-btn" aria-label="Close detail card" title="Dismiss details">&times;</button>
+    `;
+
+    head.querySelector('.glass-detail-close-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismiss();
+    });
+
+    card.appendChild(head);
+
+    // Records List
+    if (totalCount === 0 || !records.length) {
+      const empty = document.createElement('div');
+      empty.className = 'glass-empty-state';
+      empty.innerHTML = `
+        <div class="glass-empty-icon">
+          <svg viewBox="0 0 20 20" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="10" cy="10" r="7.5"/>
+            <path d="M7 10h6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="glass-empty-title">No records found for this selection.</div>
+        <div class="glass-empty-desc">Zero telemetry outliers or breaches recorded for ${escapeHTML(month)}.</div>
+      `;
+      card.appendChild(empty);
+    } else {
+      const list = document.createElement('div');
+      list.className = 'glass-record-list';
+
+      const displayedRecords = isExpanded ? records : records.slice(0, 5);
+
+      displayedRecords.forEach((rec, idx) => {
+        const item = document.createElement('div');
+        item.className = 'glass-record-item';
+        item.innerHTML = `
+          <div class="glass-record-left">
+            <div class="glass-record-idx">${idx + 1}</div>
+            <div class="glass-record-info">
+              <div class="glass-record-name" title="${escapeHTML(rec.name)}">${escapeHTML(rec.name)}</div>
+              <div class="glass-record-tags">
+                <span class="glass-record-tag system">${escapeHTML(rec.system || 'Core System')}</span>
+                ${rec.target ? `<span class="glass-record-tag target">${escapeHTML(rec.target)}</span>` : ''}
+                ${rec.date ? `<span class="glass-record-tag">${escapeHTML(rec.date)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="glass-record-right">
+            ${rec.value !== undefined && rec.value !== null ? `<div class="glass-record-metric-val">${escapeHTML(String(rec.value))}</div>` : ''}
+            <span class="glass-record-status-chip ${rec.statusClass || 'trend'}">${escapeHTML(rec.status || 'Active')}</span>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+
+      card.appendChild(list);
+
+      // Show All Button
+      if (records.length > 5) {
+        const footer = document.createElement('div');
+        footer.className = 'glass-detail-footer';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'glass-show-all-btn';
+        btn.innerHTML = isExpanded 
+          ? `<span>Show Less (5)</span> <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10l4-4 4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+          : `<span>Show All (${totalCount})</span> <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          isExpanded = !isExpanded;
+          render();
+          positionFloatingCardCenter(card);
+        });
+
+        footer.appendChild(btn);
+        card.appendChild(footer);
+      }
+    }
+  }
+
+  function dismiss() {
+    if (card.classList.contains('is-closing')) return;
+    card.classList.remove('is-visible');
+    card.classList.add('is-closing');
+    if (backdrop) {
+      backdrop.classList.remove('is-visible');
+      backdrop.classList.add('is-closing');
+    }
+    if (activeFloatingCleanup) {
+      activeFloatingCleanup();
+      activeFloatingCleanup = null;
+    }
+    setTimeout(() => {
+      if (card.parentNode) card.parentNode.removeChild(card);
+      if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+      if (activeFloatingCard === card) activeFloatingCard = null;
+      if (activeFloatingBackdrop === backdrop) activeFloatingBackdrop = null;
+      if (typeof onClose === 'function') onClose();
+    }, 220);
+  }
+
+  render();
+  document.body.appendChild(backdrop);
+  document.body.appendChild(card);
+  activeFloatingCard = card;
+  activeFloatingBackdrop = backdrop;
+
+  // Immediate placement & next frame animated entrance
+  positionFloatingCardCenter(card);
+  requestAnimationFrame(() => {
+    backdrop.classList.add('is-visible');
+    card.classList.add('is-visible');
+    positionFloatingCardCenter(card);
+  });
+
+  // Backdrop click dismisses
+  backdrop.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dismiss();
+  });
+
+  // Escape key closes modal
+  const onKeyDown = (e) => {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      dismiss();
+    }
+  };
+  window.addEventListener('keydown', onKeyDown);
+
+  // Outside pointerdown fallback
+  const onPointerDown = (e) => {
+    if (!card.isConnected) return;
+    if (card.contains(e.target)) return;
+    if (e.target.closest('.rag-donut-slice, .rag-donut-card, .legend-row, #patches_pie, #vuln_donut, #patch_comp_donut, .patches-leg-card, .vuln-leg-item')) {
+      return; // Handled by chart click
+    }
+    dismiss();
+  };
+  document.addEventListener('pointerdown', onPointerDown);
+
+  activeFloatingCleanup = () => {
+    window.removeEventListener('keydown', onKeyDown);
+    document.removeEventListener('pointerdown', onPointerDown);
+  };
+}
+
+function openRAGSegmentDetailCard(sKey) {
+  activePieDetailCategory = sKey;
+  const slot = document.getElementById('overview-pie-detail-card-slot');
+
+  const monthData = state.monthData || {};
+  const metricsMap = monthData.metrics || {};
+  const isTrend = sKey === 'trend';
+
+  const matchedMetrics = [];
+
+  state.metrics.forEach(m => {
+    const entry = metricsMap[m.id];
+    if (!entry || entry.computed === null || entry.computed === undefined) return;
+    const sec = state.sections.find(s => s.id === m.section) || { name: m.section };
+
+    let isMatch = false;
+    if (isTrend) {
+      isMatch = (m.direction === 'trend');
+    } else {
+      isMatch = (entry.rag === sKey);
+    }
+
+    if (isMatch) {
+      matchedMetrics.push({
+        id: m.id,
+        name: m.label || m.id,
+        system: sec.name || 'Core System',
+        value: fmtVal(entry.computed, m.unit),
+        target: m.target !== undefined && m.target !== null ? `SLA Target: ${m.target}${m.unit || ''}` : (m.desc || ''),
+        status: entry.rag ? (entry.rag === 'red' ? 'CRITICAL BREACH' : (entry.rag === 'amber' ? 'ATTENTION REQUIRED' : 'WITHIN TARGET')) : 'TRACKING',
+        statusClass: entry.rag || 'trend',
+        date: state.month
+      });
+    }
+  });
+
+  let title = 'Selected Metric Records';
+  let categoryLabel = sKey.toUpperCase();
+  if (sKey === 'red') {
+    title = 'Critical Breaches & SLA Remediation';
+    categoryLabel = 'CRITICAL BREACHES';
+  } else if (sKey === 'amber') {
+    title = 'Attention Required & Elevated Risks';
+    categoryLabel = 'ATTENTION REQUIRED';
+  } else if (sKey === 'green') {
+    title = 'Within Target & SLA Attainment';
+    categoryLabel = 'WITHIN TARGET';
+  } else if (sKey === 'trend') {
+    title = 'Operational Telemetry & Trackers';
+    categoryLabel = 'TELEMETRY TRACKERS';
+  }
+
+  const anchor = document.querySelector('.rag-distribution-card') 
+              || document.querySelector('.rag-donut-card')
+              || document.querySelector('.rag-donut-svg')
+              || slot;
+
+  renderGlassSegmentDetailCard({
+    anchorElement: anchor,
+    targetContainer: slot,
+    title: title,
+    category: sKey,
+    categoryLabel: categoryLabel,
+    sourceLabel: 'EVALUATED TELEMETRY',
+    totalCount: matchedMetrics.length,
+    records: matchedMetrics,
+    month: state.month,
+    onClose: () => {
+      activePieDetailCategory = null;
+      document.querySelectorAll('.rag-donut-slice').forEach(el => el.classList.remove('is-selected-slice'));
+      document.querySelectorAll('.legend-row').forEach(el => el.classList.remove('is-selected-legend'));
+    }
+  });
 }
 
 
@@ -3009,26 +3914,65 @@ function renderSection(sectionId) {
   metricsBySection(sectionId).forEach(m => list.appendChild(renderMetricCard(m)));
   frag.appendChild(list);
 
-  // ---- Managed Endpoints Auto-Propagation ----
-  // After rendering, wire up managed_endpoints input to auto-fill all
-  // denomination fields in this section that are based on managed_endpoints.
-  // Also pre-populate those den fields from the current stored managed_endpoints value.
+  // ---- Managed Endpoints Auto-Propagation & Live Derived Recalculation ----
   if (sectionId === 'endpoint') {
-    // Find the managed_endpoints direct input
-    const meCards = list.querySelectorAll('.metric-card');
-    let meInput = null;
-    meCards.forEach(card => {
-      const inp = card.querySelector('input[data-key="value"]');
-      // The managed_endpoints card is the first card with a direct value input
-      // Check via its label text
-      const label = card.querySelector('.metric-label');
-      if (label && label.textContent === 'Managed endpoints' && inp) {
-        meInput = inp;
+    const meCard = list.querySelector('.metric-card[data-metric-id="managed_endpoints"]');
+    const dnrCard = list.querySelector('.metric-card[data-metric-id="devices_not_reporting"]');
+    const dnrPctCard = list.querySelector('.metric-card[data-metric-id="devices_not_reporting_pct"]');
+    const meInput = meCard ? meCard.querySelector('input[data-key="value"]') : null;
+    const dnrInput = dnrCard ? dnrCard.querySelector('input[data-key="value"]') : null;
+
+    function liveUpdateDnrPct() {
+      if (!dnrPctCard) return;
+      const meVal = meInput && meInput.value !== '' ? Number(meInput.value) : (state.monthData && state.monthData.metrics && state.monthData.metrics.managed_endpoints && typeof state.monthData.metrics.managed_endpoints.computed === 'number' ? state.monthData.metrics.managed_endpoints.computed : null);
+      const dnrVal = dnrInput && dnrInput.value !== '' ? Number(dnrInput.value) : (state.monthData && state.monthData.metrics && state.monthData.metrics.devices_not_reporting && typeof state.monthData.metrics.devices_not_reporting.computed === 'number' ? state.monthData.metrics.devices_not_reporting.computed : null);
+
+      const dnrDisp = dnrPctCard.querySelector('#dnr-pct-disp-dnr');
+      const meDisp = dnrPctCard.querySelector('#dnr-pct-disp-me');
+      const resDisp = dnrPctCard.querySelector('#dnr-pct-disp-result');
+
+      const dnrText = (dnrVal !== null && !isNaN(dnrVal) && dnrVal >= 0) ? String(dnrVal) : '–';
+      const meText = (meVal !== null && !isNaN(meVal) && meVal > 0) ? String(meVal) : '–';
+
+      if (dnrDisp) dnrDisp.textContent = dnrText;
+      if (meDisp) meDisp.textContent = meText;
+
+      const valEl = dnrPctCard.querySelector('.metric-value');
+      const badgeEl = dnrPctCard.querySelector('.metric-badge');
+      const stripEl = dnrPctCard.querySelector('.metric-rag-strip');
+
+      if (dnrVal !== null && meVal !== null && !isNaN(dnrVal) && !isNaN(meVal) && meVal > 0 && dnrVal >= 0) {
+        const pct = Math.round((dnrVal / meVal) * 10000) / 100;
+        const pctStr = (Number.isInteger(pct) ? pct : pct.toFixed(2)) + '%';
+        if (resDisp) resDisp.textContent = pctStr;
+        if (valEl) {
+          valEl.textContent = pctStr;
+          valEl.classList.remove('green', 'amber', 'red');
+        }
+        let rag = 'green';
+        if (pct > 2.0 * 1.1) rag = 'red';
+        else if (pct > 2.0) rag = 'amber';
+
+        if (valEl) valEl.classList.add(rag);
+        if (badgeEl) {
+          badgeEl.className = 'metric-badge ' + rag;
+          badgeEl.textContent = rag.toUpperCase();
+        }
+        if (stripEl) {
+          stripEl.className = 'metric-rag-strip ' + rag;
+        }
+      } else {
+        if (resDisp) resDisp.textContent = '–';
+        if (valEl) valEl.innerHTML = '<span class="metric-value-empty">-</span>';
+        if (badgeEl) {
+          badgeEl.className = 'metric-badge';
+          badgeEl.textContent = '';
+        }
+        if (stripEl) stripEl.className = 'metric-rag-strip';
       }
-    });
+    }
 
     if (meInput) {
-      // Propagate current value to all managed-endpoints den inputs in this section
       function propagateManagedEndpoints() {
         const val = meInput.value;
         list.querySelectorAll('input[data-managed-endpoints-den]').forEach(denInp => {
@@ -3037,12 +3981,16 @@ function renderSection(sectionId) {
             denInp.dispatchEvent(new Event('input', { bubbles: true }));
           }
         });
+        liveUpdateDnrPct();
       }
-
       meInput.addEventListener('input', propagateManagedEndpoints);
-      // Initial propagation on render
       setTimeout(propagateManagedEndpoints, 0);
     }
+
+    if (dnrInput) {
+      dnrInput.addEventListener('input', liveUpdateDnrPct);
+    }
+    setTimeout(liveUpdateDnrPct, 0);
   }
 
   return frag;
@@ -3062,6 +4010,7 @@ function renderMetricCard(metric) {
 
   const wrap = document.createElement('div');
   wrap.className = 'metric-card';
+  wrap.dataset.metricId = metric.id;
 
   const cardTop = document.createElement('div');
   cardTop.className = 'metric-card-top';
@@ -3293,7 +4242,7 @@ function renderMetricCard(metric) {
   } else if (metric.mode === 'derived') {
     const note = document.createElement('div');
     note.className = 'derived-note';
-    note.textContent = 'Auto-computed from ' + metric.deriveFrom.map(id => {
+    note.textContent = 'Auto-computed from ' + (metric.deriveFrom || []).map(id => {
       const mm = state.metrics.find(x => x.id === id);
       return mm ? mm.label : id;
     }).join(' & ');
@@ -3450,10 +4399,10 @@ function miniField(key, label, value) {
       ${canWrite ? `
       <div class="stepper-controls">
         <button type="button" class="stepper-btn stepper-up" title="Increase value">
-          <svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M2 8L6 4L10 8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 14 14" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9L7 5L11 9"/></svg>
         </button>
         <button type="button" class="stepper-btn stepper-down" title="Decrease value">
-          <svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M2 4L6 8L10 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 14 14" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5L7 9L11 5"/></svg>
         </button>
       </div>` : ''}
     </div>
@@ -4176,16 +5125,26 @@ function renderAuditLogs() {
   const frag = document.createElement('div');
   frag.className = 'audit-mgmt-view';
 
+  const canDelete = hasPermission('audit:delete') || state.role === 'superadmin';
+
   frag.innerHTML = `
     <div class="audit-header-row">
       <div class="audit-header-info">
         <h3>Security Audit Logs & Compliance Trail</h3>
         <p>Immutable forensic record of administrative actions, clearance modifications, and authentication events.</p>
       </div>
-      <button id="btn-refresh-audit" class="btn btn-clear">
-        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>Refresh Logs</span>
-      </button>
+      <div class="audit-header-actions">
+        <button id="btn-refresh-audit" class="btn btn-clear">
+          <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Refresh Logs</span>
+        </button>
+        ${canDelete ? `
+        <button id="btn-clear-all-audit" class="btn btn-danger-soft" title="Purge all audit logs (Super Admin only)">
+          <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H3.862a2 2 0 01-1.995-1.858L1 7m5 4v6m4-6v6m4-6v6M1 7h18M8 7V4a1 1 0 011-1h2a1 1 0 011 1v3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Purge All Logs</span>
+        </button>
+        ` : ''}
+      </div>
     </div>
 
     <!-- Filter Card -->
@@ -4210,13 +5169,33 @@ function renderAuditLogs() {
           <label>User (Actor or Target)</label>
           <input type="text" id="flt-user" placeholder="e.g. Jeeva, operator..." autocomplete="off">
         </div>
-        <div class="audit-field">
+        <div class="audit-field audit-field-date">
           <label>From Date</label>
-          <input type="date" id="flt-from">
+          <div class="audit-date-picker-wrap">
+            <input type="text" id="flt-from" class="audit-date-input" placeholder="YYYY-MM-DD" autocomplete="off" readonly>
+            <div class="audit-cal-toggle-icon">
+              <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="4" width="14" height="13" rx="2.5" ry="2.5"/>
+                <line x1="13" y1="2" x2="13" y2="5"/>
+                <line x1="7" y1="2" x2="7" y2="5"/>
+                <line x1="3" y1="8.5" x2="17" y2="8.5"/>
+              </svg>
+            </div>
+          </div>
         </div>
-        <div class="audit-field">
+        <div class="audit-field audit-field-date">
           <label>To Date</label>
-          <input type="date" id="flt-to">
+          <div class="audit-date-picker-wrap">
+            <input type="text" id="flt-to" class="audit-date-input" placeholder="YYYY-MM-DD" autocomplete="off" readonly>
+            <div class="audit-cal-toggle-icon">
+              <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="4" width="14" height="13" rx="2.5" ry="2.5"/>
+                <line x1="13" y1="2" x2="13" y2="5"/>
+                <line x1="7" y1="2" x2="7" y2="5"/>
+                <line x1="3" y1="8.5" x2="17" y2="8.5"/>
+              </svg>
+            </div>
+          </div>
         </div>
         <div class="audit-filter-actions">
           <button type="submit" class="btn btn-primary" id="btn-apply-filters">Filter</button>
@@ -4231,7 +5210,7 @@ function renderAuditLogs() {
         <span id="audit-count-badge" class="audit-count-badge">0 events</span>
       </div>
       <div id="audit-loading" class="audit-loading" style="padding: 24px; text-align: center; color: var(--text-dim, #64748b);">Loading audit trail...</div>
-      <div id="audit-table-wrap" style="display: none;">
+      <div id="audit-table-wrap" class="audit-table-wrap" style="display: none;">
         <table class="audit-table">
           <thead>
             <tr>
@@ -4241,10 +5220,22 @@ function renderAuditLogs() {
               <th>Target</th>
               <th>Result</th>
               <th>Details</th>
+              ${canDelete ? '<th style="text-align: right; width: 64px;">Action</th>' : ''}
             </tr>
           </thead>
           <tbody id="audit-tbody"></tbody>
         </table>
+      </div>
+      <div id="audit-table-footer" class="audit-table-footer" style="display: none;">
+        <div class="audit-footer-info">
+          <span id="audit-showing-text">Showing 10 of 0 events</span>
+        </div>
+        <button type="button" id="btn-audit-toggle-all" class="btn-audit-toggle-all">
+          <span id="btn-audit-toggle-label">Show All</span>
+          <svg id="btn-audit-toggle-icon" viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 7.5L10 12.5L15 7.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
     </div>
   `;
@@ -4252,13 +5243,83 @@ function renderAuditLogs() {
   const form = frag.querySelector('#audit-filter-form');
   const resetBtn = frag.querySelector('#btn-reset-filters');
   const refreshBtn = frag.querySelector('#btn-refresh-audit');
+  const fltFrom = frag.querySelector('#flt-from');
+  const fltTo = frag.querySelector('#flt-to');
+  const toggleAllBtn = frag.querySelector('#btn-audit-toggle-all');
+  const tableWrap = frag.querySelector('#audit-table-wrap');
+
+  attachAuditDatePicker(fltFrom);
+  attachAuditDatePicker(fltTo);
+
+  if (tableWrap) {
+    tableWrap.addEventListener('scroll', () => {
+      if (frag._auditShowAll) return;
+      const events = frag._auditAllEvents || [];
+      const current = frag._auditVisibleCount || 10;
+      if (current >= events.length) return;
+
+      // Load next 10 logs when scrolled near the bottom
+      if (tableWrap.scrollTop + tableWrap.clientHeight >= tableWrap.scrollHeight - 50) {
+        frag._auditVisibleCount = Math.min(events.length, current + 10);
+        renderAuditTableRows(frag);
+      }
+    });
+  }
+
+  if (toggleAllBtn) {
+    toggleAllBtn.addEventListener('click', () => {
+      frag._auditShowAll = !frag._auditShowAll;
+      if (!frag._auditShowAll) {
+        frag._auditVisibleCount = 10;
+        if (tableWrap) tableWrap.scrollTop = 0;
+      }
+      renderAuditTableRows(frag);
+    });
+  }
+
+  const clearAllBtn = frag.querySelector('#btn-clear-all-audit');
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener('click', async () => {
+      if (!confirm('⚠️ WARNING: Are you sure you want to PURGE ALL audit logs? This action is permanent and cannot be undone.')) return;
+      try {
+        clearAllBtn.disabled = true;
+        await api('/api/audit', { method: 'DELETE' });
+        showToast('All audit logs have been purged', 'green');
+        loadAuditEvents(frag, {});
+      } catch (err) {
+        showToast('Could not purge audit logs: ' + err.message, 'red');
+      } finally {
+        clearAllBtn.disabled = false;
+      }
+    });
+  }
+
+  const tbody = frag.querySelector('#audit-tbody');
+  if (tbody) {
+    tbody.addEventListener('click', async (e) => {
+      const delBtn = e.target.closest('.btn-audit-row-del');
+      if (!delBtn) return;
+      const logId = delBtn.dataset.id;
+      if (!logId) return;
+      if (!confirm('Delete this audit log entry permanently?')) return;
+      try {
+        delBtn.disabled = true;
+        await api('/api/audit/' + encodeURIComponent(logId), { method: 'DELETE' });
+        showToast('Audit log deleted', 'green');
+        loadAuditEvents(frag, getFilters());
+      } catch (err) {
+        showToast('Could not delete audit log: ' + err.message, 'red');
+        delBtn.disabled = false;
+      }
+    });
+  }
 
   function getFilters() {
     return {
       action: frag.querySelector('#flt-action').value.trim(),
       user: frag.querySelector('#flt-user').value.trim(),
-      from: frag.querySelector('#flt-from').value.trim(),
-      to: frag.querySelector('#flt-to').value.trim(),
+      from: fltFrom.value.trim(),
+      to: fltTo.value.trim(),
     };
   }
 
@@ -4269,6 +5330,8 @@ function renderAuditLogs() {
 
   resetBtn.addEventListener('click', () => {
     form.reset();
+    fltFrom.value = '';
+    fltTo.value = '';
     loadAuditEvents(frag, {});
   });
 
@@ -4280,16 +5343,310 @@ function renderAuditLogs() {
   return frag;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   CUSTOM LIGHT THEME CALENDAR PICKER (Matching User Reference Image)
+   - Clean light card with 26px rounded radius
+   - Signature purple top accent notch
+   - Month & Year header with Year stepper and quick Year picker
+   - MON..SUN uppercase weekdays header
+   - Monday-first dates grid with purple glowing active circle
+   - Sized perfectly to fit audit filter panel
+   ═══════════════════════════════════════════════════════════════════════════ */
+function attachAuditDatePicker(inputEl) {
+  const wrap = inputEl.closest('.audit-date-picker-wrap');
+  if (!wrap) return;
+
+  let popover = null;
+  let showYearPicker = false;
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  // Default view to current year/month
+  let viewDate = new Date();
+  if (inputEl.value) {
+    const p = inputEl.value.split('-');
+    if (p.length === 3) viewDate = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+  }
+  let viewYear = viewDate.getFullYear();
+  let viewMonth = viewDate.getMonth();
+  let selectedYMD = inputEl.value || '';
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function formatYMD(y, m, d) { return `${y}-${pad(m + 1)}-${pad(d)}`; }
+
+  function renderCalendar() {
+    if (!popover) {
+      popover = document.createElement('div');
+      popover.className = 'audit-cal-popover';
+      wrap.appendChild(popover);
+    }
+
+    const today = new Date();
+    const todayYMD = formatYMD(today.getFullYear(), today.getMonth(), today.getDate());
+
+    if (showYearPicker) {
+      // Quick Year Selector view
+      const startYear = Math.floor(viewYear / 12) * 12;
+      let yearButtons = '';
+      for (let y = startYear; y < startYear + 12; y++) {
+        const isSel = y === viewYear;
+        yearButtons += `<button type="button" class="audit-cal-year-option${isSel ? ' selected' : ''}" data-year="${y}">${y}</button>`;
+      }
+
+      popover.innerHTML = `
+        <div class="audit-cal-top-notch"></div>
+        <div class="audit-cal-header">
+          <button type="button" class="audit-cal-nav-btn audit-cal-prev-range" title="Previous Range">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 15L7 10L12 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="audit-cal-title">
+            <span class="audit-cal-month-text" style="cursor:pointer;" id="btn-back-to-month">${startYear} - ${startYear + 11}</span>
+          </div>
+          <button type="button" class="audit-cal-nav-btn audit-cal-next-range" title="Next Range">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 5L13 10L8 15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="audit-cal-year-grid">${yearButtons}</div>
+        <div class="audit-cal-footer">
+          <button type="button" class="audit-cal-action-btn" id="btn-cancel-year">Back</button>
+        </div>
+      `;
+
+      popover.querySelector('.audit-cal-prev-range').addEventListener('click', (e) => {
+        e.stopPropagation();
+        viewYear -= 12;
+        renderCalendar();
+      });
+      popover.querySelector('.audit-cal-next-range').addEventListener('click', (e) => {
+        e.stopPropagation();
+        viewYear += 12;
+        renderCalendar();
+      });
+      popover.querySelector('#btn-back-to-month').addEventListener('click', (e) => {
+        e.stopPropagation();
+        showYearPicker = false;
+        renderCalendar();
+      });
+      popover.querySelector('#btn-cancel-year').addEventListener('click', (e) => {
+        e.stopPropagation();
+        showYearPicker = false;
+        renderCalendar();
+      });
+      popover.querySelectorAll('.audit-cal-year-option').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          viewYear = parseInt(btn.dataset.year, 10);
+          showYearPicker = false;
+          renderCalendar();
+        });
+      });
+      popover.addEventListener('click', (e) => e.stopPropagation());
+      return;
+    }
+
+    // Standard Month View with Year Stepper (Matching User Reference Image)
+    const firstDay = new Date(viewYear, viewMonth, 1);
+    const startDayOfWeek = firstDay.getDay(); // 0 is Sun, 1 is Mon...
+    const mondayStartOffset = (startDayOfWeek + 6) % 7; // Mon=0, Sun=6
+
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+
+    popover.innerHTML = `
+      <div class="audit-cal-top-notch"></div>
+      <div class="audit-cal-header">
+        <button type="button" class="audit-cal-nav-btn audit-cal-prev" title="Previous Month">
+          <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 15L7 10L12 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="audit-cal-title">
+          <span class="audit-cal-month-text">${MONTHS[viewMonth]}</span>
+          <div class="audit-cal-year-control">
+            <button type="button" class="audit-cal-year-btn audit-cal-year-down" title="Previous Year">‹</button>
+            <span class="audit-cal-year-text" title="Click to pick year">${viewYear}</span>
+            <button type="button" class="audit-cal-year-btn audit-cal-year-up" title="Next Year">›</button>
+          </div>
+        </div>
+        <button type="button" class="audit-cal-nav-btn audit-cal-next" title="Next Month">
+          <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 5L13 10L8 15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="audit-cal-weekdays">
+        <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+      </div>
+      <div class="audit-cal-grid" id="audit-cal-grid"></div>
+      <div class="audit-cal-footer">
+        <button type="button" class="audit-cal-action-btn audit-cal-btn-clear">Clear</button>
+        <button type="button" class="audit-cal-action-btn audit-cal-btn-today">Today</button>
+      </div>
+    `;
+
+    const gridEl = popover.querySelector('#audit-cal-grid');
+
+    // Previous month overflow days
+    for (let i = mondayStartOffset - 1; i >= 0; i--) {
+      const pDay = daysInPrevMonth - i;
+      const pMonth = viewMonth === 0 ? 11 : viewMonth - 1;
+      const pYear = viewMonth === 0 ? viewYear - 1 : viewYear;
+      const ymd = formatYMD(pYear, pMonth, pDay);
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'audit-cal-cell other-month' + (selectedYMD === ymd ? ' selected' : '');
+      cell.textContent = pDay;
+      cell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        viewMonth = pMonth;
+        viewYear = pYear;
+        selectDate(ymd);
+      });
+      gridEl.appendChild(cell);
+    }
+
+    // Current month days
+    for (let day = 1; day <= daysInMonth; day++) {
+      const ymd = formatYMD(viewYear, viewMonth, day);
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      const isSel = selectedYMD === ymd;
+      const isTod = todayYMD === ymd;
+      cell.className = 'audit-cal-cell' + (isSel ? ' selected' : '') + (isTod ? ' is-today' : '');
+      cell.textContent = day;
+      cell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectDate(ymd);
+      });
+      gridEl.appendChild(cell);
+    }
+
+    // Next month overflow days
+    const totalCells = mondayStartOffset + daysInMonth;
+    const remainingCells = (7 - (totalCells % 7)) % 7;
+    for (let day = 1; day <= remainingCells; day++) {
+      const nMonth = viewMonth === 11 ? 0 : viewMonth + 1;
+      const nYear = viewMonth === 11 ? viewYear + 1 : viewYear;
+      const ymd = formatYMD(nYear, nMonth, day);
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'audit-cal-cell other-month' + (selectedYMD === ymd ? ' selected' : '');
+      cell.textContent = day;
+      cell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        viewMonth = nMonth;
+        viewYear = nYear;
+        selectDate(ymd);
+      });
+      gridEl.appendChild(cell);
+    }
+
+    // Navigation Listeners
+    popover.querySelector('.audit-cal-prev').addEventListener('click', (e) => {
+      e.stopPropagation();
+      viewMonth--;
+      if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+      renderCalendar();
+    });
+
+    popover.querySelector('.audit-cal-next').addEventListener('click', (e) => {
+      e.stopPropagation();
+      viewMonth++;
+      if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+      renderCalendar();
+    });
+
+    popover.querySelector('.audit-cal-year-down').addEventListener('click', (e) => {
+      e.stopPropagation();
+      viewYear--;
+      renderCalendar();
+    });
+
+    popover.querySelector('.audit-cal-year-up').addEventListener('click', (e) => {
+      e.stopPropagation();
+      viewYear++;
+      renderCalendar();
+    });
+
+    popover.querySelector('.audit-cal-year-text').addEventListener('click', (e) => {
+      e.stopPropagation();
+      showYearPicker = true;
+      renderCalendar();
+    });
+
+    popover.querySelector('.audit-cal-btn-clear').addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectedYMD = '';
+      inputEl.value = '';
+      closePopover();
+      inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    popover.querySelector('.audit-cal-btn-today').addEventListener('click', (e) => {
+      e.stopPropagation();
+      viewYear = today.getFullYear();
+      viewMonth = today.getMonth();
+      selectDate(todayYMD);
+    });
+
+    popover.addEventListener('click', (e) => e.stopPropagation());
+  }
+
+  function selectDate(ymd) {
+    selectedYMD = ymd;
+    inputEl.value = ymd;
+    closePopover();
+    inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function openPopover() {
+    document.querySelectorAll('.audit-cal-popover').forEach(p => p.remove());
+    document.querySelectorAll('.audit-date-input.active').forEach(i => i.classList.remove('active'));
+
+    inputEl.classList.add('active');
+    showYearPicker = false;
+    if (inputEl.value) {
+      const parts = inputEl.value.split('-');
+      if (parts.length === 3) {
+        viewYear = parseInt(parts[0], 10);
+        viewMonth = parseInt(parts[1], 10) - 1;
+        selectedYMD = inputEl.value;
+      }
+    }
+    renderCalendar();
+    setTimeout(() => {
+      document.addEventListener('click', onDocClick);
+    }, 10);
+  }
+
+  function closePopover() {
+    if (popover) {
+      popover.remove();
+      popover = null;
+    }
+    inputEl.classList.remove('active');
+    document.removeEventListener('click', onDocClick);
+  }
+
+  function onDocClick(e) {
+    if (!wrap.contains(e.target)) {
+      closePopover();
+    }
+  }
+
+  inputEl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (popover) closePopover();
+    else openPopover();
+  });
+}
+
 async function loadAuditEvents(container, filters = {}) {
   const loadingEl = container.querySelector('#audit-loading');
   const tableWrap = container.querySelector('#audit-table-wrap');
   const tbody = container.querySelector('#audit-tbody');
-  const countBadge = container.querySelector('#audit-count-badge');
+  const footerEl = container.querySelector('#audit-table-footer');
   if (!loadingEl || !tbody) return;
 
   loadingEl.style.display = 'block';
   loadingEl.textContent = 'Loading audit trail...';
   tableWrap.style.display = 'none';
+  if (footerEl) footerEl.style.display = 'none';
 
   const params = new URLSearchParams();
   if (filters.action) params.set('action', filters.action);
@@ -4303,48 +5660,105 @@ async function loadAuditEvents(container, filters = {}) {
     const res = await api('/api/audit' + queryStr);
     loadingEl.style.display = 'none';
     tableWrap.style.display = 'block';
-    tbody.innerHTML = '';
 
     const events = (res.events || []).slice().reverse(); // newest first
-    if (countBadge) countBadge.textContent = `${events.length} event${events.length === 1 ? '' : 's'}`;
+    container._auditAllEvents = events;
+    container._auditVisibleCount = 10; // default to 10 logs
+    container._auditShowAll = false;
+    tableWrap.scrollTop = 0;
 
-    if (events.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-dim, #64748b);">No audit events match the selected criteria.</td></tr>`;
-      return;
-    }
-
-    events.forEach(ev => {
-      const tr = document.createElement('tr');
-      const isSuccess = (ev.result || '').toUpperCase() === 'SUCCESS';
-      const actionClass = (ev.action || 'OTHER').toLowerCase();
-      
-      // Formatted details
-      let detailsStr = '-';
-      if (ev.details && typeof ev.details === 'object' && Object.keys(ev.details).length > 0) {
-        detailsStr = Object.entries(ev.details)
-          .map(([k, v]) => `${escapeHTML(k)}: ${escapeHTML(String(v))}`)
-          .join(', ');
-      }
-
-      tr.innerHTML = `
-        <td class="audit-time-cell">${ev.timestamp ? formatIST(ev.timestamp) : '-'}</td>
-        <td>
-          <div class="audit-user-tag">
-            <span class="audit-user-avatar">${escapeHTML(ev.actor || 'SYSTEM').charAt(0).toUpperCase()}</span>
-            <span class="audit-user-name">@${escapeHTML(ev.actor || 'SYSTEM')}</span>
-          </div>
-        </td>
-        <td><span class="audit-badge ${actionClass}">${escapeHTML(ev.action || 'UNKNOWN')}</span></td>
-        <td>${ev.target && ev.target !== 'N/A' ? '@' + escapeHTML(ev.target) : '<span style="color:var(--text-faint, #94a3b8)">—</span>'}</td>
-        <td><span class="audit-result-tag ${isSuccess ? 'success' : 'failed'}">${escapeHTML(ev.result || 'UNKNOWN')}</span></td>
-        <td class="audit-details-cell">${detailsStr}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+    renderAuditTableRows(container);
   } catch (err) {
     loadingEl.style.display = 'block';
     loadingEl.textContent = 'Could not load audit trail: ' + err.message;
+    if (footerEl) footerEl.style.display = 'none';
   }
+}
+
+function renderAuditTableRows(container) {
+  const tbody = container.querySelector('#audit-tbody');
+  const countBadge = container.querySelector('#audit-count-badge');
+  const footerEl = container.querySelector('#audit-table-footer');
+  const toggleLabel = container.querySelector('#btn-audit-toggle-label');
+  const toggleIcon = container.querySelector('#btn-audit-toggle-icon');
+  const showingText = container.querySelector('#audit-showing-text');
+  if (!tbody) return;
+
+  const events = container._auditAllEvents || [];
+  const total = events.length;
+  const canDelete = hasPermission('audit:delete') || state.role === 'superadmin';
+  const colspan = canDelete ? 7 : 6;
+  tbody.innerHTML = '';
+
+  if (total === 0) {
+    if (countBadge) countBadge.textContent = '0 events';
+    tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 24px; color: var(--text-dim, #64748b);">No audit events match the selected criteria.</td></tr>`;
+    if (footerEl) footerEl.style.display = 'none';
+    return;
+  }
+
+  const showAll = Boolean(container._auditShowAll);
+  let visibleCount = showAll ? total : (container._auditVisibleCount || 10);
+  if (visibleCount > total) visibleCount = total;
+
+  const displayedEvents = events.slice(0, visibleCount);
+
+  if (total > 10) {
+    if (visibleCount >= total) {
+      if (countBadge) countBadge.textContent = `Showing all ${total} events`;
+      if (showingText) showingText.textContent = `Showing all ${total} events`;
+      if (toggleLabel) toggleLabel.textContent = `Show Less (First 10)`;
+      if (toggleIcon) toggleIcon.innerHTML = `<path d="M15 12.5L10 7.5L5 12.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+      if (footerEl) footerEl.style.display = 'flex';
+    } else {
+      if (countBadge) countBadge.textContent = `Showing ${visibleCount} of ${total} events`;
+      if (showingText) showingText.textContent = `Showing ${visibleCount} of ${total} events (scroll down for more)`;
+      if (toggleLabel) toggleLabel.textContent = `Show All (${total} events)`;
+      if (toggleIcon) toggleIcon.innerHTML = `<path d="M5 7.5L10 12.5L15 7.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+      if (footerEl) footerEl.style.display = 'flex';
+    }
+  } else {
+    if (countBadge) countBadge.textContent = `${total} event${total === 1 ? '' : 's'}`;
+    if (footerEl) footerEl.style.display = 'none';
+  }
+
+  displayedEvents.forEach(ev => {
+    const tr = document.createElement('tr');
+    const isSuccess = (ev.result || '').toUpperCase() === 'SUCCESS';
+    const actionClass = (ev.action || 'OTHER').toLowerCase();
+    
+    // Formatted details
+    let detailsStr = '-';
+    if (ev.details && typeof ev.details === 'object' && Object.keys(ev.details).length > 0) {
+      detailsStr = Object.entries(ev.details)
+        .map(([k, v]) => `${escapeHTML(k)}: ${escapeHTML(String(v))}`)
+        .join(', ');
+    }
+
+    tr.innerHTML = `
+      <td class="audit-time-cell">${ev.timestamp ? formatIST(ev.timestamp) : '-'}</td>
+      <td>
+        <div class="audit-user-tag">
+          <span class="audit-user-avatar">${escapeHTML(ev.actor || 'SYSTEM').charAt(0).toUpperCase()}</span>
+          <span class="audit-user-name">@${escapeHTML(ev.actor || 'SYSTEM')}</span>
+        </div>
+      </td>
+      <td><span class="audit-badge ${actionClass}">${escapeHTML(ev.action || 'UNKNOWN')}</span></td>
+      <td>${ev.target && ev.target !== 'N/A' ? '@' + escapeHTML(ev.target) : '<span style="color:var(--text-faint, #94a3b8)">—</span>'}</td>
+      <td><span class="audit-result-tag ${isSuccess ? 'success' : 'failed'}">${escapeHTML(ev.result || 'UNKNOWN')}</span></td>
+      <td class="audit-details-cell">${detailsStr}</td>
+      ${canDelete ? `
+        <td style="text-align: right; padding-right: 14px;">
+          <button type="button" class="btn-audit-row-del" data-id="${escapeHTML(ev.id)}" title="Delete this log entry (Super Admin only)">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H3.862a2 2 0 01-1.995-1.858L1 7m5 4v6m4-6v6m4-6v6M1 7h18M8 7V4a1 1 0 011-1h2a1 1 0 011 1v3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </td>
+      ` : ''}
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 // ---------- Toast ----------
