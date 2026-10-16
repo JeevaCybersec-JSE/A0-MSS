@@ -2848,7 +2848,7 @@ function buildRAGDistributionPanel(g, a, r, t) {
       <div class="legend-row" data-key="${s.key}" data-idx="${idx}" style="cursor:pointer;">
         <span class="legend-dot" style="background:${s.color};"></span>
         <span class="legend-name">${s.label}</span>
-        <span class="legend-count">${s.v} <span style="color:#94a3b8; font-weight:500; font-size:10px;">(${pct}%)</span></span>
+        <span class="legend-count">${s.v} <span class="legend-pct">(${pct}%)</span></span>
       </div>
     `;
   }).join('');
@@ -2892,7 +2892,7 @@ function buildRAGDistributionPanel(g, a, r, t) {
   const numEl = E('text', {
     x: CX, y: CY - 3,
     'text-anchor': 'middle',
-    'font-family': "'JetBrains Mono', monospace",
+    'font-family': "'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif",
     'font-size': '22',
     'font-weight': '800',
     fill: '#0f172a',
