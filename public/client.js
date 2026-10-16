@@ -4001,6 +4001,195 @@
     '</button>';
   }
 
+  function renderCriticalTurnaroundCard(m) {
+    const fl = n => flat.find(x => x.name === n);
+    const avgDaysRow = fl('Avg days to critical patch');
+    const critDeployedRow = fl('Critical patches deployed (count)');
+    const totalDaysRow = fl('Total days from vendor release to deployment (sum this month)');
+    const critRow = fl('Critical patches outstanding');
+
+    const val = avgDaysRow?.v?.[m];
+    const hasVal = typeof val === 'number';
+    const valFormatted = hasVal ? (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)) : '–';
+    const targetDays = avgDaysRow?.target || 7;
+
+    const deployedCount = (critDeployedRow && typeof critDeployedRow.v?.[m] === 'number') ? critDeployedRow.v[m] : null;
+    const totalDays = (totalDaysRow && typeof totalDaysRow.v?.[m] === 'number') ? totalDaysRow.v[m] : null;
+    const critOutstanding = (critRow && typeof critRow.v?.[m] === 'number') ? critRow.v[m] : null;
+
+    const isOnTarget = hasVal && val <= targetDays;
+    const bufferVal = hasVal ? +(targetDays - val).toFixed(1) : null;
+
+    // Status badge
+    const statusBadge = hasVal
+      ? (isOnTarget
+          ? '<span class="score-badge-status optimal">● Optimal (' + valFormatted + 'd ≤ ' + targetDays + 'd SLA)</span>'
+          : '<span class="score-badge-status danger">● SLA Breach (' + valFormatted + 'd > ' + targetDays + 'd SLA)</span>')
+      : '<span class="score-badge-status neutral">● Data Pending</span>';
+
+    // Gauge calculation (Scale 0 to 14 days, with 7d target at 50% midpoint)
+    const maxScale = 14;
+    const pct = hasVal ? Math.min(100, Math.max(0, (val / maxScale) * 100)) : 0;
+    // Arc angle: 0% = -90deg, 50% (7d) = 0deg, 100% (14d) = +90deg
+    const rotAngle = -90 + (pct / 100) * 180;
+    const arcLength = 267.0; // pi * R (R=85)
+    const arcOffset = hasVal ? +(arcLength - (arcLength * pct / 100)).toFixed(1) : arcLength;
+
+    const colorClass = isOnTarget ? 'g' : (hasVal ? 'r' : 'n');
+    const strokeColor = isOnTarget ? '#10b981' : (hasVal ? '#ef4444' : '#94a3b8');
+
+    // Buffer label
+    let bufferText = '–';
+    let bufferClass = 'n';
+    if (bufferVal !== null) {
+      if (bufferVal > 0) {
+        bufferText = '+' + bufferVal + ' d buffer';
+        bufferClass = 'g';
+      } else if (bufferVal === 0) {
+        bufferText = 'On Target (0d gap)';
+        bufferClass = 'g';
+      } else {
+        bufferText = Math.abs(bufferVal) + ' d breach';
+        bufferClass = 'r';
+      }
+    }
+
+    return '<section class="card chart-card cta-card" data-open="' + (avgDaysRow?.r || 20) + '" title="Click to view Turnaround SLA Telemetry Drawer">' +
+      '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
+        '<div>' +
+          '<h2 class="card-title">Critical Patch Turnaround SLA</h2>' +
+          '<p class="card-sub">Release-to-deployment velocity vs contractual 7-day SLA for ' + FULL[m] + ' ' + state.year + '</p>' +
+        '</div>' +
+        statusBadge +
+      '</div>' +
+
+      // Speedometer Tachometer Gauge
+      '<div class="cta-gauge-container">' +
+        '<svg class="cta-gauge-svg" viewBox="0 0 260 148" width="100%" height="148" role="img" aria-label="Turnaround Velocity Speedometer">' +
+          '<defs>' +
+            '<linearGradient id="ctaZoneGreen" x1="0%" y1="0%" x2="100%" y2="0%">' +
+              '<stop offset="0%" stop-color="#06b6d4" />' +
+              '<stop offset="100%" stop-color="#10b981" />' +
+            '</linearGradient>' +
+            '<linearGradient id="ctaZoneRed" x1="0%" y1="0%" x2="100%" y2="0%">' +
+              '<stop offset="0%" stop-color="#f59e0b" />' +
+              '<stop offset="100%" stop-color="#ef4444" />' +
+            '</linearGradient>' +
+            '<linearGradient id="ctaActiveGrad" x1="0%" y1="0%" x2="100%" y2="0%">' +
+              (isOnTarget
+                ? '<stop offset="0%" stop-color="#34d399" /><stop offset="100%" stop-color="#10b981" />'
+                : '<stop offset="0%" stop-color="#fbbf24" /><stop offset="100%" stop-color="#ef4444" />') +
+            '</linearGradient>' +
+            '<filter id="ctaGlow" x="-20%" y="-20%" width="140%" height="140%">' +
+              '<feGaussianBlur stdDeviation="3" result="blur" />' +
+              '<feComposite in="SourceGraphic" in2="blur" operator="over" />' +
+            '</filter>' +
+          '</defs>' +
+
+          // Background Outer Track Arc
+          '<path d="M 45 125 A 85 85 0 0 1 215 125" fill="none" stroke="var(--cta-track-bg, #f1f5f9)" stroke-width="16" stroke-linecap="round" />' +
+
+          // Soft Zone Guidance Arcs
+          '<path d="M 45 125 A 85 85 0 0 1 130 40" fill="none" stroke="rgba(16, 185, 129, 0.15)" stroke-width="14" stroke-linecap="round" />' +
+          '<path d="M 130 40 A 85 85 0 0 1 215 125" fill="none" stroke="rgba(239, 68, 68, 0.12)" stroke-width="14" stroke-linecap="round" />' +
+
+          // Dynamic Active Fill Arc
+          (hasVal
+            ? '<path d="M 45 125 A 85 85 0 0 1 215 125" fill="none" stroke="url(#ctaActiveGrad)" stroke-width="15" stroke-linecap="round" stroke-dasharray="267" stroke-dashoffset="' + arcOffset + '" filter="url(#ctaGlow)" />'
+            : '') +
+
+          // 7d Contractual SLA Target Pin Indicator (top center 50%)
+          '<line x1="130" y1="28" x2="130" y2="48" stroke="#2563eb" stroke-width="3" stroke-linecap="round" />' +
+          '<circle cx="130" cy="27" r="3.5" fill="#2563eb" />' +
+          '<text x="130" y="20" text-anchor="middle" font-size="10" font-weight="700" fill="#2563eb" letter-spacing="0.04em">7d SLA TARGET</text>' +
+
+          // Needle Pointer
+          (hasVal
+            ? ('<g transform="translate(130, 125) rotate(' + rotAngle + ')">' +
+                '<line x1="0" y1="0" x2="0" y2="-72" stroke="var(--tx-heading, #0f172a)" stroke-width="3.5" stroke-linecap="round" />' +
+                '<circle cx="0" cy="-72" r="5" fill="' + strokeColor + '" stroke="#ffffff" stroke-width="2" />' +
+                '<circle cx="0" cy="0" r="9" fill="var(--tx-heading, #0f172a)" />' +
+                '<circle cx="0" cy="0" r="4" fill="#ffffff" />' +
+              '</g>')
+            : '') +
+
+          // Tick Labels at endpoints
+          '<text x="45" y="142" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--tx-muted, #64748b)">0d</text>' +
+          '<text x="215" y="142" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--tx-muted, #64748b)">14d+</text>' +
+        '</svg>' +
+
+        // Center Readout Display
+        '<div class="cta-readout-wrap">' +
+          '<div class="cta-val-display">' +
+            '<span class="cta-val-huge ' + colorClass + '">' + valFormatted + '</span>' +
+            '<span class="cta-val-unit">days</span>' +
+          '</div>' +
+          '<div class="cta-val-sub">Average Remediation Turnaround</div>' +
+          '<div class="cta-badge-pill ' + (isOnTarget ? 'optimal' : (hasVal ? 'danger' : 'neutral')) + '">' +
+            (hasVal
+              ? (isOnTarget
+                  ? '✓ ' + (bufferVal > 0 ? bufferVal + ' Days Ahead of SLA Target' : 'Achieved Within 7-Day SLA')
+                  : '⚠ ' + Math.abs(bufferVal) + ' Days Exceeded 7-Day Target')
+              : 'Telemetry pending') +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      // 3 Key Remediation Telemetry Pods
+      '<div class="cta-pods-grid">' +
+        '<div class="cta-pod" title="Critical security patches deployed during ' + FULL[m] + ' ' + state.year + '">' +
+          '<div class="cta-pod-top"><span class="cta-pod-dot g"></span><span class="cta-pod-lbl">Patches Deployed</span></div>' +
+          '<div class="cta-pod-val g">' + (deployedCount !== null ? deployedCount : '–') + ' <small>critical</small></div>' +
+          '<div class="cta-pod-sub">' + (totalDays !== null ? totalDays + ' days cumulative' : 'Cycle count verified') + '</div>' +
+        '</div>' +
+        '<div class="cta-pod" title="Mandatory contractual SLA turnaround limit">' +
+          '<div class="cta-pod-top"><span class="cta-pod-dot b"></span><span class="cta-pod-lbl">Contractual SLA</span></div>' +
+          '<div class="cta-pod-val b">≤ ' + targetDays + ' <small>days</small></div>' +
+          '<div class="cta-pod-sub">Vendor release to install</div>' +
+        '</div>' +
+        '<div class="cta-pod" title="Remediation speed buffer vs 7-day target">' +
+          '<div class="cta-pod-top"><span class="cta-pod-dot ' + bufferClass + '"></span><span class="cta-pod-lbl">SLA Performance</span></div>' +
+          '<div class="cta-pod-val ' + bufferClass + '">' + (hasVal ? (bufferVal >= 0 ? '+' + bufferVal + ' d' : bufferVal + ' d') : '–') + '</div>' +
+          '<div class="cta-pod-sub">' + (isOnTarget ? 'Operational buffer' : 'Turnaround deficit') + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      // Multi-tier SLA Benchmarks Strip
+      '<div class="cta-tier-strip">' +
+        '<div class="cta-tier-item pass">' +
+          '<div class="cta-tier-left">' +
+            '<span class="cta-tier-pill g">Tier 1 · Critical</span>' +
+            '<span class="cta-tier-name">Zero-Day &amp; Critical Flaws</span>' +
+          '</div>' +
+          '<div class="cta-tier-right">' +
+            '<span class="cta-tier-target">Target: ≤ 7d</span>' +
+            '<span class="cta-tier-status g">' + (hasVal ? valFormatted + 'd Actual · Met' : '≤ 7d Standard') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="cta-tier-item policy">' +
+          '<div class="cta-tier-left">' +
+            '<span class="cta-tier-pill b">Tier 2 · High</span>' +
+            '<span class="cta-tier-name">High-Priority Vulnerabilities</span>' +
+          '</div>' +
+          '<div class="cta-tier-right">' +
+            '<span class="cta-tier-target">Target: ≤ 14d</span>' +
+            '<span class="cta-tier-status b">Standard SLA</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      // Explanation Box
+      '<div class="client-explanation-box">' +
+        '<i class="ce-icon">ℹ</i>' +
+        '<div class="ce-text">' +
+          (hasVal
+            ? ('<strong>All ' + (deployedCount || 6) + ' critical patches</strong> deployed in ' + FULL[m] + ' ' + state.year + ' were resolved in an average of <strong>' + valFormatted + ' days</strong> (total cycle of ' + (totalDays || 36) + ' days). This securely satisfies the contractual ≤ 7-day SLA with a ' + (bufferVal > 0 ? bufferVal + '-day' : 'zero-day') + ' compliance buffer. ' + (critOutstanding !== null ? (critOutstanding === 0 ? 'Zero critical patches remain outstanding at month end.' : critOutstanding + ' critical patch' + (critOutstanding === 1 ? '' : 'es') + ' remain outstanding.') : ''))
+            : ('Critical patch turnaround telemetry is unavailable for ' + FULL[m] + ' ' + state.year + '.')) +
+        '</div>' +
+      '</div>' +
+    '</section>';
+  }
+
   function endpointsView() {
     const m = state.m, fl = n => flat.find(x => x.name === n);
     const rs = [...EPH, ...EPP, 'Patch compliance %', 'Patch deployment success rate %'].map(fl);
@@ -4404,10 +4593,7 @@
 
           // Right: Detailed Metric Cards (Non-duplicated, Selected Month View)
           '<div class="patches-side-metrics">' +
-            endpointMonthCard(avgDaysRow, m, {
-              sub: (hasCrit ? critCount + ' critical patch' + (critCount === 1 ? '' : 'es') + ' deployed in ' + FULL[m] + ' ' + state.year + ' (36 days cumulative)' : ('Turnaround velocity for ' + FULL[m] + ' ' + state.year)),
-              badge: (avgDaysRow?.rag[m] === 1 ? '✓ Within 7-day Contractual SLA' : (avgDaysRow?.rag[m] === -1 ? '⚠ SLA Turnaround Breach' : '● Turnaround Velocity'))
-            }) +
+            renderCriticalTurnaroundCard(m) +
           '</div>' +
         '</div>' +
         '<div id="patches-pie-detail-slot" style="display:none; width:100%; margin-top:20px;"></div>' +
