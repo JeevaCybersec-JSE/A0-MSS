@@ -2817,7 +2817,6 @@ function buildRAGDistributionPanel(g, a, r, t) {
   titleRow.className = 'rag-card-header';
   titleRow.innerHTML = `
     <span class="rag-title">RAG Distribution</span>
-    <span class="rag-live-indicator"><span class="rag-orbit-dot"></span>LIVE</span>
   `;
   panel.appendChild(titleRow);
 
