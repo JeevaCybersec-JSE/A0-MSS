@@ -3914,16 +3914,6 @@
 
       '<div class="blk"><div class="bt"><h2>Service delivered</h2><span class="sub">Work completed for you in ' + FULL[m] + '</span></div>' +
         '<div class="stats3">' + stat('Threats blocked', 'Threats blocked') + stat('Security incidents raised', 'Security incidents raised', 'P1: ' + (fl('P1 security incidents')?.v[m] ?? '0') + ' · Ransomware: ' + (fl('Ransomware detections')?.v[m] ?? '0')) + stat('Vulnerabilities remediated', 'Vulnerabilities fixed') + stat('Successful patch deployments', 'Patch deployments completed') + stat('Incidents resolved', 'Tickets resolved') + stat('Recommendations completed', 'Recommendations completed') + '</div></div>' +
-
-      '<div class="blk"><div class="bt"><h2>Changes since ' + (prev >= 1 ? FULL[prev] : (state.data?.prevMonth ? 'last month' : 'previous month')) + '</h2><span class="sub">Metrics that moved to a better or worse status</span></div>' +
-        '<div class="lists">' +
-          '<section class="card"><h2 class="h2">Slipped</h2>' + (prev >= 1 && slips.length ? li(top(slips), chg) : '<p class="empty">' + (prev >= 1 ? 'No metric moved to a worse status.' : 'First month of data, nothing to compare.') + '</p>') + '</section>' +
-          '<section class="card"><h2 class="h2">Improved</h2>' + (prev >= 1 && gains.length ? li(top(gains), chg) : '<p class="empty">' + (prev >= 1 ? 'No metric moved to a better status.' : 'First month of data, nothing to compare.') + '</p>') + '</section>' +
-        '</div></div>' +
-
-      '<section class="card" id="commentary"><h2 class="h2">Month in review · ' + FULL[m] + ' ' + state.year + '</h2><p class="sub">Written by the service team</p>' +
-        '<div class="cm">' + [['risks', 'Top risks'], ['improvements', 'Improvements delivered'], ['actions', 'Planned actions next month']].map(f => '<div><h3 class="cl">' + f[1] + '</h3><ul class="cmu">' + (((COMMENT[m] || {})[f[0]] || []).map(t => '<li>' + t + '</li>').join('') || '<li class="empty">Nothing recorded for this month yet.</li>') + '</ul></div>').join('') + '</div>' +
-      '</section>' +
     '</div>';
   }
 
