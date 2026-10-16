@@ -4865,17 +4865,14 @@ button.sla-radial-card:hover {
 .patches-side-metrics {
   display: flex !important;
   flex-direction: column !important;
-  gap: 16px !important;
-  justify-content: space-between !important;
 }
 
 .patches-side-metrics .mc {
   flex: 1 !important;
   min-height: auto !important;
-}
-
-.patches-side-metrics .patch-turnaround-card {
-  flex: 1.25 !important;
+  padding: 26px 28px !important;
+  border-radius: 16px !important;
+  justify-content: space-between !important;
 }
 
 /* ==========================================================================

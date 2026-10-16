@@ -4842,17 +4842,14 @@ button.sla-radial-card:hover {
 .patches-side-metrics {
   display: flex !important;
   flex-direction: column !important;
-  gap: 16px !important;
-  justify-content: space-between !important;
 }
 
 .patches-side-metrics .mc {
   flex: 1 !important;
   min-height: auto !important;
-}
-
-.patches-side-metrics .patch-turnaround-card {
-  flex: 1.25 !important;
+  padding: 26px 28px !important;
+  border-radius: 16px !important;
+  justify-content: space-between !important;
 }
 
 /* ==========================================================================
@@ -10461,7 +10458,6 @@ button.sla-radial-card:hover {
         })() +
 
         '<div class="row2" style="margin-top:20px">' + tile(fl('Successful patch deployments'), 'Succeeded this month') + tile(fl('Failed patch deployments'), 'Failed this month') + '</div>' +
-        '<div class="row2">' + mcard(fl('Patch compliance %'), m) + mcard(sr, m) + '</div>' +
       '</div>' +
 
       // Device Health & Protection Coverage Breakdown
@@ -10564,43 +10560,6 @@ button.sla-radial-card:hover {
           // Right: Detailed Metric Cards (Non-duplicated)
           '<div class="patches-side-metrics">' +
             mcard(avgDaysRow, m) +
-            (function() {
-              const avgDaysVal = (typeof avgDaysRow?.v[m] === 'number') ? avgDaysRow.v[m] : null;
-              const avgDaysRag = avgDaysRow?.rag[m];
-              const avgDaysDelta = delta(avgDaysRow, m) || 'Estate velocity';
-              const critDeployed = fl('Critical patches deployed (count)')?.v[m];
-              const hasCritDeployed = (typeof critDeployed === 'number');
-
-              return '<section class="card patch-turnaround-card" style="padding:22px 24px;border-radius:16px;display:flex;flex-direction:column;justify-content:space-between;background:var(--surface-card, #ffffff);border:1px solid var(--line, #e2e8f0);box-shadow:0 1px 3px rgba(0,0,0,0.05);">' +
-                '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
-                  '<div>' +
-                    '<h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:0 0 3px;">Critical Patch Turnaround SLA</h3>' +
-                    '<p style="font-size:12px;color:var(--muted);margin:0;">Time-to-deploy velocity against vendor release policy</p>' +
-                  '</div>' +
-                  (avgDaysRag === 1 ? '<span class="score-badge-status optimal">● On Target (≤ 7 d)</span>' : (avgDaysRag === 0 ? '<span class="score-badge-status warning">● Near Target</span>' : (avgDaysRag === -1 ? '<span class="score-badge-status danger">● SLA Breach</span>' : '<span class="score-badge-status neutral">● Data Pending</span>'))) +
-                '</div>' +
-                '<div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:12px;margin:10px 0 14px;">' +
-                  '<div style="background:var(--surface-subtle, #f8fafc);padding:14px;border-radius:12px;border:1px solid var(--line-subtle, #edf2f7);">' +
-                    '<span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;">Average Turnaround</span>' +
-                    '<div style="font-size:22px;font-weight:800;color:var(--ink);margin:3px 0 2px;">' + (avgDaysVal !== null ? avgDaysVal + ' <small style="font-size:14px;font-weight:600;color:var(--muted)">days</small>' : '–') + '</div>' +
-                    '<span style="font-size:11.5px;color:var(--g);font-weight:600;">' + avgDaysDelta + '</span>' +
-                  '</div>' +
-                  '<div style="background:var(--surface-subtle, #f8fafc);padding:14px;border-radius:12px;border:1px solid var(--line-subtle, #edf2f7);">' +
-                    '<span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;">Agreed SLA Target</span>' +
-                    '<div style="font-size:22px;font-weight:800;color:var(--ink);margin:3px 0 2px;">≤ 7.0 <small style="font-size:14px;font-weight:600;color:var(--muted)">days</small></div>' +
-                    '<span style="font-size:11.5px;color:var(--muted);font-weight:600;">Policy threshold</span>' +
-                  '</div>' +
-                '</div>' +
-                '<div class="client-explanation-box" style="margin:0;">' +
-                  '<i class="ce-icon">ℹ</i>' +
-                  '<div class="ce-text">' +
-                    (avgDaysVal !== null
-                      ? ('<strong>' + (hasCritDeployed ? critDeployed : 'Critical') + ' patches deployed</strong> with an average turnaround speed of ' + avgDaysVal + ' days from vendor release, comfortably within the 7-day contractual SLA.')
-                      : ('Turnaround telemetry is pending for ' + FULL[m] + ' ' + state.year + '.')) +
-                  '</div>' +
-                '</div>' +
-              '</section>';
-            })() +
           '</div>' +
         '</div>' +
       '</div>' +
