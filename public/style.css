@@ -762,6 +762,7 @@ body.cursor-hidden .cursor-spotlight {
 .metric-save,
 .btn-restore,
 .btn-clear,
+.btn-delete-hist,
 .btn-clear-all-hist,
 .btn-user-status,
 .btn-user-pwd,
@@ -801,6 +802,7 @@ body.cursor-hidden .cursor-spotlight {
 .metric-save:hover,
 .btn-restore:hover,
 .btn-clear:hover,
+.btn-delete-hist:hover,
 .btn-clear-all-hist:hover,
 .btn-user-status:hover,
 .btn-user-pwd:hover,
@@ -823,6 +825,7 @@ body.cursor-hidden .cursor-spotlight {
 .metric-save:active,
 .btn-restore:active,
 .btn-clear:active,
+.btn-delete-hist:active,
 .scope-btn:active,
 .ih-view-tab:active {
   transform: scale(0.97) translateY(0) !important;
@@ -838,6 +841,7 @@ body.cursor-hidden .cursor-spotlight {
 .metric-save svg,
 .btn-restore svg,
 .btn-clear svg,
+.btn-delete-hist svg,
 .scope-btn svg,
 .ih-view-tab svg {
   color: #334155 !important;
@@ -851,6 +855,7 @@ body.cursor-hidden .cursor-spotlight {
 .btn-action:hover svg,
 .metric-save:hover svg,
 .btn-restore:hover svg,
+.btn-delete-hist:hover svg,
 .ih-view-tab:hover svg {
   color: #000000 !important;
 }
@@ -3626,7 +3631,7 @@ textarea.field-readonly {
   color: #475569;
 }
 .metric-ytd-pill .ytd-lbl { font-weight: 600; color: #94a3b8; }
-.metric-ytd-pill .ytd-val { font-family: var(--mono); font-weight: 700; color: #0f172a; }
+.metric-ytd-pill .ytd-val { font-family: var(--font-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; color: #0f172a; }
 .metric-ytd-pill .ytd-rag-dot { width: 6px; height: 6px; border-radius: 50%; }
 .metric-ytd-pill .ytd-rag-dot.green { background: #16a34a; }
 .metric-ytd-pill .ytd-rag-dot.amber { background: #d97706; }
@@ -4723,10 +4728,24 @@ textarea.field-readonly {
 .metric-info { min-width: 0; }
 .metric-label { font-size: 14.5px; font-weight: 700; color: var(--text); transition: color 0.15s; }
 .metric-desc { font-size: 12.5px; color: var(--text-faint); margin-top: 4px; line-height: 1.45; font-weight: 400; }
-.metric-target { font-size: 11.5px; color: var(--text-dim); margin-top: 6px; font-family: var(--mono); font-weight: 600; }
+.metric-target { 
+  font-size: 12px; 
+  color: var(--text-dim); 
+  margin-top: 6px; 
+  font-family: var(--font-body, 'Inter', sans-serif); 
+  font-weight: 500; 
+  letter-spacing: -0.005em; 
+}
 
 .metric-value-block { text-align: right; min-width: 120px; }
-.metric-value { font-family: var(--mono); font-size: 26px; font-weight: 700; line-height: 1; color: var(--text); }
+.metric-value { 
+  font-family: var(--font-heading, 'Plus Jakarta Sans', sans-serif); 
+  font-size: 26px; 
+  font-weight: 700; 
+  line-height: 1; 
+  color: var(--text); 
+  letter-spacing: -0.02em; 
+}
 .metric-value-empty { color: var(--text-faint); font-size: 20px; }
 
 .metric-badge {
@@ -4777,7 +4796,7 @@ textarea.field-readonly {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 7px 28px 7px 10px;
-  font-family: var(--mono);
+  font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
@@ -5069,7 +5088,7 @@ textarea.field-readonly {
   border-color: #cbd5e1 !important;
   cursor: default !important;
   font-weight: 700 !important;
-  font-family: var(--mono) !important;
+  font-family: var(--font-body, 'Inter', sans-serif) !important;
   user-select: all !important;
 }
 
@@ -5100,7 +5119,7 @@ textarea.field-readonly {
   border-color: rgba(129, 140, 248, 0.3);
 }
 
-.metric-prev-ref { font-size: 11.5px; font-family: var(--mono); color: var(--text-faint); margin-top: 5px; }
+.metric-prev-ref { font-size: 11.5px; font-family: var(--font-body, 'Inter', sans-serif); color: var(--text-faint); margin-top: 5px; }
 
 /* History Drawer — Modern Unified Typography & Sleek Danger Action */
 .history-drawer {
@@ -5203,91 +5222,75 @@ textarea.field-readonly {
   gap: 8px;
 }
 
-/* Modern Pill Restore Button */
-.btn-restore {
-  padding: 5px 11px;
-  font-size: 11.5px;
-  font-weight: 600;
-  border-radius: 6px;
-  background: #FFFFFF;
-  border: 1px solid #D1D5DB;
-  color: #1E293B;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-body, 'Inter', sans-serif);
-  transition: all 0.18s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-.btn-restore:hover {
-  background: #F8FAFC;
-  border-color: #94A3B8;
-  color: #0F172A;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-}
-.btn-restore svg {
-  color: #64748B;
-  transition: color 0.15s ease;
-}
-.btn-restore:hover svg {
-  color: #0F172A;
-}
-
-/* Modern Sleek Delete Button (Red Danger Pill Matching Design System) */
-.btn-delete-hist {
-  padding: 5px 11px;
-  font-size: 11.5px;
-  font-weight: 600;
-  border-radius: 6px;
-  background: #FEF2F2;
-  border: 1px solid #FECACA;
-  color: #DC2626;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-body, 'Inter', sans-serif);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px rgba(220, 38, 38, 0.05);
-}
-.btn-delete-hist svg {
-  color: #DC2626;
-  transition: color 0.15s ease;
-}
-.btn-delete-hist:hover {
-  background: #DC2626;
-  border-color: #B91C1C;
-  color: #FFFFFF;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.28);
-}
-.btn-delete-hist:hover svg {
-  color: #FFFFFF;
-}
-.btn-delete-hist:active {
-  transform: translateY(0);
-}
-
-/* Clear All Past History Button */
+/* History Actions: Restore & Delete Pill Buttons Matching Save Button Style */
+.btn-restore,
+.btn-delete-hist,
 .btn-clear-all-hist {
-  background: #FEF2F2;
-  border: 1px solid #FECACA;
-  color: #DC2626;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  font-family: var(--font-body, 'Inter', sans-serif);
-  cursor: pointer;
-  transition: all 0.18s ease;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  padding: 0 16px !important;
+  height: 36px !important;
+  border-radius: 9999px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 12.5px !important;
+  font-weight: 550 !important;
+  letter-spacing: -0.01em !important;
+  color: #0f172a !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(240, 244, 248, 0.45) 100%) !important;
+  backdrop-filter: blur(20px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.75) !important;
+  cursor: pointer !important;
+  box-shadow: 
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.03),
+    0 4px 14px -1px rgba(15, 23, 42, 0.08),
+    0 2px 5px -1px rgba(15, 23, 42, 0.04) !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  white-space: nowrap !important;
 }
+
+.btn-restore:hover,
+.btn-delete-hist:hover,
 .btn-clear-all-hist:hover {
-  background: #DC2626;
-  border-color: #B91C1C;
-  color: #FFFFFF;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(245, 248, 252, 0.65) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.95) !important;
+  color: #000000 !important;
+  transform: translateY(-1.5px) !important;
+  box-shadow: 
+    inset 0 1px 1.5px 0 #ffffff,
+    0 6px 18px -1px rgba(15, 23, 42, 0.12),
+    0 3px 8px -1px rgba(15, 23, 42, 0.06) !important;
+}
+
+.btn-restore:active,
+.btn-delete-hist:active,
+.btn-clear-all-hist:active {
+  transform: scale(0.97) translateY(0) !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.7),
+    0 2px 6px rgba(15, 23, 42, 0.06) !important;
+}
+
+.btn-delete-hist svg,
+.btn-restore svg {
+  color: #334155 !important;
+  stroke-width: 1.8;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease !important;
+  flex-shrink: 0;
+}
+
+.btn-delete-hist:hover svg {
+  color: #DC2626 !important;
+  transform: scale(1.1);
+}
+
+.btn-restore:hover svg {
+  color: #000000 !important;
+  transform: rotate(-45deg);
 }
 
 /* Dark Mode Overrides for History Drawer */
@@ -5362,41 +5365,49 @@ textarea.field-readonly {
 }
 
 [data-theme="dark"] .btn-delete-hist,
-.dark-preview .btn-delete-hist {
-  background: rgba(239, 68, 68, 0.14);
-  border-color: rgba(239, 68, 68, 0.32);
-  color: #F87171;
+.dark-preview .btn-delete-hist,
+[data-theme="dark"] .btn-restore,
+.dark-preview .btn-restore,
+[data-theme="dark"] .btn-clear-all-hist,
+.dark-preview .btn-clear-all-hist {
+  background: linear-gradient(180deg, #2a2e39 0%, #1e222b 50%, #15181f 100%) !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.2),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.5),
+    0 1px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
 [data-theme="dark"] .btn-delete-hist:hover,
-.dark-preview .btn-delete-hist:hover {
-  background: #DC2626;
-  border-color: #B91C1C;
-  color: #FFFFFF;
+.dark-preview .btn-delete-hist:hover,
+[data-theme="dark"] .btn-restore:hover,
+.dark-preview .btn-restore:hover,
+[data-theme="dark"] .btn-clear-all-hist:hover,
+.dark-preview .btn-clear-all-hist:hover {
+  background: linear-gradient(180deg, #373c4a 0%, #292e3a 50%, #1d212b 100%) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  transform: translateY(-1.5px) !important;
 }
 
 [data-theme="dark"] .btn-delete-hist svg,
-.dark-preview .btn-delete-hist svg {
-  color: #F87171;
+.dark-preview .btn-delete-hist svg,
+[data-theme="dark"] .btn-restore svg,
+.dark-preview .btn-restore svg {
+  color: #94A3B8 !important;
 }
 
 [data-theme="dark"] .btn-delete-hist:hover svg,
 .dark-preview .btn-delete-hist:hover svg {
-  color: #FFFFFF;
+  color: #F87171 !important;
+  transform: scale(1.1);
 }
 
-[data-theme="dark"] .btn-clear-all-hist,
-.dark-preview .btn-clear-all-hist {
-  background: rgba(239, 68, 68, 0.14);
-  border-color: rgba(239, 68, 68, 0.32);
-  color: #F87171;
-}
-
-[data-theme="dark"] .btn-clear-all-hist:hover,
-.dark-preview .btn-clear-all-hist:hover {
-  background: #DC2626;
-  border-color: #B91C1C;
-  color: #FFFFFF;
+[data-theme="dark"] .btn-restore:hover svg,
+.dark-preview .btn-restore:hover svg {
+  color: #F8FAFC !important;
+  transform: rotate(-45deg);
 }
 
 /* Trends */
