@@ -10707,7 +10707,7 @@ button.sla-radial-card:hover {
           '</div>' +
         '</section>' +
         '<section class="card chart-card"><div class="card-head"><h2 class="card-title">Mean time to detect &amp; respond</h2><p class="card-sub">Average duration in hours from detection alert to confirmed triage, and from triage to containment</p></div>' +
-          '<div class="lg"><span><i style="background:var(--s1)"></i>Time to detect</span><span><i style="background:var(--s3)"></i>Time to respond</span><span><i class="dash"></i>Targets: ' + fmt(td, td.target) + ' to detect, ' + fmt(tr, tr.target) + ' to respond</span></div>' +
+          '<div class="lg"><span><i style="background:var(--s1)"></i>Time to detect</span><span><i style="background:var(--s3)"></i>Time to respond</span></div>' +
           '<div class="chart"><canvas id="t1" role="img" aria-label="Lines for mean time to detect and respond in hours by month, with dashed target lines">Detect and respond hours by month.</canvas></div></section>' +
         '<div class="row2">' + mcard(td, m) + mcard(tr, m) + '</div></div>' +
 
@@ -10758,9 +10758,7 @@ button.sla-radial-card:hover {
         labels: L,
         datasets: [
           line('Time to detect', vals(td), css('--s1')),
-          line('Time to respond', vals(tr), css('--s3')),
-          line('Detect target', L.map(() => td.target), css('--s1'), true),
-          line('Respond target', L.map(() => tr.target), css('--s3'), true)
+          line('Time to respond', vals(tr), css('--s3'))
         ]
       },
       options: o,
