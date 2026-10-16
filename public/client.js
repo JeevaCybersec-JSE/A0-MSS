@@ -4020,6 +4020,8 @@
     const epc = fl('Endpoint protection coverage %');
     const dnr = fl('Devices not reporting');
     const dop = fl('Devices with outdated protection');
+    const dnrPctRow = fl('Devices not reporting % of estate');
+    const dopPctRow = fl('Devices with outdated protection % of estate');
     const hasEpc = (typeof epc?.v[m] === 'number');
     const hasDop = (typeof dop?.v[m] === 'number');
     const hasDnr = (typeof dnr?.v[m] === 'number');
@@ -4252,28 +4254,28 @@
 
       // Device Health & Protection Coverage Breakdown
       '<div class="blk">' + bt('Device health', 'Estate protection coverage and share of devices affected by reporting lapses or outdated definitions') +
-        '<section class="card epc-summary-card" style="margin-bottom:18px">' +
+        '<section class="card epc-summary-card">' +
           '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
             '<div><h2 class="card-title">Endpoint Protection Coverage</h2><p class="card-sub">Active Sophos endpoint agent health, realtime reporting, and definition status</p></div>' +
             epcStatusBadge +
           '</div>' +
           '<div class="epc-breakdown-strip">' +
-            '<div class="epc-chip">' +
+            '<div class="epc-chip" ' + (epc?.r ? 'data-open="' + epc.r + '" title="Click to inspect ' + epc.name + ' telemetry"' : '') + '>' +
               '<span class="epc-chip-lbl">Protected Endpoints</span>' +
               '<span class="epc-chip-val g">' + (hasEpcData && protCount !== null ? protCount : '–') + '</span>' +
               '<span class="epc-chip-sub">' + (hasEpcData ? protPct + '% of estate' : '–') + '</span>' +
             '</div>' +
-            '<div class="epc-chip">' +
+            '<div class="epc-chip" ' + ((dopPctRow?.r || dop?.r) ? 'data-open="' + (dopPctRow?.r || dop?.r) + '" title="Click to inspect ' + (dopPctRow?.name || 'Outdated protection') + ' telemetry"' : '') + '>' +
               '<span class="epc-chip-lbl">Outdated Protection</span>' +
               '<span class="epc-chip-val a">' + (hasDop && opCount !== null ? opCount : '–') + '</span>' +
               '<span class="epc-chip-sub">' + (hasDop ? 'Signature lag' : '–') + '</span>' +
             '</div>' +
-            '<div class="epc-chip">' +
+            '<div class="epc-chip" ' + ((dnrPctRow?.r || dnr?.r) ? 'data-open="' + (dnrPctRow?.r || dnr?.r) + '" title="Click to inspect ' + (dnrPctRow?.name || 'Devices not reporting') + ' telemetry"' : '') + '>' +
               '<span class="epc-chip-lbl">Devices Not Reporting</span>' +
               '<span class="epc-chip-val r">' + (hasDnr && nrCount !== null ? nrCount : '–') + '</span>' +
               '<span class="epc-chip-sub">' + (hasDnr ? 'Agent offline' : '–') + '</span>' +
             '</div>' +
-            '<div class="epc-chip">' +
+            '<div class="epc-chip" ' + (me?.r ? 'data-open="' + me.r + '" title="Click to inspect ' + me.name + ' telemetry"' : '') + '>' +
               '<span class="epc-chip-lbl">Total Assessed Estate</span>' +
               '<span class="epc-chip-val">' + (hasMe ? totalAssessed : '–') + '</span>' +
               '<span class="epc-chip-sub">Target: ≥ 98%</span>' +
@@ -4287,10 +4289,6 @@
             ) + '</div>' +
           '</div>' +
         '</section>' +
-        '<div class="stats3">' + EPH.map(n => {
-          const c = n === 'Devices not reporting % of estate' ? fl('Devices not reporting') : n === 'Devices with outdated protection % of estate' ? fl('Devices with outdated protection') : null;
-          return mcard(fl(n), m, c ? '<span data-open="' + c.r + '" title="Open ' + c.name + '" style="border-bottom:1px dotted var(--muted)">' + c.name + ': <strong>' + c.v[m] + '</strong>' + (delta(c, m) ? ' · ' + delta(c, m) : '') + '</span>' : null);
-        }).join('') + '</div>' +
       '</div>' +
 
       // Patches Outstanding: Animated Pie / Donut Chart with Continuous Rotation & Legend
