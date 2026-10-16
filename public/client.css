@@ -4874,6 +4874,10 @@ button.sla-radial-card:hover {
   min-height: auto !important;
 }
 
+.patches-side-metrics .patch-turnaround-card {
+  flex: 1.25 !important;
+}
+
 /* ==========================================================================
    SEGMENTED COMPLIANCE & OUTCOME BARS
    ========================================================================== */
