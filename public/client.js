@@ -3255,8 +3255,7 @@
     const allDrv = scored.filter(r => r.rag[m] === -1).sort(rank), drivers = allDrv.slice(0, 5);
     const li = (arr, fn) => '<ul class="li">' + arr.map(r => '<li><button data-open="' + r.r + '"><span class="nm">' + r.name + '</span><span class="meta">' + fn(r) + '</span></button></li>').join('') + '</ul>';
 
-    const windowEnd = Math.max(4, Math.min(12, m));
-    const statusMonths = [windowEnd - 3, windowEnd - 2, windowEnd - 1, windowEnd];
+    const statusMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     // --- Rolling Compliance History (Score-free operational status timeline) ---
     const rollingComplianceHtml = '<div class="posture-trend-widget" style="margin-top:16px;">' +
@@ -4484,8 +4483,19 @@
         '<div class="row2" style="margin-top:20px">' + tile(fl('Successful patch deployments'), 'Succeeded this month') + tile(fl('Failed patch deployments'), 'Failed this month') + '</div>' +
       '</div>' +
 
-      // Device Health & Protection Coverage Breakdown
-      '<div class="blk">' + bt('Device health', 'Estate protection coverage and share of devices affected by reporting lapses or outdated definitions') +
+      // Device Health & Protection Coverage Breakdown with Interactive Scrollable Carousel
+      '<div class="blk device-health-block">' +
+        '<div class="device-health-header-row">' +
+          bt('Device health', 'Estate protection coverage, agent reporting heartbeat, and definition status') +
+          '<div class="device-health-nav">' +
+            '<button type="button" class="dh-nav-btn prev" id="dhNavPrev" aria-label="Scroll left" title="Scroll left">' +
+              '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '</button>' +
+            '<button type="button" class="dh-nav-btn next" id="dhNavNext" aria-label="Scroll right" title="Scroll right">' +
+              '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7.5 15l5-5-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
         '<section class="card epc-summary-card" style="margin-bottom:18px">' +
           '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
             '<div><h2 class="card-title">Endpoint Protection Coverage</h2><p class="card-sub">Active Sophos endpoint agent health, realtime reporting, and definition status</p></div>' +
@@ -4521,19 +4531,36 @@
             ) + '</div>' +
           '</div>' +
         '</section>' +
-        '<div class="stats3">' +
-          endpointMonthCard(fl('Endpoint protection coverage %'), m, {
-            sub: (hasEpcData && protCount !== null ? protCount + ' of ' + totalAssessed + ' devices fully protected' : (FULL[m] + ' ' + state.year + ' fleet coverage')),
-            badge: (epcIsOnTarget ? '✓ Target ≥ 98% Achieved' : '⚠ Below 98% Policy')
-          }) +
-          endpointMonthCard(fl('Devices not reporting % of estate'), m, {
-            sub: (hasDnr && nrCount !== null ? (nrCount === 0 ? '0 devices offline · Agent heartbeat active' : nrCount + ' device' + (nrCount === 1 ? '' : 's') + ' currently offline') : 'Agent reporting telemetry'),
-            badge: ((nrCount === 0 || fl('Devices not reporting % of estate')?.rag[m] === 1) ? '✓ Zero Offline Devices' : '⚠ Devices Not Reporting')
-          }) +
-          endpointMonthCard(fl('Devices with outdated protection % of estate'), m, {
-            sub: (hasDop && opCount !== null ? (opCount === 0 ? '0 devices with signature lag · 100% current' : opCount + ' device' + (opCount === 1 ? '' : 's') + ' require updates') : 'Signature definitions status'),
-            badge: ((opCount === 0 || fl('Devices with outdated protection % of estate')?.rag[m] === 1) ? '✓ Definitions 100% Current' : '⚠ Outdated Signatures')
-          }) +
+        '<div class="dh-carousel-container">' +
+          '<div class="dh-carousel-track" id="dhCarouselTrack">' +
+            endpointMonthCard(fl('Endpoint protection coverage %'), m, {
+              sub: (hasEpcData && protCount !== null ? protCount + ' of ' + totalAssessed + ' devices fully protected' : (FULL[m] + ' ' + state.year + ' fleet coverage')),
+              badge: (epcIsOnTarget ? '✓ Target ≥ 98% Achieved' : '⚠ Below 98% Policy')
+            }) +
+            endpointMonthCard(fl('Devices not reporting % of estate'), m, {
+              sub: (hasDnr && nrCount !== null ? (nrCount === 0 ? '0 devices offline · Agent heartbeat active' : nrCount + ' device' + (nrCount === 1 ? '' : 's') + ' currently offline') : 'Agent reporting telemetry'),
+              badge: ((nrCount === 0 || fl('Devices not reporting % of estate')?.rag[m] === 1) ? '✓ Zero Offline Devices' : '⚠ Devices Not Reporting')
+            }) +
+            endpointMonthCard(fl('Devices with outdated protection % of estate'), m, {
+              sub: (hasDop && opCount !== null ? (opCount === 0 ? '0 devices with signature lag · 100% current' : opCount + ' device' + (opCount === 1 ? '' : 's') + ' require updates') : 'Signature definitions status'),
+              badge: ((opCount === 0 || fl('Devices with outdated protection % of estate')?.rag[m] === 1) ? '✓ Definitions 100% Current' : '⚠ Outdated Signatures')
+            }) +
+            endpointMonthCard(me, m, {
+              sub: (hasMe ? totalAssessed + ' total managed endpoints in active inventory' : 'Active endpoint inventory'),
+              badge: '● Monitored Fleet'
+            }) +
+            endpointMonthCard(mo, m, {
+              sub: (mo && typeof mo.v[m] === 'number' ? mo.v[m] + ' remote & mobile devices roaming via VPN' : 'Mobile VPN telemetry'),
+              badge: '● Remote Clients'
+            }) +
+          '</div>' +
+        '</div>' +
+        '<div class="dh-carousel-dots" id="dhCarouselDots">' +
+          '<span class="dh-dot active" data-idx="0"></span>' +
+          '<span class="dh-dot" data-idx="1"></span>' +
+          '<span class="dh-dot" data-idx="2"></span>' +
+          '<span class="dh-dot" data-idx="3"></span>' +
+          '<span class="dh-dot" data-idx="4"></span>' +
         '</div>' +
       '</div>' +
 
@@ -4601,7 +4628,68 @@
     '</div>';
   }
 
+  function initDeviceHealthCarousel() {
+    const track = document.getElementById('dhCarouselTrack');
+    const prevBtn = document.getElementById('dhNavPrev');
+    const nextBtn = document.getElementById('dhNavNext');
+    const dots = document.querySelectorAll('.dh-dot');
+
+    if (!track) return;
+
+    const getScrollAmount = () => {
+      const card = track.querySelector('.endpoint-month-card');
+      return card ? card.offsetWidth + 20 : 360;
+    };
+
+    if (prevBtn) {
+      prevBtn.onclick = (e) => {
+        e.preventDefault();
+        track.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+      };
+    }
+
+    if (nextBtn) {
+      nextBtn.onclick = (e) => {
+        e.preventDefault();
+        track.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+      };
+    }
+
+    dots.forEach(dot => {
+      dot.onclick = () => {
+        const idx = parseInt(dot.getAttribute('data-idx') || '0', 10);
+        const cards = track.querySelectorAll('.endpoint-month-card');
+        if (cards[idx]) {
+          cards[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        }
+      };
+    });
+
+    const updateDots = () => {
+      const cards = track.querySelectorAll('.endpoint-month-card');
+      if (!cards.length) return;
+      const trackLeft = track.getBoundingClientRect().left;
+      let closestIdx = 0;
+      let minDiff = Infinity;
+      cards.forEach((card, idx) => {
+        const diff = Math.abs(card.getBoundingClientRect().left - trackLeft);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestIdx = idx;
+        }
+      });
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === closestIdx);
+      });
+    };
+
+    track.onscroll = () => {
+      requestAnimationFrame(updateDots);
+    };
+  }
+
   function drawEndpointCharts() {
+    initDeviceHealthCarousel();
     const L = CHART_MONTHS.map(i => MON[i]), fl = n => flat.find(x => x.name === n);
     const m = state.m;
     const mk = (id, cfg) => {

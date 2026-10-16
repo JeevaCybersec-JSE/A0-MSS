@@ -5359,6 +5359,176 @@ button.sla-radial-card:hover {
   color: var(--tx-muted, #64748b) !important;
 }
 
+/* ==========================================================================
+   DEVICE HEALTH HORIZONTAL SCROLL CAROUSEL
+   Allows seamless horizontal scrolling / sliding through endpoint health cards
+   ========================================================================== */
+
+.device-health-header-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 12px !important;
+}
+
+.device-health-nav {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.dh-nav-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: var(--surface-card, #ffffff) !important;
+  border: 1px solid var(--line, #e2e8f0) !important;
+  color: var(--tx-heading, #0f172a) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.dh-nav-btn:hover {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) scale(1.05) !important;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25) !important;
+}
+
+.dh-nav-btn:active {
+  transform: scale(0.95) !important;
+}
+
+[data-theme="dark"] .dh-nav-btn {
+  background: rgba(30, 41, 59, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .dh-nav-btn:hover {
+  background: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.dh-carousel-container {
+  position: relative !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  margin: 14px 0 6px 0 !important;
+}
+
+.dh-carousel-track {
+  display: flex !important;
+  gap: 20px !important;
+  overflow-x: auto !important;
+  scroll-behavior: smooth !important;
+  scroll-snap-type: x mandatory !important;
+  padding: 6px 4px 14px 4px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.dh-carousel-track::-webkit-scrollbar {
+  height: 6px !important;
+}
+
+.dh-carousel-track::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.dh-carousel-track::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35) !important;
+  border-radius: 999px !important;
+}
+
+.dh-carousel-track .endpoint-month-card {
+  flex: 0 0 350px !important;
+  min-width: 320px !important;
+  max-width: 380px !important;
+  scroll-snap-align: start !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 1024px) {
+  .dh-carousel-track .endpoint-month-card {
+    flex: 0 0 320px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .dh-carousel-track .endpoint-month-card {
+    flex: 0 0 88% !important;
+    min-width: 270px !important;
+  }
+}
+
+.dh-carousel-dots {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 10px !important;
+}
+
+.dh-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 999px !important;
+  background: var(--line, #cbd5e1) !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.dh-dot.active {
+  width: 26px !important;
+  background: #2563eb !important;
+}
+
+[data-theme="dark"] .dh-dot {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .dh-dot.active {
+  background: #3b82f6 !important;
+}
+
+/* Rolling SLA Status History Timeline Ribbon in Overview */
+.posture-trend-timeline {
+  display: flex !important;
+  gap: 12px !important;
+  overflow-x: auto !important;
+  scroll-snap-type: x mandatory !important;
+  padding: 8px 4px 12px 4px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.posture-trend-timeline::-webkit-scrollbar {
+  height: 6px !important;
+}
+
+.posture-trend-timeline::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.posture-trend-timeline::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35) !important;
+  border-radius: 999px !important;
+}
+
+.posture-trend-step {
+  flex: 0 0 135px !important;
+  min-width: 125px !important;
+  scroll-snap-align: start !important;
+}
 
 /* ==========================================================================
    LEGEND & CHIPS POLISH
