@@ -4408,7 +4408,7 @@ button.exec-kpi-card.interactive:hover {
 /* 4. Incident Trend & Volume + Insights Panel */
 .incident-grid {
   display: grid !important;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1.65fr) !important;
+  grid-template-columns: 1fr !important;
   gap: 24px !important;
   align-items: stretch !important;
   width: 100% !important;
