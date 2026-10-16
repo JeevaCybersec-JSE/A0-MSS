@@ -9503,6 +9503,9 @@ button.sla-radial-card:hover {
           coveredPct = Math.max(0, Math.min(100, coveredPct));
         }
         const remainingPct = hasEpcData ? Math.max(0, Math.min(100, 100 - coveredPct)) : 0;
+        const baseDevices = mEnd > 0 ? mEnd : totEstateDevices;
+        const dCovered = hasEpcData ? Math.round(baseDevices * (coveredPct / 100)) : 0;
+        const dRemaining = hasEpcData ? Math.max(0, baseDevices - dCovered) : 0;
 
         // Donut SVG generator for Endpoint Protection Coverage (Covered vs Remaining)
         const donutSvg = (function () {
@@ -9602,8 +9605,8 @@ button.sla-radial-card:hover {
                 '<div class="estate-tiles-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">' +
                   '<div class="estate-tile"><span class="tl">Managed Endpoints</span><span class="vl">' + mEnd + '</span><span class="sub">' + (delta(fl('Managed endpoints'), m) || 'Estate count') + '</span></div>' +
                   '<div class="estate-tile"><span class="tl">Mobile Devices (VPN)</span><span class="vl">' + mobEnd + '</span><span class="sub">' + (delta(fl('Mobile devices - VPN'), m) || 'MDM enrolled') + '</span></div>' +
-                  '<div class="estate-tile"><span class="tl">Outdated Protection</span><span class="vl" style="color:' + (pOutdated > 0.02 ? 'var(--r)' : 'var(--g)') + '">' + pOutdatedPct.toFixed(1) + '%</span><span class="sub">' + dOutdated + ' devices affected</span></div>' +
-                  '<div class="estate-tile"><span class="tl">Non-Reporting</span><span class="vl" style="color:' + (pNotRep > 0.02 ? 'var(--r)' : 'var(--g)') + '">' + pNotRepPct.toFixed(1) + '%</span><span class="sub">' + dNotRep + ' devices silent</span></div>' +
+                  '<div class="estate-tile"><span class="tl">Protected Devices</span><span class="vl" style="color:var(--g)">' + (hasEpcData ? dCovered : '–') + '</span><span class="sub">' + (hasEpcData ? coveredPct.toFixed(1) + '% fully secured' : 'Data pending') + '</span></div>' +
+                  '<div class="estate-tile"><span class="tl">Protection Gap</span><span class="vl" style="color:' + (dRemaining > 0 ? 'var(--a, #f59e0b)' : 'var(--g)') + '">' + (hasEpcData ? dRemaining : '–') + '</span><span class="sub">' + (hasEpcData ? (dRemaining > 0 ? remainingPct.toFixed(1) + '% to reach 100%' : 'All devices secured') : 'Data pending') + '</span></div>' +
                 '</div>' +
               '</div>' +
             '</div>' +
