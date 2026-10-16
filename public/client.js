@@ -3946,12 +3946,67 @@
     return '<button class="mc" data-open="' + r.r + '"><div class="hd"><span class="nm">' + nm + '</span>' + pill(r, r.rag[m]) + '</div><div class="val">' + fmt(r, r.v[m]) + '</div>' + (cl ? '<div class="row"><span>' + cl + '</span><span></span></div>' : '') + '<div class="row"><span>' + (delta(r, m) || '&nbsp;') + '</span><span>' + target(r) + '</span></div>' + spark(r, m) + '</button>';
   }
 
+  function endpointMonthCard(r, m, opts = {}) {
+    if (!r) return '';
+    const nm = r.name.replace(/ % of estate$/, '').replace(/ %$/, '');
+    const val = r.v[m];
+    const valFormatted = fmt(r, val);
+    const rag = r.rag[m];
+    const ragClass = rag === 1 ? 'optimal' : rag === 0 ? 'warning' : rag === -1 ? 'danger' : 'neutral';
+    const ragText = rag === 1 ? 'Optimal' : rag === 0 ? 'Near Target' : rag === -1 ? 'Off Target' : 'Data Pending';
+    const colorClass = rag === 1 ? 'g' : rag === 0 ? 'a' : rag === -1 ? 'r' : 'b';
+
+    const sub = opts.sub || behind(r, m) || (FULL[m] + ' ' + state.year + ' verified posture');
+    const targetLabel = target(r);
+    const badgeText = opts.badge || (rag === 1 ? '✓ Target Achieved' : (rag === -1 ? '⚠ SLA Deficit' : '● ' + ragText));
+    const badgeClass = rag === 1 ? '' : (rag === 0 ? 'warning' : (rag === -1 ? 'danger' : ''));
+
+    // Gauge calculation for single month
+    let fillPct = 100;
+    let pinLeft = null;
+    if (typeof val === 'number') {
+      if (isPct(r)) {
+        fillPct = Math.min(100, Math.max(0, +(val * 100).toFixed(1)));
+        if (typeof r.target === 'number') {
+          pinLeft = Math.min(100, Math.max(0, +(r.target * 100).toFixed(1)));
+        }
+      } else if (r.name.includes('days')) {
+        const tgtDays = r.target || 7;
+        fillPct = Math.min(100, Math.max(0, +((val / tgtDays) * 100).toFixed(1)));
+        pinLeft = 100;
+      }
+    }
+
+    return '<button type="button" class="endpoint-month-card" data-open="' + r.r + '" title="Open ' + r.name + ' Telemetry">' +
+      '<div class="emc-head">' +
+        '<h3 class="emc-title">' + nm + '</h3>' +
+        '<span class="score-badge-status ' + ragClass + '">' + (rag === 1 ? '● ' : '') + ragText + '</span>' +
+      '</div>' +
+      '<div class="emc-body">' +
+        '<div class="emc-val-row">' +
+          '<span class="emc-val ' + colorClass + '">' + valFormatted + '</span>' +
+        '</div>' +
+        '<div class="emc-sub">' + sub + '</div>' +
+      '</div>' +
+      '<div class="emc-gauge-wrap">' +
+        '<div class="emc-gauge-track">' +
+          '<div class="emc-gauge-fill ' + colorClass + '" style="width:' + fillPct + '%;"></div>' +
+          (pinLeft !== null ? '<div class="emc-gauge-pin" style="left:' + pinLeft + '%;" title="Target: ' + targetLabel + '"></div>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="emc-footer">' +
+        '<span class="emc-footer-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '<span class="emc-footer-tgt">' + (targetLabel ? targetLabel : (FULL[m] + ' ' + state.year)) + '</span>' +
+      '</div>' +
+    '</button>';
+  }
+
   function endpointsView() {
     const m = state.m, fl = n => flat.find(x => x.name === n);
     const rs = [...EPH, ...EPP, 'Patch compliance %', 'Patch deployment success rate %'].map(fl);
     const g = rs.filter(r => r.rag[m] === 1).length, bad = rs.filter(r => r.rag[m] === -1).length;
     const me = fl('Managed endpoints'), mo = fl('Mobile devices - VPN'), ne = fl('New endpoints'), rm = fl('Removed endpoints');
-    const tile = (r, t) => '<button class="stat" data-open="' + r.r + '"><div class="t">' + t + '</div><div class="v">' + fmt(r, r.v[m]) + '</div><div class="d">' + (delta(r, m) || '&nbsp;') + '</div></button>';
+    const tile = (r, t) => '<button class="stat" data-open="' + r.r + '"><div class="t">' + t + '</div><div class="v">' + fmt(r, r.v[m]) + '</div><div class="d" style="font-weight:600;color:var(--tx-muted);font-size:11.5px;">' + FULL[m] + ' ' + state.year + '</div></button>';
     const bt = (h, s) => '<div class="bt"><h2>' + h + '</h2><span class="sub">' + s + '</span></div>';
 
     // 1. PATCH COMPLIANCE METRICS & CALCULATION
@@ -4079,7 +4134,7 @@
         '<div class="stats">' + tile(me, 'Managed endpoints') + tile(mo, 'Mobile devices') + tile(ne, 'New endpoints') + tile(rm, 'Removed endpoints') + '</div></div>' +
 
       // Patching: Compliance Donut & Deployment Outcome Cards
-      '<div class="blk">' + bt('Patching', 'Compliance posture, deployment outcome breakdown, and monthly trends') +
+      '<div class="blk">' + bt('Patching', 'Compliance posture, deployment outcome breakdown, and selected month SLA posture') +
         '<div class="row2">' +
           // 1. Redesigned Patch Compliance Donut Card
           '<section class="card chart-card kpi-donut-card">' +
@@ -4117,7 +4172,7 @@
             '<div class="client-explanation-box">' +
               '<i class="ce-icon">ℹ</i>' +
               '<div class="ce-text">' + (hasPcData
-                ? ('<strong>' + pcPctVal + '% of assessed devices (' + compEndpoints + ' of ' + totalAssessed + ')</strong> meet the defined patch compliance criteria. The remaining ' + nonCompEndpoints + ' device' + (nonCompEndpoints === 1 ? '' : 's') + ' (' + (100 - parseFloat(pcPctVal)).toFixed(1) + '%) require update deployment to achieve the 95% SLA target.' + (pcDelta ? ' (' + pcDelta + ')' : ''))
+                ? ('<strong>' + pcPctVal + '% of assessed devices (' + compEndpoints + ' of ' + totalAssessed + ')</strong> meet the defined patch compliance criteria. The remaining ' + nonCompEndpoints + ' device' + (nonCompEndpoints === 1 ? '' : 's') + ' (' + (100 - parseFloat(pcPctVal)).toFixed(1) + '%) require update deployment to achieve the 95% SLA target.' + (pcGapPts ? ' (' + pcGapPts + ' pt deficit)' : ''))
                 : ('Patch compliance telemetry is unavailable for ' + FULL[m] + ' ' + state.year + '.')
               ) + '</div>' +
             '</div>' +
@@ -4221,7 +4276,7 @@
               '<button type="button" class="month-pod" data-open="' + (pc?.r || '') + '" title="Open Patch Compliance Telemetry">' +
                 '<div class="month-pod-head"><span class="month-pod-lbl">SLA Performance</span><span class="donut-leg-dot a"></span></div>' +
                 '<div class="month-pod-val b">' + (hasPcData ? pcPctVal + '%' : '–') + '</div>' +
-                '<div class="month-pod-sub">' + (hasPcData ? (pcIsOnTarget ? '✓ Contractual 95% SLA achieved' : '⚠ Below 95% SLA threshold' + (pcDelta ? ' (' + pcDelta + ')' : '')) : 'Data pending') + '</div>' +
+                '<div class="month-pod-sub">' + (hasPcData ? (pcIsOnTarget ? '✓ Contractual 95% SLA achieved' : '⚠ Below 95% SLA threshold' + (pcGapPts ? ' (' + pcGapPts + ' pt gap)' : '')) : 'Data pending') + '</div>' +
                 '<div class="month-pod-link">View SLA telemetry drawer →</div>' +
               '</button>' +
             '</div>' +
@@ -4277,10 +4332,20 @@
             ) + '</div>' +
           '</div>' +
         '</section>' +
-        '<div class="stats3">' + EPH.map(n => {
-          const c = n === 'Devices not reporting % of estate' ? fl('Devices not reporting') : n === 'Devices with outdated protection % of estate' ? fl('Devices with outdated protection') : null;
-          return mcard(fl(n), m, c ? '<span data-open="' + c.r + '" title="Open ' + c.name + '" style="border-bottom:1px dotted var(--muted)">' + c.name + ': <strong>' + c.v[m] + '</strong>' + (delta(c, m) ? ' · ' + delta(c, m) : '') + '</span>' : null);
-        }).join('') + '</div>' +
+        '<div class="stats3">' +
+          endpointMonthCard(fl('Endpoint protection coverage %'), m, {
+            sub: (hasEpcData && protCount !== null ? protCount + ' of ' + totalAssessed + ' devices fully protected' : (FULL[m] + ' ' + state.year + ' fleet coverage')),
+            badge: (epcIsOnTarget ? '✓ Target ≥ 98% Achieved' : '⚠ Below 98% Policy')
+          }) +
+          endpointMonthCard(fl('Devices not reporting % of estate'), m, {
+            sub: (hasDnr && nrCount !== null ? (nrCount === 0 ? '0 devices offline · Agent heartbeat active' : nrCount + ' device' + (nrCount === 1 ? '' : 's') + ' currently offline') : 'Agent reporting telemetry'),
+            badge: ((nrCount === 0 || fl('Devices not reporting % of estate')?.rag[m] === 1) ? '✓ Zero Offline Devices' : '⚠ Devices Not Reporting')
+          }) +
+          endpointMonthCard(fl('Devices with outdated protection % of estate'), m, {
+            sub: (hasDop && opCount !== null ? (opCount === 0 ? '0 devices with signature lag · 100% current' : opCount + ' device' + (opCount === 1 ? '' : 's') + ' require updates') : 'Signature definitions status'),
+            badge: ((opCount === 0 || fl('Devices with outdated protection % of estate')?.rag[m] === 1) ? '✓ Definitions 100% Current' : '⚠ Outdated Signatures')
+          }) +
+        '</div>' +
       '</div>' +
 
       // Patches Outstanding: Animated Pie / Donut Chart with Continuous Rotation & Legend
@@ -4337,9 +4402,12 @@
             '</div>' +
           '</section>' +
 
-          // Right: Detailed Metric Cards (Non-duplicated)
+          // Right: Detailed Metric Cards (Non-duplicated, Selected Month View)
           '<div class="patches-side-metrics">' +
-            mcard(avgDaysRow, m) +
+            endpointMonthCard(avgDaysRow, m, {
+              sub: (hasCrit ? critCount + ' critical patch' + (critCount === 1 ? '' : 'es') + ' deployed in ' + FULL[m] + ' ' + state.year + ' (36 days cumulative)' : ('Turnaround velocity for ' + FULL[m] + ' ' + state.year)),
+              badge: (avgDaysRow?.rag[m] === 1 ? '✓ Within 7-day Contractual SLA' : (avgDaysRow?.rag[m] === -1 ? '⚠ SLA Turnaround Breach' : '● Turnaround Velocity'))
+            }) +
           '</div>' +
         '</div>' +
         '<div id="patches-pie-detail-slot" style="display:none; width:100%; margin-top:20px;"></div>' +

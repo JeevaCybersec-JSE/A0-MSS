@@ -7098,3 +7098,186 @@ button.sla-radial-card:hover {
   gap: 4px !important;
 }
 
+/* ==========================================================================
+   SINGLE-MONTH ENDPOINT TELEMETRY CARDS (NO OTHER MONTH COMPARISON)
+   ========================================================================== */
+
+.endpoint-month-card {
+  background: var(--surface-card, #ffffff) !important;
+  border: 1px solid var(--line, #e2e8f0) !important;
+  border-radius: 16px !important;
+  padding: 24px 26px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 220px !important;
+  font: inherit !important;
+  color: inherit !important;
+  box-sizing: border-box !important;
+}
+
+.patches-side-metrics .endpoint-month-card {
+  height: 100% !important;
+  min-height: 100% !important;
+  flex: 1 !important;
+}
+
+.endpoint-month-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 10px 28px rgba(59, 130, 246, 0.12) !important;
+}
+
+[data-theme="dark"] .endpoint-month-card {
+  background: linear-gradient(145deg, #151a24 0%, #0d1117 100%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+.emc-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+}
+
+.emc-title {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: var(--tx-heading, #0f172a) !important;
+  margin: 0 !important;
+  line-height: 1.35 !important;
+}
+
+[data-theme="dark"] .emc-title {
+  color: #f8fafc !important;
+}
+
+.emc-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  margin: 2px 0 !important;
+}
+
+.emc-val-row {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 6px !important;
+}
+
+.emc-val {
+  font-size: 34px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.025em !important;
+  color: var(--tx-heading, #0f172a) !important;
+  line-height: 1.05 !important;
+}
+
+[data-theme="dark"] .emc-val {
+  color: #ffffff !important;
+}
+
+.emc-val.g { color: #10b981 !important; }
+.emc-val.r { color: #ef4444 !important; }
+.emc-val.b { color: #3b82f6 !important; }
+.emc-val.a { color: #f59e0b !important; }
+
+.emc-unit {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: var(--tx-muted, #64748b) !important;
+}
+
+.emc-sub {
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  color: var(--tx-muted, #64748b) !important;
+  line-height: 1.4 !important;
+}
+
+.emc-gauge-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  margin: 8px 0 2px 0 !important;
+}
+
+.emc-gauge-track {
+  position: relative !important;
+  height: 9px !important;
+  border-radius: 999px !important;
+  background: #f1f5f9 !important;
+  overflow: visible !important;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="dark"] .emc-gauge-track {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.emc-gauge-fill {
+  height: 100% !important;
+  border-radius: 999px !important;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.emc-gauge-fill.g { background: linear-gradient(90deg, #10b981, #34d399) !important; box-shadow: 0 0 10px rgba(16, 185, 129, 0.35) !important; }
+.emc-gauge-fill.r { background: linear-gradient(90deg, #ef4444, #f87171) !important; box-shadow: 0 0 10px rgba(239, 68, 68, 0.35) !important; }
+.emc-gauge-fill.b { background: linear-gradient(90deg, #3b82f6, #60a5fa) !important; box-shadow: 0 0 10px rgba(59, 130, 246, 0.35) !important; }
+.emc-gauge-fill.a { background: linear-gradient(90deg, #f59e0b, #fbbf24) !important; box-shadow: 0 0 10px rgba(245, 158, 11, 0.35) !important; }
+
+.emc-gauge-pin {
+  position: absolute !important;
+  top: -4px !important;
+  width: 2.5px !important;
+  height: 17px !important;
+  background: var(--tx-heading, #0f172a) !important;
+  border-radius: 2px !important;
+  z-index: 2 !important;
+}
+
+[data-theme="dark"] .emc-gauge-pin {
+  background: #ffffff !important;
+}
+
+.emc-footer {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-size: 11.5px !important;
+  color: var(--tx-muted, #64748b) !important;
+  border-top: 1px solid var(--line-subtle, #f1f5f9) !important;
+  padding-top: 10px !important;
+  gap: 8px !important;
+}
+
+[data-theme="dark"] .emc-footer {
+  border-top-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.emc-footer-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-weight: 600 !important;
+  color: #10b981 !important;
+}
+
+.emc-footer-badge.warning { color: #f59e0b !important; }
+.emc-footer-badge.danger { color: #ef4444 !important; }
+
+.emc-footer-tgt {
+  font-weight: 600 !important;
+  color: var(--tx-muted, #64748b) !important;
+  white-space: nowrap !important;
+}
+
