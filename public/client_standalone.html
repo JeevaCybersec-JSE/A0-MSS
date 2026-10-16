@@ -8323,7 +8323,7 @@ button.sla-radial-card:hover {
     { id: 'overview', label: 'Overview' },
     { id: 'endpoints', label: 'Endpoints & Patching', secs: ['Endpoint Management', 'Patch Management'] },
     { id: 'threats', label: 'Threats & Response', secs: ['Endpoint Protection (Sophos)', 'Security Operations', 'Email & Phishing'] },
-    { id: 'vuln', label: 'Vulnerabilities', secs: ['Vulnerability Management'] },
+    { id: 'vuln', label: 'Vulnerability Management', secs: ['Vulnerability Management'] },
     { id: 'identity', label: 'Identity & Email', secs: ['Identity & Access', 'Email & Phishing'] },
     { id: 'service', label: 'Service Delivery', secs: ['Service Delivery'] },
     { id: 'compliance', label: 'Compliance', secs: ['Compliance'] },
@@ -10852,7 +10852,7 @@ button.sla-radial-card:hover {
     ) : '';
 
     return '<div class="stack">' +
-      '<div class="sechead"><h2>Vulnerabilities</h2><span class="sub">' + g + ' of ' + rs.length + ' scored metrics on target' + (bad ? ' · ' + bad + ' off target' : '') + '</span></div>' +
+      '<div class="sechead"><h2>Vulnerability Management</h2><span class="sub">' + g + ' of ' + rs.length + ' scored metrics on target' + (bad ? ' · ' + bad + ' off target' : '') + '</span></div>' +
       
       // Zero tolerance breaches
       '<div class="blk">' + bt('Zero tolerance', 'Any critical vulnerability open, or any fix overdue, turns the month Red') +
