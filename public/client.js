@@ -4173,65 +4173,67 @@
         '</div>' +
         '<div id="patch-comp-detail-slot" style="display:none; width:100%; margin-top:20px;"></div>' +
 
-        // Monthly Historical Compliance Trend with Luminous Mountain Ridge
+        // Selected Month Compliance & Patching Status (Single Month View)
         (function() {
-          const man = fl('Managed endpoints'), pat = fl('Patch compliance %')?.helpers?.[0];
-          const pcTrendPoints = CHART_MONTHS.map(i => {
-            const totDev = man?.v?.[i];
-            const pDev = pat?.v?.[i];
-            if (typeof totDev === 'number' && typeof pDev === 'number' && totDev > 0) {
-              return Math.min(100, Math.max(0, +(pDev / totDev * 100).toFixed(1)));
-            }
-            const direct = pc?.v?.[i];
-            if (typeof direct === 'number') {
-              return Math.min(100, Math.max(0, direct <= 1 ? +(direct * 100).toFixed(1) : +direct.toFixed(1)));
-            }
-            return null;
-          });
-          const validTrend = pcTrendPoints.filter(v => typeof v === 'number');
-          const hasAnyTrendData = validTrend.length > 0;
-          const pcMaxVal = hasAnyTrendData ? Math.max(...validTrend) : 0;
-          const pcMaxM = pcTrendPoints.indexOf(pcMaxVal) + 1;
-          const pcMilestones = [];
-          if (typeof pcTrendPoints[0] === 'number') {
-            pcMilestones.push({ monthIndex: 1, label: pcTrendPoints[0] + '%' });
-          } else {
-            const firstIdx = pcTrendPoints.findIndex(v => typeof v === 'number');
-            if (firstIdx !== -1) {
-              pcMilestones.push({ monthIndex: firstIdx + 1, label: pcTrendPoints[firstIdx] + '%', sub: 'Baseline' });
-            }
-          }
-          if (hasPcData && m !== 1 && typeof pcTrendPoints[m - 1] === 'number') {
-            pcMilestones.push({ monthIndex: m, label: pcPctVal + '%', sub: (compEndpoints !== null ? compEndpoints + ' comp' : 'Current') });
-          }
-          if (hasAnyTrendData && pcMaxM !== m && !pcMilestones.some(ms => ms.monthIndex === pcMaxM)) {
-            pcMilestones.push({ monthIndex: pcMaxM, label: pcMaxVal + '%', sub: 'Peak SLA' });
-          }
+          const compPctNum = hasPcData ? parseFloat(pcPctVal) : 0;
+          const nonCompPctNum = (100 - compPctNum).toFixed(1);
 
-          const displayPoints = pcTrendPoints.map(v => typeof v === 'number' ? v : 0);
-
-          const pcMountainChartSvg = createLuminousMountainRidgeChart({
-            id: 'pc_mountain_ridge',
-            width: 760,
-            height: 205,
-            points: displayPoints,
-            activeMonth: m,
-            yMin: 0,
-            yMax: 100,
-            yUnit: '%',
-            yTicks: [20, 40, 65, 95],
-            milestones: pcMilestones,
-            themeColor: hasPcData ? (pcIsOnTarget ? 'green' : 'amber') : 'amber'
-          });
-
-          return '<section class="card chart-card" style="margin-top:22px">' +
-            '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start">' +
-              '<div><h2 class="card-title">Historical Patch Compliance Trajectory</h2><p class="card-sub">12-month multi-layer compliance mountain ridge with active milestone needles and 95% SLA target</p></div>' +
+          return '<section class="card chart-card month-compliance-card">' +
+            '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">' +
+              '<div>' +
+                '<h2 class="card-title">Patch Compliance &amp; Estate Posture · ' + FULL[m] + ' ' + state.year + '</h2>' +
+                '<p class="card-sub">Active fleet verification, contractual SLA threshold analysis, and remediation priority for ' + FULL[m] + ' ' + state.year + '</p>' +
+              '</div>' +
               pcStatusBadge +
             '</div>' +
-            pcMountainChartSvg +
-            '<div class="lg" style="margin-top:16px"><span><i style="background:var(--g)"></i>Fully patched</span><span><i style="background:var(--r)"></i>Not fully patched</span><span><i class="dash"></i>Target 95%</span></div>' +
-            '<div class="chart" style="height:230px !important; min-height:230px !important;"><canvas id="e1" role="img" aria-label="Stacked bars of fully patched and not fully patched endpoints by month with a 95 percent target line">Patch compliance by month.</canvas></div>' +
+
+            // Single Month Luminous Spectrum Gauge with 95% SLA Needle
+            '<div class="month-spectrum-container">' +
+              '<div class="month-spectrum-track">' +
+                '<div class="month-spectrum-bar-wrap">' +
+                  '<div class="month-spectrum-segment compliant" style="width:' + compPctNum + '%;" title="Compliant: ' + (compEndpoints ?? '–') + ' of ' + (totalAssessed ?? '–') + ' (' + pcPctVal + '%)">' +
+                    (compPctNum >= 20 ? (compEndpoints !== null ? compEndpoints + ' Patched (' + pcPctVal + '%)' : pcPctVal + '%') : '') +
+                  '</div>' +
+                  '<div class="month-spectrum-segment non-compliant" style="width:' + (100 - compPctNum) + '%;" title="Non-Compliant: ' + (nonCompEndpoints ?? '–') + ' devices (' + nonCompPctNum + '%)">' +
+                    ((100 - compPctNum) >= 15 ? (nonCompEndpoints !== null ? nonCompEndpoints + ' Pending (' + nonCompPctNum + '%)' : nonCompPctNum + '%') : '') +
+                  '</div>' +
+                '</div>' +
+                '<div class="month-spectrum-target-pin" title="Contractual Target: ≥ 95% SLA">' +
+                  '<span class="month-spectrum-target-badge">95% Target SLA</span>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            // 3 Interactive Analytical Pods for the Selected Month
+            '<div class="month-compliance-pods">' +
+              '<button type="button" class="month-pod" onclick="openClientPatchCompDetail(0)" title="Inspect Fully Patched Endpoints">' +
+                '<div class="month-pod-head"><span class="month-pod-lbl">Fully Patched</span><span class="donut-leg-dot g"></span></div>' +
+                '<div class="month-pod-val g">' + (hasPcData && compEndpoints !== null ? compEndpoints : '–') + ' <small style="font-size:14px;font-weight:600;color:var(--muted)">endpoints</small></div>' +
+                '<div class="month-pod-sub">' + (hasPcData ? pcPctVal + '% of ' + totalAssessed + ' managed estate' : 'Data pending') + '</div>' +
+                '<div class="month-pod-link">Inspect compliant list →</div>' +
+              '</button>' +
+              '<button type="button" class="month-pod" onclick="openClientPatchCompDetail(1)" title="Inspect Remediation Priority Endpoints">' +
+                '<div class="month-pod-head"><span class="month-pod-lbl">Pending Remediation</span><span class="donut-leg-dot r"></span></div>' +
+                '<div class="month-pod-val r">' + (hasPcData && nonCompEndpoints !== null ? nonCompEndpoints : '–') + ' <small style="font-size:14px;font-weight:600;color:var(--muted)">endpoints</small></div>' +
+                '<div class="month-pod-sub">' + (hasPcData ? (pcIsOnTarget ? 'Target SLA satisfied' : pcGapPts + ' pt gap to 95% SLA') : 'Data pending') + '</div>' +
+                '<div class="month-pod-link" style="color:#ef4444;">Inspect pending devices →</div>' +
+              '</button>' +
+              '<button type="button" class="month-pod" data-open="' + (pc?.r || '') + '" title="Open Patch Compliance Telemetry">' +
+                '<div class="month-pod-head"><span class="month-pod-lbl">SLA Performance</span><span class="donut-leg-dot a"></span></div>' +
+                '<div class="month-pod-val b">' + (hasPcData ? pcPctVal + '%' : '–') + '</div>' +
+                '<div class="month-pod-sub">' + (hasPcData ? (pcIsOnTarget ? '✓ Contractual 95% SLA achieved' : '⚠ Below 95% SLA threshold' + (pcDelta ? ' (' + pcDelta + ')' : '')) : 'Data pending') + '</div>' +
+                '<div class="month-pod-link">View SLA telemetry drawer →</div>' +
+              '</button>' +
+            '</div>' +
+
+            // Monthly Contextual Guidance Box
+            '<div class="client-explanation-box">' +
+              '<i class="ce-icon">ℹ</i>' +
+              '<div class="ce-text">' + (hasPcData
+                ? ('<strong>' + compEndpoints + ' of ' + totalAssessed + ' assessed devices</strong> in ' + FULL[m] + ' ' + state.year + ' meet mandatory security patch compliance (' + pcPctVal + '%). ' + (nonCompEndpoints > 0 ? (nonCompEndpoints + ' endpoint' + (nonCompEndpoints === 1 ? '' : 's') + ' require update deployment to close the ' + pcGapPts + ' pt gap and reach the 95% SLA target.') : 'The entire assessed estate is fully compliant with zero SLA deficit.'))
+                : ('Patch compliance telemetry is unavailable for ' + FULL[m] + ' ' + state.year + '.')
+              ) + '</div>' +
+            '</div>' +
           '</section>';
         })() +
 
@@ -4483,45 +4485,47 @@
     }
 
     // 2. Patch Compliance Stacked Bars (e1)
-    const man = fl('Managed endpoints'), pat = fl('Patch compliance %').helpers[0];
-    const tot = CHART_MONTHS.map(i => man.v[i]), pn = CHART_MONTHS.map(i => pat.v[i]);
-    const pp = pn.map((v, k) => tot[k] ? +(v / tot[k] * 100).toFixed(1) : null), np = pp.map(v => v === null ? null : +(100 - v).toFixed(1));
-    const o = baseOpts();
-    o.scales.x.stacked = true;
-    o.scales.y.stacked = true;
-    o.scales.y.min = 0;
-    o.scales.y.max = 115;
-    o.scales.y.ticks.callback = v => v > 100 ? '' : v + '%';
-    o.scales.y.ticks.stepSize = 25;
+    if (document.getElementById('e1')) {
+      const man = fl('Managed endpoints'), pat = fl('Patch compliance %').helpers[0];
+      const tot = CHART_MONTHS.map(i => man.v[i]), pn = CHART_MONTHS.map(i => pat.v[i]);
+      const pp = pn.map((v, k) => tot[k] ? +(v / tot[k] * 100).toFixed(1) : null), np = pp.map(v => v === null ? null : +(100 - v).toFixed(1));
+      const o = baseOpts();
+      o.scales.x.stacked = true;
+      o.scales.y.stacked = true;
+      o.scales.y.min = 0;
+      o.scales.y.max = 115;
+      o.scales.y.ticks.callback = v => v > 100 ? '' : v + '%';
+      o.scales.y.ticks.stepSize = 25;
 
-    const lab = {
-      id: 'lab',
-      afterDatasetsDraw(ch) {
-        const c = ch.ctx, bars = ch.getDatasetMeta(0).data, y = ch.scales.y.getPixelForValue(100) - 6;
-        c.save();
-        c.font = '600 11px IBM Plex Sans, system-ui, sans-serif';
-        c.fillStyle = css('--ink');
-        c.textAlign = 'center';
-        bars.forEach((b, k) => {
-          if (tot[k] && pn[k] !== null) c.fillText(pn[k] + ' of ' + tot[k], b.x, y);
-        });
-        c.restore();
-      }
-    };
+      const lab = {
+        id: 'lab',
+        afterDatasetsDraw(ch) {
+          const c = ch.ctx, bars = ch.getDatasetMeta(0).data, y = ch.scales.y.getPixelForValue(100) - 6;
+          c.save();
+          c.font = '600 11px IBM Plex Sans, system-ui, sans-serif';
+          c.fillStyle = css('--ink');
+          c.textAlign = 'center';
+          bars.forEach((b, k) => {
+            if (tot[k] && pn[k] !== null) c.fillText(pn[k] + ' of ' + tot[k], b.x, y);
+          });
+          c.restore();
+        }
+      };
 
-    mk('e1', {
-      type: 'bar',
-      data: {
-        labels: L,
-        datasets: [
-          { label: 'Fully patched', data: pp, backgroundColor: css('--g'), borderColor: css('--surface'), borderWidth: 2, maxBarThickness: 34, categoryPercentage: 0.7, barPercentage: 0.85, order: 2 },
-          { label: 'Not fully patched', data: np, backgroundColor: css('--r'), borderColor: css('--surface'), borderWidth: 2, maxBarThickness: 34, categoryPercentage: 0.7, barPercentage: 0.85, order: 2 },
-          { type: 'line', label: 'Target', data: L.map(() => 95), borderColor: css('--ink'), borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, order: 1 }
-        ]
-      },
-      options: o,
-      plugins: [lab]
-    });
+      mk('e1', {
+        type: 'bar',
+        data: {
+          labels: L,
+          datasets: [
+            { label: 'Fully patched', data: pp, backgroundColor: css('--g'), borderColor: css('--surface'), borderWidth: 2, maxBarThickness: 34, categoryPercentage: 0.7, barPercentage: 0.85, order: 2 },
+            { label: 'Not fully patched', data: np, backgroundColor: css('--r'), borderColor: css('--surface'), borderWidth: 2, maxBarThickness: 34, categoryPercentage: 0.7, barPercentage: 0.85, order: 2 },
+            { type: 'line', label: 'Target', data: L.map(() => 95), borderColor: css('--ink'), borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, order: 1 }
+          ]
+        },
+        options: o,
+        plugins: [lab]
+      });
+    }
 
     // 3. Patch Deployments Stacked Bars (e2)
     if (document.getElementById('e2')) {

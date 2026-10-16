@@ -6916,3 +6916,188 @@ button.sla-radial-card:hover {
   color: #64748b;
 }
 
+/* ==========================================================================
+   SINGLE-MONTH PATCH COMPLIANCE ARCHITECTURE CARD
+   ========================================================================== */
+
+.month-compliance-card {
+  padding: 24px 28px !important;
+  border-radius: 16px !important;
+  background: var(--surface-card, #ffffff) !important;
+  border: 1px solid var(--line, #e2e8f0) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+  margin-top: 22px !important;
+}
+
+.month-spectrum-container {
+  position: relative !important;
+  margin: 28px 0 22px 0 !important;
+}
+
+.month-spectrum-track {
+  position: relative !important;
+  height: 38px !important;
+  border-radius: 12px !important;
+  background: #f1f5f9 !important;
+  overflow: visible !important;
+  display: flex !important;
+  border: 1px solid var(--line, #e2e8f0) !important;
+}
+
+[data-theme="dark"] .month-spectrum-track {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.month-spectrum-bar-wrap {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  border-radius: 11px !important;
+  overflow: hidden !important;
+}
+
+.month-spectrum-segment {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 14px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  white-space: nowrap !important;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.month-spectrum-segment.compliant {
+  background: linear-gradient(90deg, #059669 0%, #10b981 100%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+.month-spectrum-segment.non-compliant {
+  background: linear-gradient(90deg, #ef4444 0%, #f87171 100%) !important;
+  justify-content: flex-end !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+.month-spectrum-target-pin {
+  position: absolute !important;
+  top: -10px !important;
+  bottom: -10px !important;
+  left: 95% !important;
+  width: 2px !important;
+  background: #0f172a !important;
+  z-index: 5 !important;
+  transform: translateX(-50%) !important;
+}
+
+[data-theme="dark"] .month-spectrum-target-pin {
+  background: #ffffff !important;
+}
+
+.month-spectrum-target-badge {
+  position: absolute !important;
+  top: -24px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: #0f172a !important;
+  color: #ffffff !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  padding: 2px 7px !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme="dark"] .month-spectrum-target-badge {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.month-compliance-pods {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  margin-top: 18px !important;
+}
+
+@media (max-width: 860px) {
+  .month-compliance-pods {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+.month-pod {
+  background: var(--surface-subtle, #f8fafc) !important;
+  border: 1px solid var(--line, #e2e8f0) !important;
+  border-radius: 12px !important;
+  padding: 16px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  font: inherit !important;
+  color: inherit !important;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.month-pod:hover {
+  transform: translateY(-2px) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.1) !important;
+}
+
+[data-theme="dark"] .month-pod {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+.month-pod-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 8px !important;
+}
+
+.month-pod-lbl {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  color: var(--tx-muted, #64748b) !important;
+}
+
+.month-pod-val {
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  color: var(--tx-heading, #0f172a) !important;
+  margin: 2px 0 4px 0 !important;
+}
+
+[data-theme="dark"] .month-pod-val {
+  color: #f8fafc !important;
+}
+
+.month-pod-val.g { color: #10b981 !important; }
+.month-pod-val.r { color: #ef4444 !important; }
+.month-pod-val.b { color: #3b82f6 !important; }
+
+.month-pod-sub {
+  font-size: 12px !important;
+  color: var(--tx-muted, #64748b) !important;
+}
+
+.month-pod-link {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  color: #3b82f6 !important;
+  margin-top: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
