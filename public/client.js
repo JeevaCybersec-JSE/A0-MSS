@@ -4169,17 +4169,6 @@
                 '</div>'
               ).join('') +
             '</div>' +
-            '<div class="lg" style="margin-top:14px"><span><i style="background:var(--s1)"></i>Succeeded</span><span><i style="background:var(--r)"></i>Failed</span></div>' +
-            '<div class="chart" style="height:210px !important; min-height:210px !important;"><canvas id="e2" role="img" aria-label="Stacked bars of succeeded and failed patch deployments by month">Patch deployments by month.</canvas></div>' +
-            '<div class="client-explanation-box">' +
-              '<i class="ce-icon">ℹ</i>' +
-              '<div class="ce-text">' + (hasDepData
-                ? (totalDeployments > 0
-                    ? '<strong>' + svVal + ' of ' + totalDeployments + ' patch deployment attempts</strong> succeeded in ' + FULL[m] + ' ' + state.year + ' (' + srPctVal + '% success rate). ' + (fvVal > 0 ? fvVal + ' failed deployment' + (fvVal === 1 ? '' : 's') + ' require operational remediation to reach the ≥ 97% target.' : 'All patch deployments succeeded without failures.')
-                    : 'No patch deployment attempts recorded in ' + FULL[m] + ' ' + state.year + '.')
-                : 'Patch deployment telemetry is unavailable for ' + FULL[m] + ' ' + state.year + '.') +
-              '</div>' +
-            '</div>' +
           '</section>' +
         '</div>' +
         '<div id="patch-comp-detail-slot" style="display:none; width:100%; margin-top:20px;"></div>' +
@@ -4535,23 +4524,25 @@
     });
 
     // 3. Patch Deployments Stacked Bars (e2)
-    const o2 = baseOpts();
-    o2.scales.x.stacked = true;
-    o2.scales.y.stacked = true;
-    o2.scales.y.ticks.precision = 0;
-    o2.scales.y.grace = '15%';
-    const sv = fl('Successful patch deployments'), fv = fl('Failed patch deployments');
-    mk('e2', {
-      type: 'bar',
-      data: {
-        labels: L,
-        datasets: [
-          { label: 'Succeeded', data: CHART_MONTHS.map(i => sv.v[i]), backgroundColor: css('--s1'), borderColor: css('--surface'), borderWidth: 2, maxBarThickness: 34, categoryPercentage: 0.7, barPercentage: 0.85 },
-          { label: 'Failed', data: CHART_MONTHS.map(i => fv.v[i]), backgroundColor: css('--r'), borderColor: css('--surface'), borderWidth: 2, maxBarThickness: 34, categoryPercentage: 0.7, barPercentage: 0.85 }
-        ]
-      },
-      options: o2
-    });
+    if (document.getElementById('e2')) {
+      const o2 = baseOpts();
+      o2.scales.x.stacked = true;
+      o2.scales.y.stacked = true;
+      o2.scales.y.ticks.precision = 0;
+      o2.scales.y.grace = '15%';
+      const sv = fl('Successful patch deployments'), fv = fl('Failed patch deployments');
+      mk('e2', {
+        type: 'bar',
+        data: {
+          labels: L,
+          datasets: [
+            { label: 'Succeeded', data: CHART_MONTHS.map(i => sv.v[i]), backgroundColor: css('--s1'), borderColor: css('--surface'), borderWidth: 2, maxBarThickness: 34, categoryPercentage: 0.7, barPercentage: 0.85 },
+            { label: 'Failed', data: CHART_MONTHS.map(i => fv.v[i]), backgroundColor: css('--r'), borderColor: css('--surface'), borderWidth: 2, maxBarThickness: 34, categoryPercentage: 0.7, barPercentage: 0.85 }
+          ]
+        },
+        options: o2
+      });
+    }
 
     // 4. Patches Outstanding Animated Rotating Donut Pie Chart (patches_pie)
     const pieEl = document.getElementById('patches_pie');
