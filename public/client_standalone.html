@@ -9492,60 +9492,87 @@ button.sla-radial-card:hover {
         const pOutdatedPct = (pOutdated * 100);
         const pHealthyPct = Math.max(0, 100 - (pNotRepPct + pOutdatedPct));
         const totEstateDevices = mEnd + mobEnd;
-        const dHealthy = Math.max(0, totEstateDevices - dOutdated - dNotRep);
 
-        // Donut SVG generator matching modern interface reference
+        // Fetch Endpoint Protection Coverage metric directly from green source of truth
+        const epcRow = fl('Endpoint protection coverage %');
+        const hasEpcData = (epcRow && typeof epcRow.v?.[m] === 'number');
+        let coveredPct = 0;
+        if (hasEpcData) {
+          const rawEpc = epcRow.v[m];
+          coveredPct = (rawEpc <= 1 && rawEpc > 0) ? (rawEpc * 100) : rawEpc;
+          coveredPct = Math.max(0, Math.min(100, coveredPct));
+        }
+        const remainingPct = hasEpcData ? Math.max(0, Math.min(100, 100 - coveredPct)) : 0;
+
+        // Donut SVG generator for Endpoint Protection Coverage (Covered vs Remaining)
         const donutSvg = (function () {
           const cx = 110, cy = 110, R = 90, r = 54, rMid = 72;
           let curAngle = -Math.PI / 2;
           const paths = [];
           const texts = [];
+
+          if (!hasEpcData) {
+            return '<svg class="estate-donut-svg" viewBox="0 0 220 220" width="200" height="200" style="display:block;margin:0 auto;overflow:visible;">' +
+              '<circle cx="110" cy="110" r="' + rMid + '" fill="none" stroke="rgba(148, 163, 184, 0.25)" stroke-width="' + (R - r) + '" />' +
+              '<g class="donut-center" pointer-events="none">' +
+                '<text x="110" y="106" text-anchor="middle" font-size="22" font-weight="800" fill="var(--muted)">–</text>' +
+                '<text x="110" y="124" text-anchor="middle" font-size="9" font-weight="700" fill="var(--muted)" letter-spacing="0.8">NO TELEMETRY</text>' +
+              '</g>' +
+            '</svg>';
+          }
+
           const segs = [
-            { label: 'Fully Healthy', pct: pHealthyPct, count: dHealthy, color: '#10b981' },
-            { label: 'Outdated Protection', pct: pOutdatedPct, count: dOutdated, color: '#f59e0b' },
-            { label: 'Non-Reporting', pct: pNotRepPct, count: dNotRep, color: '#ef4444' }
+            { label: 'Covered', pct: coveredPct, color: '#10b981' },
+            { label: 'Remaining', pct: remainingPct, color: '#cbd5e1' }
           ];
 
-          const active = segs.filter(s => s.pct > 0.05);
-          active.forEach(s => {
-            const isFull = s.pct >= 99.9;
-            const span = isFull ? (2 * Math.PI - 0.0005) : (s.pct / 100) * 2 * Math.PI;
-            const startA = curAngle;
-            const endA = curAngle + span;
+          const active = segs.filter(s => s.pct > 0.001);
 
-            const x1 = cx + R * Math.cos(startA);
-            const y1 = cy + R * Math.sin(startA);
-            const x2 = cx + R * Math.cos(endA);
-            const y2 = cy + R * Math.sin(endA);
-            const x3 = cx + r * Math.cos(endA);
-            const y3 = cy + r * Math.sin(endA);
-            const x4 = cx + r * Math.cos(startA);
-            const y4 = cy + r * Math.sin(startA);
-            const large = span > Math.PI ? 1 : 0;
+          if (active.length === 1 && active[0].pct >= 99.99) {
+            paths.push('<circle cx="110" cy="110" r="' + rMid + '" fill="none" stroke="' + active[0].color + '" stroke-width="' + (R - r) + '" class="donut-arc-path"><title>' + active[0].label + ': ' + active[0].pct.toFixed(1) + '%</title></circle>');
+          } else {
+            active.forEach(s => {
+              const span = (s.pct / 100) * 2 * Math.PI;
+              const startA = curAngle;
+              const endA = curAngle + span;
 
-            const d = 'M ' + x1.toFixed(2) + ' ' + y1.toFixed(2) +
-              ' A ' + R + ' ' + R + ' 0 ' + large + ' 1 ' + x2.toFixed(2) + ' ' + y2.toFixed(2) +
-              ' L ' + x3.toFixed(2) + ' ' + y3.toFixed(2) +
-              ' A ' + r + ' ' + r + ' 0 ' + large + ' 0 ' + x4.toFixed(2) + ' ' + y4.toFixed(2) + ' Z';
+              const x1 = cx + R * Math.cos(startA);
+              const y1 = cy + R * Math.sin(startA);
+              const x2 = cx + R * Math.cos(endA);
+              const y2 = cy + R * Math.sin(endA);
+              const x3 = cx + r * Math.cos(endA);
+              const y3 = cy + r * Math.sin(endA);
+              const x4 = cx + r * Math.cos(startA);
+              const y4 = cy + r * Math.sin(startA);
+              const large = span > Math.PI ? 1 : 0;
 
-            paths.push('<path d="' + d + '" fill="' + s.color + '" stroke="var(--card, #ffffff)" stroke-width="2.5" class="donut-arc-path" title="' + s.label + ': ' + s.count + ' (' + s.pct.toFixed(1) + '%)" />');
+              const d = 'M ' + x1.toFixed(2) + ' ' + y1.toFixed(2) +
+                ' A ' + R + ' ' + R + ' 0 ' + large + ' 1 ' + x2.toFixed(2) + ' ' + y2.toFixed(2) +
+                ' L ' + x3.toFixed(2) + ' ' + y3.toFixed(2) +
+                ' A ' + r + ' ' + r + ' 0 ' + large + ' 0 ' + x4.toFixed(2) + ' ' + y4.toFixed(2) + ' Z';
 
-            if (s.pct >= 8) {
-              const midA = startA + span / 2;
-              const tx = cx + rMid * Math.cos(midA);
-              const ty = cy + rMid * Math.sin(midA) + 4;
-              texts.push('<text x="' + tx.toFixed(1) + '" y="' + ty.toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff" pointer-events="none">' + s.pct.toFixed(0) + '%</text>');
-            }
+              paths.push('<path d="' + d + '" fill="' + s.color + '" stroke="var(--card, #ffffff)" stroke-width="2.5" class="donut-arc-path" title="' + s.label + ': ' + s.pct.toFixed(1) + '%">' +
+                '<title>' + s.label + ': ' + s.pct.toFixed(1) + '%</title>' +
+              '</path>');
 
-            curAngle = endA;
-          });
+              if (s.pct >= 12) {
+                const midA = startA + span / 2;
+                const tx = cx + rMid * Math.cos(midA);
+                const ty = cy + rMid * Math.sin(midA) + 4;
+                const txtColor = (s.label === 'Covered') ? '#ffffff' : '#475569';
+                texts.push('<text x="' + tx.toFixed(1) + '" y="' + ty.toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + txtColor + '" pointer-events="none">' + s.pct.toFixed(0) + '%</text>');
+              }
+
+              curAngle = endA;
+            });
+          }
 
           return '<svg class="estate-donut-svg" viewBox="0 0 220 220" width="200" height="200" style="display:block;margin:0 auto;overflow:visible;">' +
             '<g class="donut-segments">' + paths.join('') + '</g>' +
             '<g class="donut-labels">' + texts.join('') + '</g>' +
             '<g class="donut-center" pointer-events="none">' +
-              '<text x="110" y="104" text-anchor="middle" font-size="28" font-weight="800" fill="var(--ink)" letter-spacing="-0.5">' + totEstateDevices + '</text>' +
-              '<text x="110" y="122" text-anchor="middle" font-size="9" font-weight="700" fill="var(--muted)" letter-spacing="0.8">TOTAL FLEET</text>' +
+              '<text x="110" y="104" text-anchor="middle" font-size="28" font-weight="800" fill="var(--ink)" letter-spacing="-0.5">' + coveredPct.toFixed(1) + '%</text>' +
+              '<text x="110" y="122" text-anchor="middle" font-size="9" font-weight="700" fill="var(--muted)" letter-spacing="0.8">COVERED</text>' +
             '</g>' +
           '</svg>';
         })();
@@ -9559,20 +9586,15 @@ button.sla-radial-card:hover {
               '<div class="estate-donut-panel">' +
                 '<div class="estate-donut-wrap">' + donutSvg + '</div>' +
                 '<div class="estate-donut-legend-grid">' +
-                  '<div class="donut-legend-item">' +
+                  '<div class="donut-legend-item" title="Covered: ' + (hasEpcData ? coveredPct.toFixed(1) + '%' : '–') + '">' +
                     '<span class="donut-legend-swatch" style="background:#10b981"></span>' +
-                    '<span class="donut-legend-name">Fully Healthy</span>' +
-                    '<span class="donut-legend-val">' + dHealthy + ' <small>(' + pHealthyPct.toFixed(1) + '%)</small></span>' +
+                    '<span class="donut-legend-name">Covered</span>' +
+                    '<span class="donut-legend-val">' + (hasEpcData ? coveredPct.toFixed(1) + '%' : '–') + '</span>' +
                   '</div>' +
-                  '<div class="donut-legend-item">' +
-                    '<span class="donut-legend-swatch" style="background:#f59e0b"></span>' +
-                    '<span class="donut-legend-name">Outdated Protection</span>' +
-                    '<span class="donut-legend-val">' + dOutdated + ' <small>(' + pOutdatedPct.toFixed(1) + '%)</small></span>' +
-                  '</div>' +
-                  '<div class="donut-legend-item">' +
-                    '<span class="donut-legend-swatch" style="background:#ef4444"></span>' +
-                    '<span class="donut-legend-name">Non-Reporting</span>' +
-                    '<span class="donut-legend-val">' + dNotRep + ' <small>(' + pNotRepPct.toFixed(1) + '%)</small></span>' +
+                  '<div class="donut-legend-item" title="Remaining: ' + (hasEpcData ? remainingPct.toFixed(1) + '%' : '–') + '">' +
+                    '<span class="donut-legend-swatch" style="background:#cbd5e1"></span>' +
+                    '<span class="donut-legend-name">Remaining</span>' +
+                    '<span class="donut-legend-val">' + (hasEpcData ? remainingPct.toFixed(1) + '%' : '–') + '</span>' +
                   '</div>' +
                 '</div>' +
               '</div>' +
