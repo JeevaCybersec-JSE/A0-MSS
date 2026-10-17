@@ -5051,25 +5051,48 @@
               '</div>' +
             '</div>' +
 
-            '<!-- Flaw Resolution Breakdown Bar for Selected Month -->' +
-            '<div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:12px; padding:16px; margin-bottom:16px;">' +
-              '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">' +
-                '<span style="font-size:12.5px; font-weight:700; color:var(--ink);">' + FULL[m] + ' ' + state.year + ' Flaw Resolution Breakdown</span>' +
-                '<span style="font-size:11.5px; font-weight:600; color:var(--sub);">' + managedTotal + ' Total Flaws in Scope</span>' +
-              '</div>' +
-              '<div style="display:flex; height:26px; border-radius:7px; overflow:hidden; background:rgba(148,163,184,0.12); border:1px solid rgba(148,163,184,0.1);">' +
-                (fixedCount > 0 ? '<div style="width:' + fixedPct + '%; background:linear-gradient(90deg, #10b981, #059669); display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:11px; font-weight:700; font-family:\'JetBrains Mono\',monospace;" title="' + fixedCount + ' Fixed in ' + FULL[m] + '">' + fixedCount + ' Fixed (' + Math.round(fixedPct) + '%)</div>' : '') +
-                (critCount > 0 ? '<div style="width:' + critPct + '%; background:#ef4444; display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:11px; font-weight:700;" title="' + critCount + ' Critical Open">' + critCount + ' Crit</div>' : '') +
-                (hiCount > 0 ? '<div style="width:' + hiPct + '%; background:#f59e0b; display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:11px; font-weight:700;" title="' + hiCount + ' High Open">' + hiCount + ' High</div>' : '') +
-                (medCount > 0 ? '<div style="width:' + medPct + '%; background:#2563eb; display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:11px; font-weight:700;" title="' + medCount + ' Medium Open">' + medCount + ' Med</div>' : '') +
-              '</div>' +
-              '<div class="lg" style="margin-top:12px; margin-bottom:0; justify-content:flex-start; gap:16px;">' +
-                '<span><i style="background:#10b981"></i>Remediated this month (' + fixedCount + ')</span>' +
-                '<span><i style="background:#ef4444"></i>Critical open (' + critCount + ')</span>' +
-                '<span><i style="background:#f59e0b"></i>High open (' + hiCount + ')</span>' +
-                '<span><i style="background:#2563eb"></i>Medium open (' + medCount + ')</span>' +
-              '</div>' +
-            '</div>' +
+            (function() {
+              const maxVal = Math.max(critCount, hiCount, medCount, fixedCount, 1);
+              const maxScale = Math.max(maxVal * 1.5, 10);
+              const critBarW = Math.min(100, Math.round((critCount / maxScale) * 100));
+              const hiBarW = Math.min(100, Math.round((hiCount / maxScale) * 100));
+              const medBarW = Math.min(100, Math.round((medCount / maxScale) * 100));
+              const fixedBarW = Math.min(100, Math.round((fixedCount / maxScale) * 100));
+
+              const critPctStr = managedTotal > 0 ? ((critCount / managedTotal) * 100).toFixed(1) : '0.0';
+              const hiPctStr = managedTotal > 0 ? ((hiCount / managedTotal) * 100).toFixed(1) : '0.0';
+              const medPctStr = managedTotal > 0 ? ((medCount / managedTotal) * 100).toFixed(1) : '0.0';
+              const fixedPctStr = managedTotal > 0 ? ((fixedCount / managedTotal) * 100).toFixed(1) : '0.0';
+
+              const barRow = (label, color, count, pct, barW) =>
+                '<div style="display:grid; grid-template-columns: 145px 1fr 110px; align-items:center; gap:20px; padding:8px 0;">' +
+                  '<span style="font-size:13.5px; font-weight:600; color:var(--ink);">' + label + '</span>' +
+                  '<div style="height:16px; background:rgba(148, 163, 184, 0.14); border-radius:8px; overflow:hidden; width:100%;">' +
+                    '<div style="height:100%; width:' + barW + '%; background:' + color + '; border-radius:8px; transition:width 0.5s ease;"></div>' +
+                  '</div>' +
+                  '<div style="text-align:right; font-size:13.5px; font-weight:700; color:var(--ink); white-space:nowrap; font-family:JetBrains Mono, monospace;">' +
+                    count + ' <span style="font-size:12px; font-weight:500; color:var(--sub); margin-left:4px;">(' + pct + '%)</span>' +
+                  '</div>' +
+                '</div>';
+
+              return '<div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:14px; padding:20px 24px; margin-bottom:18px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">' +
+                '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">' +
+                  '<div>' +
+                    '<h3 style="font-size:15px; font-weight:700; color:var(--ink); margin:0;">Monthly Flaw Exposure Breakdown</h3>' +
+                    '<p style="font-size:12px; color:var(--sub); margin:3px 0 0 0;">Open vulnerabilities by severity for the selected month</p>' +
+                  '</div>' +
+                  '<div style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:var(--surface); border:1px solid var(--line-soft); border-radius:8px; font-size:12px; font-weight:600; color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,0.02);">' +
+                    '<span>📅 ' + FULL[m] + ' ' + state.year + '</span>' +
+                  '</div>' +
+                '</div>' +
+                '<div style="display:flex; flex-direction:column; gap:4px;">' +
+                  barRow('Critical open', '#ef4444', critCount, critPctStr, critBarW) +
+                  barRow('High open', '#f97316', hiCount, hiPctStr, hiBarW) +
+                  barRow('Medium open', '#1e3a8a', medCount, medPctStr, medBarW) +
+                  barRow('Fixed this month', '#3b82f6', fixedCount, fixedPctStr, fixedBarW) +
+                '</div>' +
+              '</div>';
+            })() +
 
             '<div class="client-explanation-box">' +
               '<i class="ce-icon">ℹ</i>' +
