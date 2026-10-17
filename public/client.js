@@ -4878,7 +4878,7 @@
       // Severity Breakdown & Remediation Posture
       '<div class="blk">' + bt('Severity breakdown', 'Active unpatched vulnerabilities by severity class and remediation turnaround') +
         // Vulnerability Exposure by Severity Card
-        '<section class="card chart-card kpi-donut-card vuln-donut-card" style="margin-bottom:18px;">' +
+        '<section class="card chart-card kpi-donut-card vuln-donut-card" style="margin:0;">' +
           '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
             '<div><h2 class="card-title">Vulnerability Exposure by Severity</h2><p class="card-sub">Distribution of recorded vulnerabilities across severity levels for the selected reporting month.</p></div>' +
             vulnStatusBadge +
@@ -5017,7 +5017,7 @@
               '</div>' +
             '</div>';
 
-          return '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(460px, 1fr)); gap:20px; align-items:stretch; margin-top:20px;">' +
+          return '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(460px, 1fr)); gap:20px; align-items:stretch; margin:0;">' +
 
             '<!-- Left Card: Remediation Velocity & Resolution Dynamics -->' +
             '<section class="card chart-card chosen-month-velocity-card" style="margin:0; padding:22px 24px; display:flex; flex-direction:column; justify-content:space-between;">' +
