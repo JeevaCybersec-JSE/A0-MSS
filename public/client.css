@@ -8296,3 +8296,180 @@ button.vuln-chip:hover {
 .threat-footer-note strong {
   color: #0f172a;
 }
+
+
+/* MODERN THREAT ACTIVITY CARDS (CHOSEN MONTH GAUGES) */
+.threat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+@media (max-width: 860px) {
+  .threat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.threat-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid var(--line-soft, #e2e8f0);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+.threat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.09);
+  border-color: #cbd5e1;
+}
+.threat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.threat-tag {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.threat-tag .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.threat-tag.blue .dot { background: #0284c7; box-shadow: 0 0 6px rgba(2, 132, 199, 0.4); }
+.threat-tag.purple .dot { background: #7c3aed; box-shadow: 0 0 6px rgba(124, 58, 237, 0.4); }
+
+.threat-stat-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.threat-stat-val {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.threat-stat-val.blue { color: #0284c7; }
+.threat-stat-val.purple { color: #7c3aed; }
+
+.threat-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.threat-gauge-box {
+  width: 100%;
+  margin: 6px 0 14px 0;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(248, 250, 252, 0.4) 100%);
+  border-radius: 14px;
+  padding: 16px 18px 12px 18px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.threat-gauge-box svg {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.threat-gauge-status-strip {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #e2e8f0;
+  font-size: 11px;
+}
+.threat-gauge-status-badge {
+  font-weight: 700;
+  color: #334155;
+  background: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 10.5px;
+}
+.threat-gauge-target {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 11.5px;
+}
+
+.threat-triage-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 4px 0 12px 0;
+}
+.threat-triage-chip {
+  background: var(--surface-subtle, #f8fafc);
+  border: 1px solid var(--line-soft, #e2e8f0);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+.threat-triage-lbl {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+.threat-triage-val {
+  font-size: 18px;
+  font-weight: 800;
+  font-family: inherit;
+  line-height: 1.2;
+}
+.threat-triage-val.blue { color: #0284c7; }
+.threat-triage-val.purple { color: #7c3aed; }
+.threat-triage-val.green { color: #10b981; }
+.threat-triage-val.red { color: #ef4444; }
+.threat-triage-val.slate { color: #475569; }
+
+.threat-triage-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.threat-footer-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #475569;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+}
+.threat-footer-note strong {
+  color: #0f172a;
+}

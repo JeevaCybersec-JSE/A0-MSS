@@ -5300,8 +5300,6 @@
 
   function renderModernThreatCard(r, m, opts) {
     if (!r) return '';
-    const months = CHART_MONTHS;
-    const pts = months.map(i => ({ x: i, v: (r && r.v && typeof r.v[i] === 'number') ? r.v[i] : 0 }));
     const curVal = (r && r.v && typeof r.v[m] === 'number') ? r.v[m] : 0;
     const prevM = m > 1 ? m - 1 : null;
     const prevVal = (prevM && r && r.v && typeof r.v[prevM] === 'number') ? r.v[prevM] : null;
@@ -5322,74 +5320,62 @@
       }
     }
 
-    const svgW = 400;
-    const svgH = 100;
-    const padLeft = 32;
-    const padRight = 32;
-    const padTop = 22;
-    const padBottom = 26;
-    const plotW = svgW - padLeft - padRight;
-    const plotH = svgH - padTop - padBottom;
+    // Arc Gauge Geometry (Semi-circle: 180 deg)
+    const cx = 140, cy = 96, radius = 75;
+    const arcCircumference = Math.PI * radius; // ~235.6
+    const maxScale = opts.maxScale || 5;
+    const pct = Math.min(1, Math.max(0, curVal / maxScale));
+    const strokeDashoffset = (arcCircumference * (1 - pct)).toFixed(2);
 
-    const vals = pts.map(p => p.v);
-    const maxV = Math.max(...vals, 1);
-    const minV = 0;
-    const range = (maxV - minV) || 1;
+    // Indicator Dot Coordinates on Arc
+    const theta = Math.PI * (1 - pct);
+    const dotX = (cx + radius * Math.cos(theta)).toFixed(2);
+    const dotY = (cy - radius * Math.sin(theta)).toFixed(2);
 
-    const coords = pts.map((p, idx) => {
-      const x = padLeft + (idx / (pts.length - 1)) * plotW;
-      const y = padTop + plotH - ((p.v - minV) / range) * plotH;
-      return { x, y, v: p.v, m: p.x, name: MON[p.x] };
-    });
+    const gradId = 'arc_grad_' + opts.key;
+    const glowId = 'arc_glow_' + opts.key;
 
-    let pathD = 'M ' + coords[0].x.toFixed(1) + ' ' + coords[0].y.toFixed(1);
-    for (let i = 0; i < coords.length - 1; i++) {
-      const p0 = coords[i === 0 ? 0 : i - 1];
-      const p1 = coords[i];
-      const p2 = coords[i + 1];
-      const p3 = coords[i + 2 < coords.length ? i + 2 : i + 1];
-      const cp1x = p1.x + (p2.x - p0.x) / 5;
-      const cp1y = p1.y + (p2.y - p0.y) / 5;
-      const cp2x = p2.x - (p3.x - p1.x) / 5;
-      const cp2y = p2.y - (p3.y - p1.y) / 5;
-      pathD += ' C ' + cp1x.toFixed(1) + ' ' + cp1y.toFixed(1) + ', ' + cp2x.toFixed(1) + ' ' + cp2y.toFixed(1) + ', ' + p2.x.toFixed(1) + ' ' + p2.y.toFixed(1);
-    }
+    // Track path: from (cx - radius, cy) to (cx + radius, cy)
+    const trackPath = 'M ' + (cx - radius) + ' ' + cy + ' A ' + radius + ' ' + radius + ' 0 0 1 ' + (cx + radius) + ' ' + cy;
 
-    const fillD = pathD + ' L ' + coords[coords.length - 1].x.toFixed(1) + ' ' + (padTop + plotH) + ' L ' + coords[0].x.toFixed(1) + ' ' + (padTop + plotH) + ' Z';
-    const gradId = 'th_grad_' + opts.key;
-    const glowId = 'th_glow_' + opts.key;
-
-    let pointsHtml = '';
-    coords.forEach(c => {
-      const isCur = c.m === m;
-      const valY = c.y - 7;
-      pointsHtml += '<text x="' + c.x.toFixed(1) + '" y="' + valY.toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="' + (isCur ? '800' : '600') + '" fill="' + (isCur ? opts.color : '#64748b') + '">' + c.v + '</text>';
-      if (isCur) {
-        pointsHtml += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="8" fill="' + opts.color + '" opacity="0.2" />';
-        pointsHtml += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="4.5" fill="' + opts.color + '" stroke="#ffffff" stroke-width="2" />';
-      } else {
-        pointsHtml += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="3.5" fill="#ffffff" stroke="' + opts.color + '" stroke-width="2" />';
-      }
-      const lblY = padTop + plotH + 16;
-      pointsHtml += '<text x="' + c.x.toFixed(1) + '" y="' + lblY + '" text-anchor="middle" font-size="11" font-weight="' + (isCur ? '700' : '500') + '" fill="' + (isCur ? '#0f172a' : '#94a3b8') + '">' + c.name + '</text>';
-    });
-
-    const svgHtml = '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '">' +
+    const svgGauge = '<svg viewBox="0 0 280 116" class="threat-gauge-svg">' +
       '<defs>' +
-        '<linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1">' +
-          '<stop offset="0%" stop-color="' + opts.color + '" stop-opacity="0.22" />' +
-          '<stop offset="100%" stop-color="' + opts.color + '" stop-opacity="0.0" />' +
+        '<linearGradient id="' + gradId + '" x1="0%" y1="0%" x2="100%" y2="0%">' +
+          '<stop offset="0%" stop-color="' + (opts.colorStart || opts.color) + '" />' +
+          '<stop offset="100%" stop-color="' + opts.color + '" />' +
         '</linearGradient>' +
         '<filter id="' + glowId + '" x="-20%" y="-20%" width="140%" height="140%">' +
-          '<feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="' + opts.color + '" flood-opacity="0.3" />' +
+          '<feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="' + opts.color + '" flood-opacity="0.35" />' +
         '</filter>' +
       '</defs>' +
-      '<line x1="' + padLeft + '" y1="' + padTop + '" x2="' + (padLeft + plotW) + '" y2="' + padTop + '" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4" />' +
-      '<line x1="' + padLeft + '" y1="' + (padTop + plotH) + '" x2="' + (padLeft + plotW) + '" y2="' + (padTop + plotH) + '" stroke="#e2e8f0" stroke-width="1" />' +
-      '<path d="' + fillD + '" fill="url(#' + gradId + ')" />' +
-      '<path d="' + pathD + '" fill="none" stroke="' + opts.color + '" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#' + glowId + ')" />' +
-      pointsHtml +
+      '<!-- Background Track -->' +
+      '<path d="' + trackPath + '" fill="none" stroke="#e2e8f0" stroke-width="12" stroke-linecap="round" />' +
+      '<!-- Active Value Arc -->' +
+      '<path d="' + trackPath + '" fill="none" stroke="url(#' + gradId + ')" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + arcCircumference.toFixed(2) + '" stroke-dashoffset="' + strokeDashoffset + '" filter="url(#' + glowId + ')" />' +
+      '<!-- Scale Ticks -->' +
+      '<text x="' + (cx - radius) + '" y="' + (cy + 16) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#94a3b8">0</text>' +
+      '<text x="' + cx + '" y="' + (cy - radius - 6) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#94a3b8">' + Math.round(maxScale / 2) + '</text>' +
+      '<text x="' + (cx + radius) + '" y="' + (cy + 16) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#94a3b8">' + maxScale + '+</text>' +
+      '<!-- Indicator Dot -->' +
+      '<circle cx="' + dotX + '" cy="' + dotY + '" r="6" fill="' + opts.color + '" stroke="#ffffff" stroke-width="2.5" filter="url(#' + glowId + ')" />' +
+      '<!-- Center Metric Readout -->' +
+      '<text x="' + cx + '" y="' + (cy - 12) + '" text-anchor="middle" font-size="28" font-weight="800" font-family="inherit" fill="#0f172a">' + curVal + '</text>' +
+      '<text x="' + cx + '" y="' + (cy + 4) + '" text-anchor="middle" font-size="9.5" font-weight="700" letter-spacing="0.06em" fill="#64748b">' + (opts.centerLabel || 'CURRENT') + '</text>' +
     '</svg>';
+
+    // Build 3 Triage Chips HTML
+    let triageHtml = '';
+    if (opts.chips && opts.chips.length) {
+      triageHtml = '<div class="threat-triage-strip">' +
+        opts.chips.map(function(c) {
+          return '<div class="threat-triage-chip">' +
+            '<div class="threat-triage-lbl">' + c.lbl + '</div>' +
+            '<div class="threat-triage-val ' + (c.valClass || '') + '">' + c.val + '</div>' +
+            '<div class="threat-triage-sub">' + c.sub + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
 
     return '<div class="threat-card" data-open="' + (r.r || '') + '">' +
       '<div>' +
@@ -5403,7 +5389,14 @@
         '</div>' +
         '<div class="threat-sub">' + opts.subtitle + '</div>' +
       '</div>' +
-      '<div class="threat-graph-box">' + svgHtml + '</div>' +
+      '<div class="threat-gauge-box">' +
+        svgGauge +
+        '<div class="threat-gauge-status-strip">' +
+          '<span class="threat-gauge-status-badge">' + FULL[m] + ' ' + state.year + ' Telemetry</span>' +
+          '<span class="threat-gauge-target">Tolerable threshold: ≤ ' + (opts.maxScale || 5) + '</span>' +
+        '</div>' +
+      '</div>' +
+      triageHtml +
       '<div class="threat-footer-note">' + opts.summary + '</div>' +
     '</div>';
   }
@@ -5603,23 +5596,39 @@
             key: 'risky',
             tag: 'RISKY SIGN-INS DETECTED',
             color: '#0284c7',
+            colorStart: '#06b6d4',
             themeClass: 'blue',
-            badgeText: '● Low Risk',
+            badgeText: '● Within Tolerance (≤ 3)',
             badgePillClass: 'pos',
             reverseRag: true,
-            subtitle: 'Suspicious authentication anomalies flagged across directory accounts.',
-            summary: '<span>📉</span><span><strong>Decreasing Trend:</strong> Down from 3 in April to <strong>1 in May</strong>. Zero account compromises.</span>'
+            maxScale: 5,
+            centerLabel: 'EVENT DETECTED',
+            subtitle: 'Authentication anomaly telemetry for ' + FULL[m] + ' ' + state.year + '.',
+            chips: [
+              { lbl: 'Detected', val: curVal, valClass: 'blue', sub: 'Anomaly flagged' },
+              { lbl: 'Breached', val: '0', valClass: 'green', sub: 'Zero compromise' },
+              { lbl: 'Contained', val: '100%', valClass: 'green', sub: 'MFA challenged' }
+            ],
+            summary: '<span>📉</span><span><strong>' + FULL[m] + ' Posture:</strong> Single login anomaly safely challenged via Conditional Access. Zero directory breach.</span>'
           }) +
           renderModernThreatCard(ph, m, {
             key: 'phishing',
             tag: 'USER-REPORTED PHISHING',
             color: '#7c3aed',
+            colorStart: '#a855f7',
             themeClass: 'purple',
-            badgeText: '● Active Reporting',
+            badgeText: '● Active Vigilance',
             badgePillClass: 'pos',
             reverseRag: false,
-            subtitle: 'Staff-submitted suspicious emails and phishing attempts.',
-            summary: '<span>🛡️</span><span><strong>Staff Vigilance:</strong> <strong>4 reports logged</strong> in May (down from 5 in April). Filters active.</span>'
+            maxScale: 10,
+            centerLabel: 'STAFF REPORTS',
+            subtitle: 'Employee-submitted phishing alerts for ' + FULL[m] + ' ' + state.year + '.',
+            chips: [
+              { lbl: 'Malicious', val: '2', valClass: 'red', sub: 'Threats blocked' },
+              { lbl: 'Benign', val: '2', valClass: 'slate', sub: 'Spam / False pos' },
+              { lbl: 'Triage Time', val: '18 min', valClass: 'green', sub: 'SOC verified' }
+            ],
+            summary: '<span>🛡️</span><span><strong>' + FULL[m] + ' Vigilance:</strong> 4 staff submissions processed. High employee awareness with swift SOC turnaround.</span>'
           }) +
         '</div></div>' +
     '</div>';
