@@ -8175,3 +8175,18 @@ button.vuln-chip:hover {
   color: #94a3b8;
   margin-top: auto;
 }
+
+/* MFA FLANK LAYOUT: 2 LEFT, DONUT CENTER, 2 RIGHT */
+.mfa-donut-flank-layout {
+  display: grid;
+  grid-template-columns: 1fr 270px 1fr;
+  gap: 28px;
+  align-items: center;
+  margin: 16px 0 20px 0;
+}
+@media (max-width: 900px) {
+  .mfa-donut-flank-layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}

@@ -8190,6 +8190,21 @@ button.vuln-chip:hover {
   margin-top: auto;
 }
 
+/* MFA FLANK LAYOUT: 2 LEFT, DONUT CENTER, 2 RIGHT */
+.mfa-donut-flank-layout {
+  display: grid;
+  grid-template-columns: 1fr 270px 1fr;
+  gap: 28px;
+  align-items: center;
+  margin: 16px 0 20px 0;
+}
+@media (max-width: 900px) {
+  .mfa-donut-flank-layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -13633,31 +13648,40 @@ const MOUNTAIN_CARD_BG = 'data:image/webp;base64,UklGRtIsAABXRUJQVlA4WAoAAAAgAAA
             '<div><h2 class="card-title">MFA Enforcement Posture</h2><p class="card-sub">Realtime proportion of enabled accounts with MFA protection</p></div>' +
             (!hasMfaData ? '<span class="score-badge-status neutral">● Data Not Available</span>' : (mfaIsOnTarget ? '<span class="score-badge-status optimal">● 100% Policy Target Achieved</span>' : '<span class="score-badge-status warning">● Policy Gap (Target: 100%)</span>')) +
           '</div>' +
-          '<div class="kpi-donut-wrapper">' +
-            '<div class="kpi-donut-canvas-box">' +
-              '<canvas id="mfa_donut" role="img" aria-label="MFA Coverage Donut Chart"></canvas>' +
-              '<div class="kpi-donut-center">' +
-                '<span class="kpi-donut-center-num">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span>' +
-                '<span class="kpi-donut-center-lbl">' + (hasMfaData ? 'MFA Enforced' : 'No Data') + '</span>' +
+          '<div class="mfa-donut-flank-layout" style="display:grid; grid-template-columns: 1fr 270px 1fr; gap:28px; align-items:center; margin:16px 0 20px 0;">' +
+            '<!-- Left Column: 2 Metrics -->' +
+            '<div style="display:flex; flex-direction:column; gap:16px;">' +
+              '<div class="donut-leg-item" style="padding:14px 18px; border-radius:12px;">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name" style="font-size:13px;">MFA Enforced</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">' + (mfaEnabledCount !== null ? mfaEnabledCount : '–') + '</span><span class="donut-leg-pct" style="font-size:12px;">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span></div>' +
+              '</div>' +
+              '<div class="donut-leg-item" style="padding:14px 18px; border-radius:12px;">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name" style="font-size:13px;">MFA Not Enforced</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">' + (mfaNotEnabledCount !== null ? mfaNotEnabledCount : '–') + '</span><span class="donut-leg-pct" style="font-size:12px;">' + (hasMfaData ? (100 - parseFloat(mfaPctVal)).toFixed(1) + '%' : '–') + '</span></div>' +
               '</div>' +
             '</div>' +
-          '</div>' +
-          '<div class="donut-legend-grid">' +
-            '<div class="donut-leg-item">' +
-              '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name">MFA Enforced</span></div>' +
-              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (mfaEnabledCount !== null ? mfaEnabledCount : '–') + '</span><span class="donut-leg-pct">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span></div>' +
+
+            '<!-- Center: Donut Pie Chart -->' +
+            '<div class="kpi-donut-wrapper" style="margin:0; width:100%; display:flex; justify-content:center;">' +
+              '<div class="kpi-donut-canvas-box" style="margin:0;">' +
+                '<canvas id="mfa_donut" role="img" aria-label="MFA Coverage Donut Chart"></canvas>' +
+                '<div class="kpi-donut-center">' +
+                  '<span class="kpi-donut-center-num">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span>' +
+                  '<span class="kpi-donut-center-lbl">' + (hasMfaData ? 'MFA Enforced' : 'No Data') + '</span>' +
+                '</div>' +
+              '</div>' +
             '</div>' +
-            '<div class="donut-leg-item">' +
-              '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name">MFA Not Enforced</span></div>' +
-              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (mfaNotEnabledCount !== null ? mfaNotEnabledCount : '–') + '</span><span class="donut-leg-pct">' + (hasMfaData ? (100 - parseFloat(mfaPctVal)).toFixed(1) + '%' : '–') + '</span></div>' +
-            '</div>' +
-            '<div class="donut-leg-item">' +
-              '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name">Total Enabled Users</span></div>' +
-              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (totalUsers !== null ? totalUsers : '–') + '</span><span class="donut-leg-pct">' + (hasMfaData ? '100% directory' : '–') + '</span></div>' +
-            '</div>' +
-            '<div class="donut-leg-item">' +
-              '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name">Mandatory SLA</span></div>' +
-              '<div class="donut-leg-stats"><span class="donut-leg-val">100%</span><span class="donut-leg-pct">' + (!hasMfaData ? '–' : (mfaNotEnabledCount > 0 ? mfaNotEnabledCount + ' gap' : 'Compliant')) + '</span></div>' +
+
+            '<!-- Right Column: 2 Metrics -->' +
+            '<div style="display:flex; flex-direction:column; gap:16px;">' +
+              '<div class="donut-leg-item" style="padding:14px 18px; border-radius:12px;">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name" style="font-size:13px;">Total Enabled Users</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">' + (totalUsers !== null ? totalUsers : '–') + '</span><span class="donut-leg-pct" style="font-size:12px;">' + (hasMfaData ? '100% directory' : '–') + '</span></div>' +
+              '</div>' +
+              '<div class="donut-leg-item" style="padding:14px 18px; border-radius:12px;">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name" style="font-size:13px;">Mandatory SLA</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">100%</span><span class="donut-leg-pct" style="font-size:12px;">' + (!hasMfaData ? '–' : (mfaNotEnabledCount > 0 ? mfaNotEnabledCount + ' gap' : 'Compliant')) + '</span></div>' +
+              '</div>' +
             '</div>' +
           '</div>' +
           '<div class="client-explanation-box">' +
