@@ -3544,8 +3544,8 @@
           '</svg>';
         })();
 
-        return '<div class="blk"><div class="bt"><h2>Estate coverage &amp; infrastructure security</h2><span class="sub">Fleet composition, device connectivity, and endpoint protection health</span></div>' +
-          '<section class="card estate-card" aria-label="Estate health and device coverage">' +
+        return '<div class="blk"><div class="bt"><h2>Device coverage &amp; infrastructure security</h2><span class="sub">Fleet composition, device connectivity, and endpoint protection health</span></div>' +
+          '<section class="card estate-card" aria-label="Device health and coverage">' +
             '<div class="estate-card-head">' +
               '<div><span style="font-size:14px;font-weight:700;color:var(--ink)">Device Protection Composition</span><span style="font-size:12px;color:var(--muted);margin-left:8px">' + totEstateDevices + ' total enrolled devices (' + mEnd + ' endpoints + ' + mobEnd + ' mobile VPN)</span></div>' +
             '</div>' +
@@ -3567,7 +3567,7 @@
               '</div>' +
               '<div class="estate-stats-panel">' +
                 '<div class="estate-tiles-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">' +
-                  '<div class="estate-tile"><span class="tl">Managed Endpoints</span><span class="vl">' + mEnd + '</span><span class="sub">' + (delta(fl('Managed endpoints'), m) || 'Estate count') + '</span></div>' +
+                  '<div class="estate-tile"><span class="tl">Managed Endpoints</span><span class="vl">' + mEnd + '</span><span class="sub">' + (delta(fl('Managed endpoints'), m) || 'Device count') + '</span></div>' +
                   '<div class="estate-tile"><span class="tl">Mobile Devices (VPN)</span><span class="vl">' + mobEnd + '</span><span class="sub">' + (delta(fl('Mobile devices - VPN'), m) || 'MDM enrolled') + '</span></div>' +
                   '<div class="estate-tile"><span class="tl">Protected Devices</span><span class="vl" style="color:var(--g)">' + (hasEpcData ? dCovered : '–') + '</span><span class="sub">' + (hasEpcData ? coveredPct.toFixed(1) + '% fully secured' : 'Data pending') + '</span></div>' +
                   '<div class="estate-tile"><span class="tl">Protection Gap</span><span class="vl" style="color:' + (dRemaining > 0 ? 'var(--a, #f59e0b)' : 'var(--g)') + '">' + (hasEpcData ? dRemaining : '–') + '</span><span class="sub">' + (hasEpcData ? (dRemaining > 0 ? remainingPct.toFixed(1) + '% to reach 100%' : 'All devices secured') : 'Data pending') + '</span></div>' +
@@ -3978,7 +3978,7 @@
       }
     }
 
-    return '<button type="button" class="endpoint-month-card" data-open="' + r.r + '" title="Open ' + r.name + ' Telemetry">' +
+    return '<button type="button" class="endpoint-month-card" data-open="' + r.r + '" title="Open ' + nm + ' Telemetry">' +
       '<div class="emc-head">' +
         '<h3 class="emc-title">' + nm + '</h3>' +
         '<span class="score-badge-status ' + ragClass + '">' + (rag === 1 ? '● ' : '') + ragText + '</span>' +
@@ -4320,7 +4320,7 @@
       '<div class="sechead"><h2>Endpoints &amp; Patching</h2><span class="sub">' + g + ' of ' + rs.length + ' scored metrics on target' + (bad ? ' · ' + bad + ' off target' : '') + '</span></div>' +
       
       // Estate Devices
-      '<div class="blk">' + bt('Estate', 'Devices under management at month end') +
+      '<div class="blk">' + bt('Devices', 'Devices under management at month end') +
         '<div class="stats">' + tile(me, 'Managed endpoints') + tile(mo, 'Mobile devices') + tile(ne, 'New endpoints') + tile(rm, 'Removed endpoints') + '</div></div>' +
 
       // Patch & Remediation: Compliance Donut & Deployment Outcome Cards
@@ -4329,7 +4329,7 @@
           // 1. Redesigned Patch Compliance Donut Card
           '<section class="card chart-card kpi-donut-card">' +
             '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
-              '<div><h2 class="card-title">Patch Compliance</h2><p class="card-sub">Overall proportion of assessed estate meeting mandatory patching policy</p></div>' +
+              '<div><h2 class="card-title">Patch Compliance</h2><p class="card-sub">Overall proportion of assessed devices meeting mandatory patching policy</p></div>' +
               pcStatusBadge +
             '</div>' +
             '<div class="kpi-donut-wrapper">' +
@@ -4352,7 +4352,7 @@
               '</button>' +
               '<div class="donut-leg-item">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name">Total Assessed</span></div>' +
-                '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasMe ? totalAssessed : '–') + '</span><span class="donut-leg-pct">' + (hasMe ? '100% estate' : '–') + '</span></div>' +
+                '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasMe ? totalAssessed : '–') + '</span><span class="donut-leg-pct">' + (hasMe ? '100% fleet' : '–') + '</span></div>' +
               '</div>' +
               '<div class="donut-leg-item">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name">Compliance Target</span></div>' +
@@ -4426,7 +4426,7 @@
           return '<section class="card chart-card month-compliance-card">' +
             '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">' +
               '<div>' +
-                '<h2 class="card-title">Patch Compliance &amp; Estate Posture · ' + FULL[m] + ' ' + state.year + '</h2>' +
+                '<h2 class="card-title">Patch Compliance &amp; Fleet Posture · ' + FULL[m] + ' ' + state.year + '</h2>' +
                 '<p class="card-sub">Active fleet verification, contractual SLA threshold analysis, and remediation priority for ' + FULL[m] + ' ' + state.year + '</p>' +
               '</div>' +
               pcStatusBadge +
@@ -4454,7 +4454,7 @@
               '<button type="button" class="month-pod" onclick="openClientPatchCompDetail(0)" title="Inspect Fully Patched Endpoints">' +
                 '<div class="month-pod-head"><span class="month-pod-lbl">Fully Patched</span><span class="donut-leg-dot g"></span></div>' +
                 '<div class="month-pod-val g">' + (hasPcData && compEndpoints !== null ? compEndpoints : '–') + ' <small style="font-size:14px;font-weight:600;color:var(--muted)">endpoints</small></div>' +
-                '<div class="month-pod-sub">' + (hasPcData ? pcPctVal + '% of ' + totalAssessed + ' managed estate' : 'Data pending') + '</div>' +
+                '<div class="month-pod-sub">' + (hasPcData ? pcPctVal + '% of ' + totalAssessed + ' managed devices' : 'Data pending') + '</div>' +
                 '<div class="month-pod-link">Inspect compliant list →</div>' +
               '</button>' +
               '<button type="button" class="month-pod" onclick="openClientPatchCompDetail(1)" title="Inspect Remediation Priority Endpoints">' +
@@ -4475,7 +4475,7 @@
             '<div class="client-explanation-box">' +
               '<i class="ce-icon">ℹ</i>' +
               '<div class="ce-text">' + (hasPcData
-                ? ('<strong>' + compEndpoints + ' of ' + totalAssessed + ' assessed devices</strong> in ' + FULL[m] + ' ' + state.year + ' meet mandatory security patch compliance (' + pcPctVal + '%). ' + (nonCompEndpoints > 0 ? (nonCompEndpoints + ' endpoint' + (nonCompEndpoints === 1 ? '' : 's') + ' require update deployment to close the ' + pcGapPts + ' pt gap and reach the 95% SLA target.') : 'The entire assessed estate is fully compliant with zero SLA deficit.'))
+                ? ('<strong>' + compEndpoints + ' of ' + totalAssessed + ' assessed devices</strong> in ' + FULL[m] + ' ' + state.year + ' meet mandatory security patch compliance (' + pcPctVal + '%). ' + (nonCompEndpoints > 0 ? (nonCompEndpoints + ' endpoint' + (nonCompEndpoints === 1 ? '' : 's') + ' require update deployment to close the ' + pcGapPts + ' pt gap and reach the 95% SLA target.') : 'The entire assessed fleet is fully compliant with zero SLA deficit.'))
                 : ('Patch compliance telemetry is unavailable for ' + FULL[m] + ' ' + state.year + '.')
               ) + '</div>' +
             '</div>' +
@@ -4487,7 +4487,7 @@
 
       // Device Health & Protection Coverage Breakdown with 3D Coverflow Carousel (Matching Overview 3D Carousel)
       '<div class="blk device-health-block">' +
-        bt('Device health', 'Estate protection coverage, agent reporting heartbeat, and definition status') +
+        bt('Device health', 'Fleet protection coverage, agent reporting heartbeat, and definition status') +
         '<section class="card epc-summary-card" style="margin-bottom:18px">' +
           '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
             '<div><h2 class="card-title">Endpoint Protection Coverage</h2><p class="card-sub">Active Sophos endpoint agent health, realtime reporting, and definition status</p></div>' +
@@ -4497,7 +4497,7 @@
             '<div class="epc-chip">' +
               '<span class="epc-chip-lbl">Protected Endpoints</span>' +
               '<span class="epc-chip-val g">' + (hasEpcData && protCount !== null ? protCount : '–') + '</span>' +
-              '<span class="epc-chip-sub">' + (hasEpcData ? protPct + '% of estate' : '–') + '</span>' +
+              '<span class="epc-chip-sub">' + (hasEpcData ? protPct + '% of fleet' : '–') + '</span>' +
             '</div>' +
             '<div class="epc-chip">' +
               '<span class="epc-chip-lbl">Outdated Protection</span>' +
@@ -4510,7 +4510,7 @@
               '<span class="epc-chip-sub">' + (hasDnr ? 'Agent offline' : '–') + '</span>' +
             '</div>' +
             '<div class="epc-chip">' +
-              '<span class="epc-chip-lbl">Total Assessed Estate</span>' +
+              '<span class="epc-chip-lbl">Total Assessed Devices</span>' +
               '<span class="epc-chip-val">' + (hasMe ? totalAssessed : '–') + '</span>' +
               '<span class="epc-chip-sub">Target: ≥ 98%</span>' +
             '</div>' +
@@ -4527,7 +4527,7 @@
         '<div class="dh-3d-stage">' +
           '<div class="ih-carousel-wrapper" id="dh-carousel-wrapper">' +
             '<button type="button" class="ih-nav-btn left" id="dhNavPrev" aria-label="Previous Health Metric">' +
-              '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+              '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
             '</button>' +
             '<div class="ih-carousel-track" id="dhCarouselTrack">' +
               endpointMonthCard(fl('Endpoint protection coverage %'), m, {
@@ -4552,7 +4552,7 @@
               }) +
             '</div>' +
             '<button type="button" class="ih-nav-btn right" id="dhNavNext" aria-label="Next Health Metric">' +
-              '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7.5 15l5-5-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+              '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7.5 15l5-5-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
             '</button>' +
           '</div>' +
           '<div class="ih-indicators" id="dhCarouselDots">' +
@@ -4564,7 +4564,7 @@
           '</div>' +
           '<div class="ih-bottom-action-wrap">' +
             '<div class="ih-pill-action">' +
-              '<span style="color:#10b981;font-weight:800;">✓</span> Currently Active: ' + FULL[m] + ' ' + state.year + ' · Monitored Estate Telemetry' +
+              '<span style="color:#10b981;font-weight:800;">✓</span> Currently Active: ' + FULL[m] + ' ' + state.year + ' · Monitored Fleet Telemetry' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -5004,7 +5004,7 @@
               callbacks: {
                 label: function(ctx) {
                   if (!hasOutstanding) return ' Patch telemetry is unavailable';
-                  if (total === 0) return ' Estate 100% Up-to-date (0 Outstanding)';
+                  if (total === 0) return ' Fleet 100% Up-to-date (0 Outstanding)';
                   const val = ctx.raw;
                   const pct = ((val / total) * 100).toFixed(1);
                   return ' ' + ctx.label + ': ' + val + ' patches (' + pct + '%)';
@@ -5121,7 +5121,7 @@
 
       // Threat Activity
       '<div class="blk">' + bt('Threat activity', 'What was detected and stopped across your protected endpoints') +
-        '<section class="card chart-card"><div class="card-head"><h2 class="card-title">Threat activity &amp; detections</h2><p class="card-sub">Total security detections blocked and malware events stopped across the protected estate</p></div>' +
+        '<section class="card chart-card"><div class="card-head"><h2 class="card-title">Threat activity &amp; detections</h2><p class="card-sub">Total security detections blocked and malware events stopped across the protected environment</p></div>' +
           '<div class="lg"><span><i style="background:var(--s1)"></i>Threats blocked</span><span><i style="background:var(--s3)"></i>Malware detections</span></div>' +
           '<div class="chart"><canvas id="t2" role="img" aria-label="Bars of threats blocked and malware detections by month">Threats blocked and malware detections by month.</canvas></div></section>' +
         '<div class="stats">' + mcard(tb, m) + mcard(md, m) + mcard(inc, m, 'P1: ' + p1.v[m] + ' · Ransomware: ' + rans.v[m]) + mcard(pv, m) + '</div></div>' +
@@ -6410,7 +6410,7 @@
         ce: 'Cyber Essentials Plus (Incident Readiness)'
       };
       if (x === 1) {
-        diagnosis = 'Containment and response execution times demonstrated high operational agility. SOAR playbooks and active endpoint isolation prevented lateral movement across protected estates.';
+        diagnosis = 'Containment and response execution times demonstrated high operational agility. SOAR playbooks and active endpoint isolation prevented lateral movement across protected environments.';
         actions = [
           'Verify that automated isolation playbooks remain synchronized with endpoint policies.',
           'Conduct quarterly tabletop drills simulating multi-vector ransomware scenarios.',
