@@ -1,3 +1,4 @@
+const MOUNTAIN_CARD_BG = 'data:image/webp;base64,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';
 // ============================================================
 // Brysa KPI Dashboard · Client Deliverable Engine
 // Exact visual presentation, Split two-panel layout,
@@ -5392,37 +5393,119 @@
       '<div class="blk">' + bt('Sign-ins and email', 'Suspicious activity spotted, and what your staff reported') +
         '<div class="row2">' + mcard(risky, m) + mcard(ph, m) + '</div></div>' +
 
-      // 3. Complete Audit: Directory Governance & Account Lifecycle
+      // 3. Complete Audit: Directory Governance & Account Lifecycle (6 Visual Cards)
       '<div class="blk">' + bt('Directory governance', 'User provisioning lifecycle, joiners, leavers, and directory health') +
-        '<section class="card" style="margin-bottom:18px;padding:22px 26px;">' +
-          '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
-            '<div><h2 class="card-title">Identity &amp; Account Governance Audit</h2><p class="card-sub">Provisioning velocity, directory account hygiene, and policy alignment</p></div>' +
+        '<div class="pin-cards-section">' +
+          '<div class="pin-cards-head">' +
+            '<div><h3 class="pin-cards-head-title">Identity &amp; Account Governance Audit</h3><p class="pin-cards-head-sub">Provisioning velocity, directory account hygiene, and policy alignment</p></div>' +
             '<span class="score-badge-status optimal">● Directory Synced</span>' +
           '</div>' +
-          '<div class="epc-breakdown-strip">' +
-            '<div class="epc-chip">' +
-              '<span class="epc-chip-lbl">Total Enabled Users</span>' +
-              '<span class="epc-chip-val b">' + totalUsers + '</span>' +
-              '<span class="epc-chip-sub">Active directory accounts</span>' +
+          '<div class="pin-cards-grid">' +
+
+            // Card 1: Total Enabled Users
+            '<div class="pin-card">' +
+              '<div class="pin-card-media">' +
+                '<img src="' + MOUNTAIN_CARD_BG + '" alt="Total Enabled Users" />' +
+                '<span class="pin-card-badge blue"><i class="dot"></i>Active</span>' +
+              '</div>' +
+              '<div class="pin-card-body">' +
+                '<div class="pin-card-tag">CARD 1 &bull; TOTAL ENABLED USERS</div>' +
+                '<div class="pin-card-stat-row">' +
+                  '<span class="pin-card-val blue">' + totalUsers + '</span>' +
+                  '<span class="pin-card-pill info">1 more than April</span>' +
+                '</div>' +
+                '<div class="pin-card-title">Total <strong>enabled user accounts</strong> active in directory service.</div>' +
+                '<div class="pin-card-sub">Active directory accounts</div>' +
+              '</div>' +
             '</div>' +
-            '<div class="epc-chip">' +
-              '<span class="epc-chip-lbl">MFA Enforced Users</span>' +
-              '<span class="epc-chip-val g">' + mfaEnabledCount + '</span>' +
-              '<span class="epc-chip-sub">' + mfaPctVal + '% compliance</span>' +
+
+            // Card 2: MFA Enforced Users
+            '<div class="pin-card">' +
+              '<div class="pin-card-media">' +
+                '<img src="' + MOUNTAIN_CARD_BG + '" alt="MFA Enforced Users" />' +
+                '<span class="pin-card-badge green"><i class="dot"></i>50.0% Enforced</span>' +
+              '</div>' +
+              '<div class="pin-card-body">' +
+                '<div class="pin-card-tag">CARD 2 &bull; MFA ENFORCED USERS</div>' +
+                '<div class="pin-card-stat-row">' +
+                  '<span class="pin-card-val green">' + mfaEnabledCount + '</span>' +
+                  '<span class="pin-card-pill pos">' + mfaPctVal + '% SLA</span>' +
+                '</div>' +
+                '<div class="pin-card-title">Multi-factor <strong>authentication enforced</strong> on user accounts.</div>' +
+                '<div class="pin-card-sub">' + mfaPctVal + '% compliance</div>' +
+              '</div>' +
             '</div>' +
-            '<div class="epc-chip">' +
-              '<span class="epc-chip-lbl">MFA Policy Gaps</span>' +
-              '<span class="epc-chip-val ' + (mfaNotEnabledCount > 0 ? 'r' : 'g') + '">' + mfaNotEnabledCount + '</span>' +
-              '<span class="epc-chip-sub">' + (mfaNotEnabledCount === 0 ? 'Zero gaps' : 'Requires enrollment') + '</span>' +
+
+            // Card 3: MFA Policy Gaps
+            '<div class="pin-card">' +
+              '<div class="pin-card-media">' +
+                '<img src="' + MOUNTAIN_CARD_BG + '" alt="MFA Policy Gaps" />' +
+                '<span class="pin-card-badge ' + (mfaNotEnabledCount > 0 ? 'red' : 'green') + '"><i class="dot"></i>' + (mfaNotEnabledCount > 0 ? 'Requires Setup' : 'Zero Gaps') + '</span>' +
+              '</div>' +
+              '<div class="pin-card-body">' +
+                '<div class="pin-card-tag">CARD 3 &bull; MFA POLICY GAPS</div>' +
+                '<div class="pin-card-stat-row">' +
+                  '<span class="pin-card-val ' + (mfaNotEnabledCount > 0 ? 'red' : 'green') + '">' + mfaNotEnabledCount + '</span>' +
+                  '<span class="pin-card-pill ' + (mfaNotEnabledCount > 0 ? 'neg' : 'pos') + '">' + (mfaNotEnabledCount > 0 ? 'Requires enrollment' : 'Zero gaps') + '</span>' +
+                '</div>' +
+                '<div class="pin-card-title">User accounts <strong>pending MFA policy</strong> enforcement.</div>' +
+                '<div class="pin-card-sub">' + (mfaNotEnabledCount === 0 ? 'Zero gaps' : 'Requires enrollment') + '</div>' +
+              '</div>' +
             '</div>' +
-            '<div class="epc-chip">' +
-              '<span class="epc-chip-lbl">Policy Violations</span>' +
-              '<span class="epc-chip-val ' + ((pv && typeof pv.v[m] === 'number' && pv.v[m] > 0) ? 'a' : 'g') + '">' + ((pv && typeof pv.v[m] === 'number') ? pv.v[m] : 0) + '</span>' +
-              '<span class="epc-chip-sub">Access anomalies</span>' +
+
+            // Card 4: Policy Violations
+            '<div class="pin-card">' +
+              '<div class="pin-card-media">' +
+                '<img src="' + MOUNTAIN_CARD_BG + '" alt="Policy Violations" />' +
+                '<span class="pin-card-badge ' + ((pv && typeof pv.v[m] === 'number' && pv.v[m] > 0) ? 'amber' : 'green') + '"><i class="dot"></i>' + ((pv && typeof pv.v[m] === 'number' && pv.v[m] > 0) ? '8 Anomalies' : 'Normal') + '</span>' +
+              '</div>' +
+              '<div class="pin-card-body">' +
+                '<div class="pin-card-tag">CARD 4 &bull; POLICY VIOLATIONS</div>' +
+                '<div class="pin-card-stat-row">' +
+                  '<span class="pin-card-val ' + ((pv && typeof pv.v[m] === 'number' && pv.v[m] > 0) ? 'amber' : 'green') + '">' + ((pv && typeof pv.v[m] === 'number') ? pv.v[m] : 0) + '</span>' +
+                  '<span class="pin-card-pill ' + ((pv && typeof pv.v[m] === 'number' && pv.v[m] > 0) ? 'warn' : 'pos') + '">Access anomalies</span>' +
+                '</div>' +
+                '<div class="pin-card-title">Privileged <strong>access violations</strong> flagged for review.</div>' +
+                '<div class="pin-card-sub">Access anomalies</div>' +
+              '</div>' +
             '</div>' +
+
+            // Card 5: Joined
+            '<div class="pin-card">' +
+              '<div class="pin-card-media">' +
+                '<img src="' + MOUNTAIN_CARD_BG + '" alt="Joined" />' +
+                '<span class="pin-card-badge cyan"><i class="dot"></i>Onboarded</span>' +
+              '</div>' +
+              '<div class="pin-card-body">' +
+                '<div class="pin-card-tag">CARD 5 &bull; JOINED THIS MONTH</div>' +
+                '<div class="pin-card-stat-row">' +
+                  '<span class="pin-card-val cyan">' + fmt(on, on.v[m]) + '</span>' +
+                  '<span class="pin-card-pill pos">' + (delta(on, m) || '+1 vs Apr') + '</span>' +
+                '</div>' +
+                '<div class="pin-card-title">New <strong>staff members joined</strong> and provisioned in tenant.</div>' +
+                '<div class="pin-card-sub">' + (delta(on, m) || '+1 vs Apr') + '</div>' +
+              '</div>' +
+            '</div>' +
+
+            // Card 6: Left
+            '<div class="pin-card">' +
+              '<div class="pin-card-media">' +
+                '<img src="' + MOUNTAIN_CARD_BG + '" alt="Left" />' +
+                '<span class="pin-card-badge purple"><i class="dot"></i>Offboarding</span>' +
+              '</div>' +
+              '<div class="pin-card-body">' +
+                '<div class="pin-card-tag">CARD 6 &bull; LEFT THIS MONTH</div>' +
+                '<div class="pin-card-stat-row">' +
+                  '<span class="pin-card-val purple">' + fmt(off, off.v[m]) + '</span>' +
+                  '<span class="pin-card-pill neu">' + (delta(off, m) || 'No change') + '</span>' +
+                '</div>' +
+                '<div class="pin-card-title">Directory <strong>departures recorded</strong> and decommissioned.</div>' +
+                '<div class="pin-card-sub">' + (delta(off, m) || 'No change vs Apr') + '</div>' +
+              '</div>' +
+            '</div>' +
+
           '</div>' +
-        '</section>' +
-        '<div class="stats3">' + tile(on, 'Joined', fmt(on, on.v[m]), delta(on, m) || '&nbsp;') + tile(off, 'Left', fmt(off, off.v[m]), delta(off, m) || '&nbsp;') + tile(mfa, 'Enabled users', typeof tv === 'number' ? tv : '–', dtxt) + '</div></div>' +
+        '</div></div>' +
     '</div>';
   }
 
