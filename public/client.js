@@ -4990,8 +4990,6 @@
           '</section>';
         })() +
 
-        // 3 Cards with Luminous Glowing Ridge Waves
-        '<div class="stats3" style="margin-top:20px;">' + mcard(hi, m) + mcard(med, m) + mcard(fx, m) + '</div>' +
       '</div>' +
 
       // Fixing Speed
