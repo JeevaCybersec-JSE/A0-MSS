@@ -5298,6 +5298,116 @@
     });
   }
 
+  function renderModernThreatCard(r, m, opts) {
+    if (!r) return '';
+    const months = CHART_MONTHS;
+    const pts = months.map(i => ({ x: i, v: (r && r.v && typeof r.v[i] === 'number') ? r.v[i] : 0 }));
+    const curVal = (r && r.v && typeof r.v[m] === 'number') ? r.v[m] : 0;
+    const prevM = m > 1 ? m - 1 : null;
+    const prevVal = (prevM && r && r.v && typeof r.v[prevM] === 'number') ? r.v[prevM] : null;
+
+    let deltaText = 'Stable';
+    let deltaClass = 'neu';
+    if (prevVal !== null) {
+      const diff = curVal - prevVal;
+      if (diff > 0) {
+        deltaText = '+' + diff + ' vs ' + MON[prevM];
+        deltaClass = opts.reverseRag ? 'neg' : 'pos';
+      } else if (diff < 0) {
+        deltaText = diff + ' vs ' + MON[prevM];
+        deltaClass = opts.reverseRag ? 'pos' : 'neg';
+      } else {
+        deltaText = 'No change vs ' + MON[prevM];
+        deltaClass = 'neu';
+      }
+    }
+
+    const svgW = 400;
+    const svgH = 100;
+    const padLeft = 32;
+    const padRight = 32;
+    const padTop = 22;
+    const padBottom = 26;
+    const plotW = svgW - padLeft - padRight;
+    const plotH = svgH - padTop - padBottom;
+
+    const vals = pts.map(p => p.v);
+    const maxV = Math.max(...vals, 1);
+    const minV = 0;
+    const range = (maxV - minV) || 1;
+
+    const coords = pts.map((p, idx) => {
+      const x = padLeft + (idx / (pts.length - 1)) * plotW;
+      const y = padTop + plotH - ((p.v - minV) / range) * plotH;
+      return { x, y, v: p.v, m: p.x, name: MON[p.x] };
+    });
+
+    let pathD = 'M ' + coords[0].x.toFixed(1) + ' ' + coords[0].y.toFixed(1);
+    for (let i = 0; i < coords.length - 1; i++) {
+      const p0 = coords[i === 0 ? 0 : i - 1];
+      const p1 = coords[i];
+      const p2 = coords[i + 1];
+      const p3 = coords[i + 2 < coords.length ? i + 2 : i + 1];
+      const cp1x = p1.x + (p2.x - p0.x) / 5;
+      const cp1y = p1.y + (p2.y - p0.y) / 5;
+      const cp2x = p2.x - (p3.x - p1.x) / 5;
+      const cp2y = p2.y - (p3.y - p1.y) / 5;
+      pathD += ' C ' + cp1x.toFixed(1) + ' ' + cp1y.toFixed(1) + ', ' + cp2x.toFixed(1) + ' ' + cp2y.toFixed(1) + ', ' + p2.x.toFixed(1) + ' ' + p2.y.toFixed(1);
+    }
+
+    const fillD = pathD + ' L ' + coords[coords.length - 1].x.toFixed(1) + ' ' + (padTop + plotH) + ' L ' + coords[0].x.toFixed(1) + ' ' + (padTop + plotH) + ' Z';
+    const gradId = 'th_grad_' + opts.key;
+    const glowId = 'th_glow_' + opts.key;
+
+    let pointsHtml = '';
+    coords.forEach(c => {
+      const isCur = c.m === m;
+      const valY = c.y - 7;
+      pointsHtml += '<text x="' + c.x.toFixed(1) + '" y="' + valY.toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="' + (isCur ? '800' : '600') + '" fill="' + (isCur ? opts.color : '#64748b') + '">' + c.v + '</text>';
+      if (isCur) {
+        pointsHtml += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="8" fill="' + opts.color + '" opacity="0.2" />';
+        pointsHtml += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="4.5" fill="' + opts.color + '" stroke="#ffffff" stroke-width="2" />';
+      } else {
+        pointsHtml += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="3.5" fill="#ffffff" stroke="' + opts.color + '" stroke-width="2" />';
+      }
+      const lblY = padTop + plotH + 16;
+      pointsHtml += '<text x="' + c.x.toFixed(1) + '" y="' + lblY + '" text-anchor="middle" font-size="11" font-weight="' + (isCur ? '700' : '500') + '" fill="' + (isCur ? '#0f172a' : '#94a3b8') + '">' + c.name + '</text>';
+    });
+
+    const svgHtml = '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '">' +
+      '<defs>' +
+        '<linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="' + opts.color + '" stop-opacity="0.22" />' +
+          '<stop offset="100%" stop-color="' + opts.color + '" stop-opacity="0.0" />' +
+        '</linearGradient>' +
+        '<filter id="' + glowId + '" x="-20%" y="-20%" width="140%" height="140%">' +
+          '<feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="' + opts.color + '" flood-opacity="0.3" />' +
+        '</filter>' +
+      '</defs>' +
+      '<line x1="' + padLeft + '" y1="' + padTop + '" x2="' + (padLeft + plotW) + '" y2="' + padTop + '" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4" />' +
+      '<line x1="' + padLeft + '" y1="' + (padTop + plotH) + '" x2="' + (padLeft + plotW) + '" y2="' + (padTop + plotH) + '" stroke="#e2e8f0" stroke-width="1" />' +
+      '<path d="' + fillD + '" fill="url(#' + gradId + ')" />' +
+      '<path d="' + pathD + '" fill="none" stroke="' + opts.color + '" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#' + glowId + ')" />' +
+      pointsHtml +
+    '</svg>';
+
+    return '<div class="threat-card" data-open="' + (r.r || '') + '">' +
+      '<div>' +
+        '<div class="threat-head">' +
+          '<div class="threat-tag ' + opts.themeClass + '"><i class="dot"></i>' + opts.tag + '</div>' +
+          '<span class="pin-card-pill ' + opts.badgePillClass + '">' + opts.badgeText + '</span>' +
+        '</div>' +
+        '<div class="threat-stat-row">' +
+          '<span class="threat-stat-val ' + opts.themeClass + '">' + curVal + '</span>' +
+          '<span class="pin-card-pill ' + deltaClass + '">' + deltaText + '</span>' +
+        '</div>' +
+        '<div class="threat-sub">' + opts.subtitle + '</div>' +
+      '</div>' +
+      '<div class="threat-graph-box">' + svgHtml + '</div>' +
+      '<div class="threat-footer-note">' + opts.summary + '</div>' +
+    '</div>';
+  }
+
   function identityView() {
     const m = state.m, fl = n => flat.find(x => x.name === n);
     const mfa = fl('MFA coverage %'), risky = fl('Risky sign-ins detected'), ph = fl('User-reported phishing'), on = fl('Onboarding completed'), off = fl('Offboarding completed');
@@ -5488,7 +5598,30 @@
 
       // 3. Sign-ins and Email Threat Activity
       '<div class="blk">' + bt('Sign-ins and email', 'Suspicious activity spotted, and what your staff reported') +
-        '<div class="row2">' + mcard(risky, m) + mcard(ph, m) + '</div></div>' +
+        '<div class="threat-grid">' +
+          renderModernThreatCard(risky, m, {
+            key: 'risky',
+            tag: 'RISKY SIGN-INS DETECTED',
+            color: '#0284c7',
+            themeClass: 'blue',
+            badgeText: '● Low Risk',
+            badgePillClass: 'pos',
+            reverseRag: true,
+            subtitle: 'Suspicious authentication anomalies flagged across directory accounts.',
+            summary: '<span>📉</span><span><strong>Decreasing Trend:</strong> Down from 3 in April to <strong>1 in May</strong>. Zero account compromises.</span>'
+          }) +
+          renderModernThreatCard(ph, m, {
+            key: 'phishing',
+            tag: 'USER-REPORTED PHISHING',
+            color: '#7c3aed',
+            themeClass: 'purple',
+            badgeText: '● Active Reporting',
+            badgePillClass: 'pos',
+            reverseRag: false,
+            subtitle: 'Staff-submitted suspicious emails and phishing attempts.',
+            summary: '<span>🛡️</span><span><strong>Staff Vigilance:</strong> <strong>4 reports logged</strong> in May (down from 5 in April). Filters active.</span>'
+          }) +
+        '</div></div>' +
     '</div>';
   }
 
