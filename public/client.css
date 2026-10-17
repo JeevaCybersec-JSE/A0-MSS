@@ -7986,8 +7986,20 @@ button.vuln-chip:hover {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 
+.vuln-donut-flank-layout {
+  display: grid !important;
+  grid-template-columns: 1fr 270px 1fr !important;
+  gap: 28px !important;
+  align-items: center !important;
+  margin: 16px 0 20px 0 !important;
+}
+
 @media (max-width: 900px) {
   .vuln-donut-card .donut-legend-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .vuln-donut-flank-layout {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
   }
 }

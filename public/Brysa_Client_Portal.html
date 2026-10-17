@@ -8000,9 +8000,21 @@ button.vuln-chip:hover {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 
+.vuln-donut-flank-layout {
+  display: grid !important;
+  grid-template-columns: 1fr 270px 1fr !important;
+  gap: 28px !important;
+  align-items: center !important;
+  margin: 16px 0 20px 0 !important;
+}
+
 @media (max-width: 900px) {
   .vuln-donut-card .donut-legend-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .vuln-donut-flank-layout {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
   }
 }
 
@@ -12977,31 +12989,40 @@ button.vuln-chip:hover {
             '<div><h2 class="card-title">Vulnerability Exposure by Severity</h2><p class="card-sub">Distribution of recorded vulnerabilities across severity levels for the selected reporting month.</p></div>' +
             vulnStatusBadge +
           '</div>' +
-          '<div class="kpi-donut-wrapper">' +
-            '<div class="kpi-donut-canvas-box">' +
-              '<canvas id="vuln_donut" role="img" aria-label="Vulnerability Severity Donut Chart"></canvas>' +
-              '<div class="kpi-donut-center">' +
-                '<span class="kpi-donut-center-num">' + (hasData ? totalOpen : '–') + '</span>' +
-                '<span class="kpi-donut-center-lbl">' + (hasData ? 'Total Flaws Open' : 'No Telemetry') + '</span>' +
+          '<div class="vuln-donut-flank-layout" style="display:grid; grid-template-columns: 1fr 270px 1fr; gap:28px; align-items:center; margin:16px 0 20px 0;">' +
+            '<!-- Left Column: 2 Metrics -->' +
+            '<div style="display:flex; flex-direction:column; gap:16px;">' +
+              '<button type="button" class="donut-leg-item" data-open="' + (crit?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:14px 18px;border-radius:12px;" title="Inspect Critical Vulnerabilities">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name" style="font-size:13px;">Critical Open</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">' + (hasData ? critVal : '–') + '</span><span class="donut-leg-pct" style="font-size:12px;">' + critPct + '% (Target: 0)</span></div>' +
+              '</button>' +
+              '<button type="button" class="donut-leg-item" data-open="' + (hi?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:14px 18px;border-radius:12px;" title="Inspect High-Priority Vulnerabilities">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name" style="font-size:13px;">High-Priority</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">' + (hasData ? hiVal : '–') + '</span><span class="donut-leg-pct" style="font-size:12px;">' + hiPct + '% (Target: ≤ 10)</span></div>' +
+              '</button>' +
+            '</div>' +
+
+            '<!-- Center: Donut Pie Chart -->' +
+            '<div class="kpi-donut-wrapper" style="margin:0; width:100%; display:flex; justify-content:center;">' +
+              '<div class="kpi-donut-canvas-box" style="margin:0;">' +
+                '<canvas id="vuln_donut" role="img" aria-label="Vulnerability Severity Donut Chart"></canvas>' +
+                '<div class="kpi-donut-center">' +
+                  '<span class="kpi-donut-center-num">' + (hasData ? totalOpen : '–') + '</span>' +
+                  '<span class="kpi-donut-center-lbl">' + (hasData ? 'Total Flaws Open' : 'No Telemetry') + '</span>' +
+                '</div>' +
               '</div>' +
             '</div>' +
-          '</div>' +
-          '<div class="donut-legend-grid">' +
-            '<button type="button" class="donut-leg-item" data-open="' + (crit?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Critical Vulnerabilities">' +
-              '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name">Critical Open</span></div>' +
-              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? critVal : '–') + '</span><span class="donut-leg-pct">' + critPct + '% (Target: 0)</span></div>' +
-            '</button>' +
-            '<button type="button" class="donut-leg-item" data-open="' + (hi?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect High-Priority Vulnerabilities">' +
-              '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name">High-Priority</span></div>' +
-              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? hiVal : '–') + '</span><span class="donut-leg-pct">' + hiPct + '% (Target: ≤ 10)</span></div>' +
-            '</button>' +
-            '<button type="button" class="donut-leg-item" data-open="' + (med?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Medium Vulnerabilities">' +
-              '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name">Medium Severity</span></div>' +
-              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? medVal : '–') + '</span><span class="donut-leg-pct">' + medPct + '%</span></div>' +
-            '</button>' +
-            '<div class="donut-leg-item">' +
-              '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name">Critical SLA</span></div>' +
-              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? (critVal === 0 ? 'Clear' : critVal + ' Breach') : '–') + '</span><span class="donut-leg-pct">Zero tolerance</span></div>' +
+
+            '<!-- Right Column: 2 Metrics -->' +
+            '<div style="display:flex; flex-direction:column; gap:16px;">' +
+              '<button type="button" class="donut-leg-item" data-open="' + (med?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:14px 18px;border-radius:12px;" title="Inspect Medium Vulnerabilities">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name" style="font-size:13px;">Medium Severity</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">' + (hasData ? medVal : '–') + '</span><span class="donut-leg-pct" style="font-size:12px;">' + medPct + '%</span></div>' +
+              '</button>' +
+              '<div class="donut-leg-item" style="padding:14px 18px; border-radius:12px;">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name" style="font-size:13px;">Critical SLA</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">' + (hasData ? (critVal === 0 ? 'Clear' : critVal + ' Breach') : '–') + '</span><span class="donut-leg-pct" style="font-size:12px;">Zero tolerance</span></div>' +
+              '</div>' +
             '</div>' +
           '</div>' +
           '<div class="client-explanation-box">' +
