@@ -2035,441 +2035,36 @@
       .replace(/'/g, '&#39;');
   }
 
-  function renderClientGlassDetailCard(opts) {
-    const {
-      targetContainer,
-      anchorElement = null,
-      title,
-      category = 'trend',
-      categoryLabel = 'SEGMENT',
-      sourceLabel = 'SECURITY METRIC',
-      totalCount = 0,
-      records = [],
-      period = (typeof FULL !== 'undefined' && state?.m ? `${FULL[state.m]} ${state.year}` : 'Current Period'),
-      onClose = null
-    } = opts;
-
-    // Hide any legacy in-flow slot so it never pushes layout down
-    if (targetContainer) {
-      targetContainer.style.display = 'none';
-      targetContainer.innerHTML = '';
-    }
-
-    // Clean up previous floating card and backdrop if active
-    if (activeFloatingClientCard && activeFloatingClientCard.parentNode) {
-      activeFloatingClientCard.parentNode.removeChild(activeFloatingClientCard);
-      activeFloatingClientCard = null;
-    }
-    if (activeFloatingClientBackdrop && activeFloatingClientBackdrop.parentNode) {
-      activeFloatingClientBackdrop.parentNode.removeChild(activeFloatingClientBackdrop);
-      activeFloatingClientBackdrop = null;
-    }
-    if (activeFloatingClientCleanup) {
-      activeFloatingClientCleanup();
-      activeFloatingClientCleanup = null;
-    }
-
-    let isExpanded = false;
-
-    const backdrop = document.createElement('div');
-    backdrop.className = 'glass-detail-backdrop';
-    backdrop.setAttribute('aria-hidden', 'true');
-
-    const card = document.createElement('div');
-    card.className = 'glass-segment-detail-card';
-    card.setAttribute('role', 'dialog');
-    card.setAttribute('aria-modal', 'true');
-    card.setAttribute('aria-label', `${title} Detail List`);
-
-    function render() {
-      card.innerHTML = '';
-      card.classList.toggle('is-expanded', isExpanded);
-
-      const head = document.createElement('div');
-      head.className = 'glass-detail-head';
-      head.innerHTML = `
-        <div class="glass-detail-head-left">
-          <div class="glass-detail-badge-row">
-            <span class="glass-category-pill ${category}">${escapeHTML(categoryLabel)}</span>
-            <span class="glass-source-pill">${escapeHTML(sourceLabel)}</span>
-          </div>
-          <h3 class="glass-detail-title">${escapeHTML(title)}</h3>
-          <div class="glass-detail-subtitle">
-            <span class="glass-detail-meta-total">Total: ${totalCount}</span>
-            <span>&bull;</span>
-            <span>Reporting Period: ${escapeHTML(period)}</span>
-          </div>
-        </div>
-        <button type="button" class="glass-detail-close-btn" aria-label="Close detail card" title="Dismiss details">&times;</button>
-      `;
-
-      head.querySelector('.glass-detail-close-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        dismiss();
-      });
-
-      card.appendChild(head);
-
-      if (totalCount === 0 || !records.length) {
-        const empty = document.createElement('div');
-        empty.className = 'glass-empty-state';
-        empty.innerHTML = `
-          <div class="glass-empty-icon">
-            <svg viewBox="0 0 20 20" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
-              <circle cx="10" cy="10" r="7.5"/>
-              <path d="M7 10h6" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="glass-empty-title">No records found for this selection.</div>
-          <div class="glass-empty-desc">Zero telemetry outliers or breaches recorded for ${escapeHTML(period)}.</div>
-        `;
-        card.appendChild(empty);
-      } else {
-        const list = document.createElement('div');
-        list.className = 'glass-record-list';
-
-        const displayedRecords = isExpanded ? records : records.slice(0, 5);
-
-        displayedRecords.forEach((rec, idx) => {
-          const item = document.createElement('div');
-          item.className = 'glass-record-item';
-          item.innerHTML = `
-            <div class="glass-record-left">
-              <div class="glass-record-idx">${idx + 1}</div>
-              <div class="glass-record-info">
-                <div class="glass-record-name" title="${escapeHTML(rec.name)}">${escapeHTML(rec.name)}</div>
-                <div class="glass-record-tags">
-                  <span class="glass-record-tag system">${escapeHTML(rec.system || 'Core System')}</span>
-                  ${rec.target ? `<span class="glass-record-tag target">${escapeHTML(rec.target)}</span>` : ''}
-                  ${rec.date ? `<span class="glass-record-tag">${escapeHTML(rec.date)}</span>` : ''}
-                </div>
-              </div>
-            </div>
-            <div class="glass-record-right">
-              ${rec.value !== undefined && rec.value !== null ? `<div class="glass-record-metric-val">${escapeHTML(String(rec.value))}</div>` : ''}
-              <span class="glass-record-status-chip ${rec.statusClass || 'trend'}">${escapeHTML(rec.status || 'Active')}</span>
-            </div>
-          `;
-          list.appendChild(item);
-        });
-
-        card.appendChild(list);
-
-        if (records.length > 5) {
-          const footer = document.createElement('div');
-          footer.className = 'glass-detail-footer';
-
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'glass-show-all-btn';
-          btn.innerHTML = isExpanded 
-            ? `<span>Show Less (5)</span> <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10l4-4 4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-            : `<span>Show All (${totalCount})</span> <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            isExpanded = !isExpanded;
-            render();
-            positionFloatingCardCenter(card);
-          });
-
-          footer.appendChild(btn);
-          card.appendChild(footer);
-        }
-      }
-    }
-
-    function dismiss() {
-      if (card.classList.contains('is-closing')) return;
-      card.classList.remove('is-visible');
-      card.classList.add('is-closing');
-      if (backdrop) {
-        backdrop.classList.remove('is-visible');
-        backdrop.classList.add('is-closing');
-      }
-      if (activeFloatingClientCleanup) {
-        activeFloatingClientCleanup();
-        activeFloatingClientCleanup = null;
-      }
-      setTimeout(() => {
-        if (card.parentNode) card.parentNode.removeChild(card);
-        if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
-        if (activeFloatingClientCard === card) activeFloatingClientCard = null;
-        if (activeFloatingClientBackdrop === backdrop) activeFloatingClientBackdrop = null;
-        if (typeof onClose === 'function') onClose();
-      }, 220);
-    }
-
-    render();
-    document.body.appendChild(backdrop);
-    document.body.appendChild(card);
-    activeFloatingClientCard = card;
-    activeFloatingClientBackdrop = backdrop;
-
-    positionFloatingCardCenter(card);
-    requestAnimationFrame(() => {
-      backdrop.classList.add('is-visible');
-      card.classList.add('is-visible');
-      positionFloatingCardCenter(card);
-    });
-
-    backdrop.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dismiss();
-    });
-
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape' || e.key === 'Esc') {
-        dismiss();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-
-    const onPointerDown = (e) => {
-      if (!card.isConnected) return;
-      if (card.contains(e.target)) return;
-      if (e.target.closest('#patches_pie, #vuln_donut, #patch_comp_donut, .patches-leg-card, .donut-leg-item')) {
-        return;
-      }
-      dismiss();
-    };
-    document.addEventListener('pointerdown', onPointerDown);
-
-    activeFloatingClientCleanup = () => {
-      window.removeEventListener('keydown', onKeyDown);
-      document.removeEventListener('pointerdown', onPointerDown);
-    };
+  function closeClientGlassDetailModal() {
+    activeClientDetail = null;
+    const b = document.querySelector('.glass-detail-backdrop');
+    if (b) b.remove();
+    const c = document.querySelector('.glass-segment-detail-card');
+    if (c) c.remove();
   }
 
-  let activeClientDetail = null;
-
-  function openClientPatchesSegmentDetail(segIdx) {
-    activeClientDetail = { type: 'patches', idx: segIdx };
-    const m = state.m;
-    const critRow = flat.find(x => x.name === 'Critical patches outstanding');
-    const highRow = flat.find(x => x.name === 'High patches outstanding');
-    const critVal = (critRow && typeof critRow.v[m] === 'number') ? critRow.v[m] : 0;
-    const highVal = (highRow && typeof highRow.v[m] === 'number') ? highRow.v[m] : 0;
-
-    const slot = document.getElementById('patches-pie-detail-slot');
-    const anchorEl = document.getElementById('patches_pie') || document.querySelector('.patches-pie-card') || slot;
-
-    const isCrit = (segIdx === 0);
-    const totalCount = isCrit ? critVal : highVal;
-    const category = isCrit ? 'red' : 'amber';
-    const categoryLabel = isCrit ? 'CRITICAL PATCHES' : 'HIGH-PRIORITY PATCHES';
-    const title = isCrit ? 'Critical Patches Outstanding' : 'High-Priority Patches Outstanding';
-    const sourceLabel = 'ENDPOINT SECURITY TELEMETRY';
-
-    const basePool = isCrit ? [
-      { name: 'KB5037765 - Windows Kernel Security Update (CVE-2024-30051)', system: 'Domain Controllers & Windows Fleet', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' },
-      { name: 'KB5036909 - Microsoft Edge & Chromium V8 Zero-Day (CVE-2024-4671)', system: 'Corporate Workstations Fleet', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' },
-      { name: 'KB5037422 - Exchange Server Remote Code Execution (CVE-2024-26169)', system: 'Mail Services Node', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' },
-      { name: 'KB5037890 - OpenSSL ASN.1 Memory Corruption Fix', system: 'Perimeter Gateway Proxy', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' },
-      { name: 'KB5037912 - VMware ESXi OpenSLP Heap Overflow (CVE-2024-37085)', system: 'Virtualization Host Cluster', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' },
-      { name: 'KB5037955 - Systemd Core Privilege Escalation Advisory', system: 'Linux Application Servers', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' }
-    ] : [
-      { name: 'KB5036893 - .NET Core & Runtime Remote Code Execution Rollup', system: 'Workstations Fleet (Win 11)', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
-      { name: 'KB5037021 - Google Chrome Security Advisory Channel Update', system: 'Sales & Operations Laptops', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
-      { name: 'KB5037144 - Apache Tomcat Security Advisory & Protocol Fix', system: 'Internal Portal App Servers', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
-      { name: 'KB5037288 - Cisco AnyConnect VPN Client DLL Hijacking Hotfix', system: 'Remote Worker Endpoints', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
-      { name: 'KB5037350 - Adobe Acrobat Reader Privilege Escalation Update', system: 'Executive Workstations', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
-      { name: 'KB5037411 - OpenSSH Client Channel Overflow Security Patch', system: 'DevOps Bastion Hosts', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
-      { name: 'KB5037520 - Mozilla Firefox Extended Support Release Patch', system: 'Engineering Workstations', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
-      { name: 'KB5037633 - Wireshark Dissector Buffer Overflow Hotfix', system: 'SOC Analysis Laptops', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' }
-    ];
-
-    const records = [];
-    for (let i = 0; i < totalCount; i++) {
-      const item = basePool[i % basePool.length];
-      records.push({
-        name: (i >= basePool.length) ? `${item.name} [Node ${i + 1}]` : item.name,
-        system: item.system,
-        target: item.target,
-        status: item.status,
-        statusClass: item.statusClass,
-        date: `${FULL[m]} ${state.year}`,
-        value: item.value
-      });
-    }
-
-    renderClientGlassDetailCard({
-      targetContainer: slot,
-      anchorElement: anchorEl,
-      title,
-      category,
-      categoryLabel,
-      sourceLabel,
-      totalCount,
-      records,
-      period: `${FULL[m]} ${state.year}`,
-      onClose: () => {
-        activeClientDetail = null;
-      }
-    });
-  }
-
-  function openClientVulnDonutDetail(segIdx) {
-    activeClientDetail = { type: 'vuln', idx: segIdx };
-    const m = state.m;
-    const cr = flat.find(x => x.name === 'Critical vulnerabilities open');
-    const hi = flat.find(x => x.name === 'High vulnerabilities open');
-    const me = flat.find(x => x.name === 'Medium vulnerabilities open');
-    const critVal = (cr && typeof cr.v[m] === 'number') ? cr.v[m] : 0;
-    const hiVal = (hi && typeof hi.v[m] === 'number') ? hi.v[m] : 0;
-    const medVal = (me && typeof me.v[m] === 'number') ? me.v[m] : 0;
-
-    const slot = document.getElementById('vuln-donut-detail-slot');
-    const anchorEl = document.getElementById('vuln_donut') || document.querySelector('.kpi-donut-card') || slot;
-
-    let totalCount = 0;
-    let category = 'red';
-    let categoryLabel = 'CRITICAL VULNERABILITIES';
-    let title = 'Critical Vulnerabilities Open';
-    let basePool = [];
-
-    if (segIdx === 0) {
-      totalCount = critVal;
-      category = 'red';
-      categoryLabel = 'CRITICAL VULNERABILITIES';
-      title = 'Critical Vulnerabilities Open';
-      basePool = [
-        { name: 'CVE-2024-3400 - Palo Alto PAN-OS Command Injection Zero-Day', system: 'Edge Gateway Firewalls', target: 'Target: 0 (Zero Tolerance)', status: 'Critical Flaw', statusClass: 'red', value: 'CVSS 10.0' },
-        { name: 'CVE-2024-21887 - Ivanti Connect Secure Web Server Command Injection', system: 'SSL VPN Appliances', target: 'Target: 0 (Zero Tolerance)', status: 'Critical Flaw', statusClass: 'red', value: 'CVSS 9.8' },
-        { name: 'CVE-2024-1709 - ConnectWise ScreenConnect Authentication Bypass', system: 'Remote Management Server', target: 'Target: 0 (Zero Tolerance)', status: 'Critical Flaw', statusClass: 'red', value: 'CVSS 10.0' },
-        { name: 'CVE-2024-27198 - JetBrains TeamCity Authentication Bypass', system: 'Build & CI Pipeline Server', target: 'Target: 0 (Zero Tolerance)', status: 'Critical Flaw', statusClass: 'red', value: 'CVSS 9.8' }
-      ];
-    } else if (segIdx === 1) {
-      totalCount = hiVal;
-      category = 'amber';
-      categoryLabel = 'HIGH-PRIORITY VULNERABILITIES';
-      title = 'High-Priority Vulnerabilities Open';
-      basePool = [
-        { name: 'CVE-2024-21413 - Microsoft Outlook Moniker Link Remote Code Execution', system: 'Corporate Workstation Fleet', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 8.8' },
-        { name: 'CVE-2024-21338 - Windows Kernel AppLocker Privilege Escalation', system: 'Production Server Pool', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 8.2' },
-        { name: 'CVE-2024-26169 - Windows Error Reporting Elevation of Privilege', system: 'Database Clusters', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 7.8' },
-        { name: 'CVE-2024-30051 - Desktop Window Manager Core Library EoP', system: 'Finance Department PCs', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 7.8' },
-        { name: 'CVE-2024-29988 - Microsoft SmartScreen Prompt Security Feature Bypass', system: 'Remote Sales Laptops', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 7.5' },
-        { name: 'CVE-2024-20656 - Visual Studio Code Extension Arbitrary Code Execution', system: 'Software Engineering Stations', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 7.5' },
-        { name: 'CVE-2024-21408 - Windows Hyper-V Denial of Service Vulnerability', system: 'Virtual Host Hypervisors', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 7.1' }
-      ];
-    } else {
-      totalCount = medVal;
-      category = 'trend';
-      categoryLabel = 'MEDIUM VULNERABILITIES';
-      title = 'Medium Severity Vulnerabilities Open';
-      basePool = [
-        { name: 'CVE-2024-21407 - Windows OLE Remote Code Execution Flaw', system: 'Office Automation Systems', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 6.8' },
-        { name: 'CVE-2024-20677 - Microsoft Office Information Disclosure', system: 'General Staff Laptops', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 6.5' },
-        { name: 'CVE-2024-21410 - Microsoft Exchange Server NTLM Relay', system: 'Internal Relay Agents', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 6.5' },
-        { name: 'CVE-2024-20682 - Windows Cryptographic Services Spoofing', system: 'Public Key Infrastructure Node', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 6.1' },
-        { name: 'CVE-2024-21396 - Windows Kernel Information Disclosure', system: 'Operations Bastion', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.9' },
-        { name: 'CVE-2024-21345 - Microsoft WDAC Security Feature Bypass', system: 'Field Sales Endpoints', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.7' },
-        { name: 'CVE-2024-21351 - SmartScreen Security Feature Bypass Flaw', system: 'Customer Support Terminals', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.5' },
-        { name: 'CVE-2024-21360 - Windows Graphics Component Elevation', system: 'Design Team Workstations', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.5' },
-        { name: 'CVE-2024-21378 - Microsoft Word Remote Code Execution Flaw', system: 'HR Department Systems', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.3' },
-        { name: 'CVE-2024-21382 - Windows Connected User Experiences RCE', system: 'Branch Office Kiosks', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.0' },
-        { name: 'CVE-2024-21390 - Windows Search Service Elevation of Privilege', system: 'Storage Area Network Controller', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.0' },
-        { name: 'CVE-2024-21398 - Microsoft Azure CLI Information Disclosure', system: 'Cloud Administration Terminals', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 4.9' }
-      ];
-    }
-
-    const records = [];
-    for (let i = 0; i < totalCount; i++) {
-      const item = basePool[i % basePool.length];
-      records.push({
-        name: (i >= basePool.length) ? `${item.name} [Node ${i + 1}]` : item.name,
-        system: item.system,
-        target: item.target,
-        status: item.status,
-        statusClass: item.statusClass,
-        date: `${FULL[m]} ${state.year}`,
-        value: item.value
-      });
-    }
-
-    renderClientGlassDetailCard({
-      targetContainer: slot,
-      anchorElement: anchorEl,
-      title,
-      category,
-      categoryLabel,
-      sourceLabel: 'VULNERABILITY SCAN & EXPOSURE TELEMETRY',
-      totalCount,
-      records,
-      period: `${FULL[m]} ${state.year}`,
-      onClose: () => {
-        activeClientDetail = null;
-      }
-    });
+  function renderClientGlassDetailCard() {
+    closeClientGlassDetailModal();
   }
 
   function openClientPatchCompDetail(segIdx) {
-    activeClientDetail = { type: 'patch_comp', idx: segIdx };
-    const m = state.m;
-    const me = flat.find(x => x.name === 'Managed endpoints');
+    closeClientGlassDetailModal();
     const pc = flat.find(x => x.name === 'Patch compliance %');
-    const pcHelper = pc?.helpers?.[0];
-    const totalAssessed = (me && typeof me.v[m] === 'number') ? me.v[m] : 0;
-    const compEndpoints = (pcHelper && typeof pcHelper.v[m] === 'number') ? pcHelper.v[m] : ((typeof pc?.v[m] === 'number') ? Math.round(pc.v[m] * totalAssessed) : 0);
-    const nonCompEndpoints = Math.max(0, totalAssessed - compEndpoints);
-
-    const slot = document.getElementById('patch-comp-detail-slot');
-    const anchorEl = document.getElementById('patch_comp_donut') || document.querySelector('#patch_comp_donut')?.closest('.card') || slot;
-
-    const isComp = (segIdx === 0);
-    const totalCount = isComp ? compEndpoints : nonCompEndpoints;
-    const category = isComp ? 'green' : 'red';
-    const categoryLabel = isComp ? 'COMPLIANT FLEET' : 'NON-COMPLIANT DEVICES';
-    const title = isComp ? 'Compliant Endpoints' : 'Non-Compliant Endpoints Requiring Remediation';
-
-    const basePool = isComp ? [
-      { name: 'WS-CORP-FIN-01 (Win 11 Pro 23H2)', system: 'Finance Department', target: 'Policy: Mandatory 30-Day Cycle', status: 'Compliant', statusClass: 'green', value: '100% Patched' },
-      { name: 'WS-ENG-LINUX-04 (Ubuntu 22.04 LTS)', system: 'Engineering Workstations', target: 'Policy: Mandatory 30-Day Cycle', status: 'Compliant', statusClass: 'green', value: '100% Patched' },
-      { name: 'SRV-PROD-APP-02 (RHEL 9.2)', system: 'Application Server Pool', target: 'Policy: Mandatory 30-Day Cycle', status: 'Compliant', statusClass: 'green', value: '100% Patched' },
-      { name: 'WS-EXEC-MAC-01 (macOS Sonoma 14.5)', system: 'Executive Laptops', target: 'Policy: Mandatory 30-Day Cycle', status: 'Compliant', statusClass: 'green', value: '100% Patched' },
-      { name: 'WS-OPS-WIN-09 (Win 11 Enterprise)', system: 'Operations Floor', target: 'Policy: Mandatory 30-Day Cycle', status: 'Compliant', statusClass: 'green', value: '100% Patched' }
-    ] : [
-      { name: 'WS-SALES-REMOTE-12 (Win 10 Ent 22H2)', system: 'Remote Worker Laptops', target: 'Target: Remediate in 7 Days', status: 'Outdated Patches', statusClass: 'red', value: '3 Missing' },
-      { name: 'WS-HR-DESK-03 (Win 11 Pro 22H2)', system: 'HR Department Systems', target: 'Target: Remediate in 7 Days', status: 'Reboot Required', statusClass: 'amber', value: 'Pending Restart' },
-      { name: 'SRV-STAGING-01 (Ubuntu 20.04)', system: 'Staging Environment', target: 'Target: Remediate in 7 Days', status: 'Patch Failed', statusClass: 'red', value: 'Error 0x80070005' },
-      { name: 'WS-CONSULT-04 (Win 11 Pro)', system: 'Contractor Fleet', target: 'Target: Remediate in 7 Days', status: 'Outdated Patches', statusClass: 'red', value: '2 Missing' },
-      { name: 'WS-LAB-TEST-02 (Win 10 Ent)', system: 'Testing Laboratory', target: 'Target: Remediate in 7 Days', status: 'Offline > 14 Days', statusClass: 'amber', value: 'Offline' }
-    ];
-
-    const records = [];
-    for (let i = 0; i < totalCount; i++) {
-      const item = basePool[i % basePool.length];
-      records.push({
-        name: (i >= basePool.length) ? `${item.name.split(' ')[0]}-${i + 1} (${item.name.split('(')[1] || ''}` : item.name,
-        system: item.system,
-        target: item.target,
-        status: item.status,
-        statusClass: item.statusClass,
-        date: `${FULL[m]} ${state.year}`,
-        value: item.value
-      });
-    }
-
-    renderClientGlassDetailCard({
-      targetContainer: slot,
-      anchorElement: anchorEl,
-      title,
-      category,
-      categoryLabel,
-      sourceLabel: 'ENDPOINT FLEET INVENTORY TELEMETRY',
-      totalCount,
-      records,
-      period: `${FULL[m]} ${state.year}`,
-      onClose: () => {
-        activeClientDetail = null;
-      }
-    });
+    if (pc) drawer(pc);
   }
 
-  window.openClientPatchesSegmentDetail = openClientPatchesSegmentDetail;
-  window.openClientVulnDonutDetail = openClientVulnDonutDetail;
-  window.openClientPatchCompDetail = openClientPatchCompDetail;
+  function openClientPatchesSegmentDetail(segIdx) {
+    closeClientGlassDetailModal();
+    const r = segIdx === 0 ? flat.find(x => x.name === 'Critical patches outstanding') : flat.find(x => x.name === 'High patches outstanding');
+    if (r) drawer(r);
+  }
+
+  function openClientVulnDonutDetail(segIdx) {
+    closeClientGlassDetailModal();
+    const names = ['Critical vulnerabilities open', 'High vulnerabilities open', 'Medium vulnerabilities open'];
+    const r = flat.find(x => x.name === names[segIdx]);
+    if (r) drawer(r);
+  }
 
   function applyServerData(json) {
     if (!json) return;
@@ -4342,11 +3937,11 @@
               '</div>' +
             '</div>' +
             '<div class="donut-legend-grid">' +
-              '<button type="button" class="donut-leg-item" onclick="openClientPatchCompDetail(0)" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Compliant Endpoints">' +
+              '<button type="button" class="donut-leg-item" data-open="' + (pc?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Patch Compliance">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name">Compliant Endpoints</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasPcData && compEndpoints !== null ? compEndpoints : '–') + '</span><span class="donut-leg-pct">' + (hasPcData ? pcPctVal + '%' : '–') + '</span></div>' +
               '</button>' +
-              '<button type="button" class="donut-leg-item" onclick="openClientPatchCompDetail(1)" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Non-Compliant Endpoints">' +
+              '<button type="button" class="donut-leg-item" data-open="' + (pc?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Patch Compliance">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name">Non-Compliant</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasPcData && nonCompEndpoints !== null ? nonCompEndpoints : '–') + '</span><span class="donut-leg-pct">' + (hasPcData ? (100 - parseFloat(pcPctVal)).toFixed(1) + '%' : '–') + '</span></div>' +
               '</button>' +
@@ -4451,17 +4046,17 @@
 
             // 3 Interactive Analytical Pods for the Selected Month
             '<div class="month-compliance-pods">' +
-              '<button type="button" class="month-pod" onclick="openClientPatchCompDetail(0)" title="Inspect Fully Patched Endpoints">' +
+              '<button type="button" class="month-pod" data-open="' + (pc?.r || '') + '" title="Inspect Patch Compliance Telemetry">' +
                 '<div class="month-pod-head"><span class="month-pod-lbl">Fully Patched</span><span class="donut-leg-dot g"></span></div>' +
                 '<div class="month-pod-val g">' + (hasPcData && compEndpoints !== null ? compEndpoints : '–') + ' <small style="font-size:14px;font-weight:600;color:var(--muted)">endpoints</small></div>' +
                 '<div class="month-pod-sub">' + (hasPcData ? pcPctVal + '% of ' + totalAssessed + ' managed devices' : 'Data pending') + '</div>' +
-                '<div class="month-pod-link">Inspect compliant list →</div>' +
+                '<div class="month-pod-link">View SLA telemetry drawer →</div>' +
               '</button>' +
-              '<button type="button" class="month-pod" onclick="openClientPatchCompDetail(1)" title="Inspect Remediation Priority Endpoints">' +
+              '<button type="button" class="month-pod" data-open="' + (pc?.r || '') + '" title="Inspect Patch Compliance Telemetry">' +
                 '<div class="month-pod-head"><span class="month-pod-lbl">Pending Remediation</span><span class="donut-leg-dot r"></span></div>' +
                 '<div class="month-pod-val r">' + (hasPcData && nonCompEndpoints !== null ? nonCompEndpoints : '–') + ' <small style="font-size:14px;font-weight:600;color:var(--muted)">endpoints</small></div>' +
                 '<div class="month-pod-sub">' + (hasPcData ? (pcIsOnTarget ? 'Target SLA satisfied' : pcGapPts + ' pt gap to 95% SLA') : 'Data pending') + '</div>' +
-                '<div class="month-pod-link" style="color:#ef4444;">Inspect pending devices →</div>' +
+                '<div class="month-pod-link" style="color:#ef4444;">View SLA telemetry drawer →</div>' +
               '</button>' +
               '<button type="button" class="month-pod" data-open="' + (pc?.r || '') + '" title="Open Patch Compliance Telemetry">' +
                 '<div class="month-pod-head"><span class="month-pod-lbl">SLA Performance</span><span class="donut-leg-dot a"></span></div>' +
@@ -4592,7 +4187,7 @@
               '</div>' +
             '</div>' +
             '<div class="patches-pie-legend-grid">' +
-              '<button type="button" class="patches-leg-card" onclick="openClientPatchesSegmentDetail(0)" title="Inspect Critical Patches">' +
+              '<button type="button" class="patches-leg-card" data-open="' + (critRow?.r || 15) + '" title="Inspect Critical Patches">' +
                 '<div class="patches-leg-top">' +
                   '<span class="patches-leg-dot red"></span>' +
                   '<span class="patches-leg-name">Critical Patches</span>' +
@@ -4603,7 +4198,7 @@
                   '<span class="patches-leg-pct">' + critPct + '</span>' +
                 '</div>' +
               '</button>' +
-              '<button type="button" class="patches-leg-card" onclick="openClientPatchesSegmentDetail(1)" title="Inspect High Patches">' +
+              '<button type="button" class="patches-leg-card" data-open="' + (highRow?.r || 16) + '" title="Inspect High Patches">' +
                 '<div class="patches-leg-top">' +
                   '<span class="patches-leg-dot amber"></span>' +
                   '<span class="patches-leg-name">High-Priority Patches</span>' +
@@ -5283,15 +4878,15 @@
               '</div>' +
             '</div>' +
             '<div class="donut-legend-grid">' +
-              '<button type="button" class="donut-leg-item" onclick="openClientVulnDonutDetail(0)" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Critical Vulnerabilities">' +
+              '<button type="button" class="donut-leg-item" data-open="' + (cr?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Critical Vulnerabilities">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name">Critical Open</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? critVal : '–') + '</span><span class="donut-leg-pct">' + critPct + '% (Target: 0)</span></div>' +
               '</button>' +
-              '<button type="button" class="donut-leg-item" onclick="openClientVulnDonutDetail(1)" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect High-Priority Vulnerabilities">' +
+              '<button type="button" class="donut-leg-item" data-open="' + (hi?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect High-Priority Vulnerabilities">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name">High-Priority</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? hiVal : '–') + '</span><span class="donut-leg-pct">' + hiPct + '% (Target: ≤ 10)</span></div>' +
               '</button>' +
-              '<button type="button" class="donut-leg-item" onclick="openClientVulnDonutDetail(2)" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Medium Vulnerabilities">' +
+              '<button type="button" class="donut-leg-item" data-open="' + (me?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Medium Vulnerabilities">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name">Medium Severity</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? medVal : '–') + '</span><span class="donut-leg-pct">' + medPct + '%</span></div>' +
               '</button>' +

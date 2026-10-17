@@ -7927,3 +7927,11 @@ button.sla-radial-card:hover {
   white-space: nowrap !important;
 }
 
+
+/* Completely disable glass detail popup modal */
+.glass-detail-backdrop,
+.glass-segment-detail-card {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
