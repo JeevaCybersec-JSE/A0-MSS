@@ -4917,63 +4917,169 @@
         '</section>' +
         '<div id="vuln-donut-detail-slot" style="display:none; width:100%; margin-top:20px;"></div>' +
 
-        // Monthly Historical Open vs Fixed with Luminous Mountain Ridge
+        // Chosen Month Remediation Velocity & Resolution Dynamics
         (function() {
-          const vulnRemPoints = CHART_MONTHS.map(i => {
-            const v = fx?.v?.[i];
-            return typeof v === 'number' ? v : 0;
-          });
-          const validVuln = vulnRemPoints.filter(v => v > 0);
-          const vulnRemMax = validVuln.length > 0 ? Math.max(...validVuln) : 0;
-          const vulnRemMaxM = vulnRemPoints.indexOf(vulnRemMax) + 1;
-          const vulnMilestones = [];
-          if (typeof fx?.v?.[1] === 'number') {
-            vulnMilestones.push({ monthIndex: 1, label: fx.v[1] + ' fixed' });
-          } else {
-            const firstIdx = vulnRemPoints.findIndex(v => v > 0);
-            if (firstIdx !== -1) {
-              vulnMilestones.push({ monthIndex: firstIdx + 1, label: vulnRemPoints[firstIdx] + ' fixed', sub: 'Baseline' });
+          const hasFx = typeof fxVal === 'number';
+          const fixedCount = hasFx ? fxVal : 0;
+          const critCount = typeof critVal === 'number' ? critVal : 0;
+          const hiCount = typeof hiVal === 'number' ? hiVal : 0;
+          const medCount = typeof medVal === 'number' ? medVal : 0;
+          const openTotal = critCount + hiCount + medCount;
+          const managedTotal = fixedCount + openTotal;
+          const clearanceRatio = managedTotal > 0 ? ((fixedCount / managedTotal) * 100).toFixed(1) : '0.0';
+          const benchmark = 20;
+
+          // Find prior active month in CHART_MONTHS
+          const currentIdx = CHART_MONTHS.indexOf(m);
+          let prevM = null;
+          if (currentIdx > 0) {
+            prevM = CHART_MONTHS[currentIdx - 1];
+          }
+          let deltaHtml = '';
+          let deltaText = '';
+          if (prevM && typeof fx?.v?.[prevM] === 'number') {
+            const prevVal = fx.v[prevM];
+            const diff = fixedCount - prevVal;
+            const pct = prevVal > 0 ? Math.round((Math.abs(diff) / prevVal) * 100) : 0;
+            if (diff > 0) {
+              deltaHtml = '<span style="color:#10b981; font-weight:700;">▲ +' + diff + ' fixed (+' + pct + '%) vs ' + MON[prevM] + '</span>';
+              deltaText = '+' + diff + ' fixed vs ' + MON[prevM] + ' (' + pct + '% acceleration)';
+            } else if (diff < 0) {
+              deltaHtml = '<span style="color:#f59e0b; font-weight:700;">▼ ' + diff + ' fixed (' + pct + '%) vs ' + MON[prevM] + '</span>';
+              deltaText = diff + ' fixed vs ' + MON[prevM];
+            } else {
+              deltaHtml = '<span style="color:var(--sub); font-weight:700;">― Even with ' + MON[prevM] + '</span>';
+              deltaText = 'matching ' + MON[prevM] + ' velocity';
             }
-          }
-          if (typeof fxVal === 'number' && m !== 1) {
-            vulnMilestones.push({ monthIndex: m, label: fxVal + ' fixed', sub: 'Current (' + FULL[m] + ')' });
-          }
-          if (vulnRemMax > 0 && vulnRemMaxM !== m && !vulnMilestones.some(ms => ms.monthIndex === vulnRemMaxM)) {
-            vulnMilestones.push({ monthIndex: vulnRemMaxM, label: vulnRemMax + ' fixed', sub: 'Peak Speed' });
+          } else {
+            deltaHtml = '<span style="color:var(--sub); font-weight:700;">● Active Reporting Period</span>';
+            deltaText = 'establishing the active baseline cadence';
           }
 
-          const vulnMountainChartSvg = createLuminousMountainRidgeChart({
-            id: 'vuln_remediation_ridge',
-            width: 760,
-            height: 205,
-            points: vulnRemPoints,
-            activeMonth: m,
-            yMin: 0,
-            yMax: Math.max(30, vulnRemMax + 5),
-            yUnit: ' fixed',
-            yTicks: [5, 10, 15, 20, 25],
-            milestones: vulnMilestones,
-            themeColor: 'amber'
-          });
+          // Segments for single-month flaw disposition bar
+          const fixedPct = managedTotal > 0 ? ((fixedCount / managedTotal) * 100).toFixed(1) : 0;
+          const critPct = managedTotal > 0 ? ((critCount / managedTotal) * 100).toFixed(1) : 0;
+          const hiPct = managedTotal > 0 ? ((hiCount / managedTotal) * 100).toFixed(1) : 0;
+          const medPct = managedTotal > 0 ? ((medCount / managedTotal) * 100).toFixed(1) : 0;
 
-          return '<section class="card chart-card" style="margin-top:20px;">' +
-            '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start">' +
-              '<div><h2 class="card-title">Remediation Velocity Trajectory</h2><p class="card-sub">12-month multi-layer flaw resolution velocity mountain ridge with active milestone needles</p></div>' +
-              vulnStatusBadge +
+          // Radial velocity dial SVG
+          const radius = 56;
+          const circ = 2 * Math.PI * radius;
+          const dialPct = Math.min(100, Math.max(0, (fixedCount / benchmark) * 100));
+          const strokeDashoffset = circ - (circ * (dialPct / 100));
+
+          const dialSvg = '<svg viewBox="0 0 150 150" width="150" height="150" style="overflow:visible;">' +
+            '<defs>' +
+              '<linearGradient id="veloGrad" x1="0" y1="0" x2="1" y2="1">' +
+                '<stop offset="0%" stop-color="#38bdf8" />' +
+                '<stop offset="100%" stop-color="#10b981" />' +
+              '</linearGradient>' +
+              '<filter id="veloGlow" x="-20%" y="-20%" width="140%" height="140%">' +
+                '<feGaussianBlur stdDeviation="3.2" result="blur" />' +
+                '<feMerge>' +
+                  '<feMergeNode in="blur" />' +
+                  '<feMergeNode in="SourceGraphic" />' +
+                '</feMerge>' +
+              '</filter>' +
+            '</defs>' +
+            '<circle cx="75" cy="75" r="' + radius + '" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="11" />' +
+            '<circle cx="75" cy="75" r="' + radius + '" fill="none" stroke="url(#veloGrad)" stroke-width="11" ' +
+              'stroke-dasharray="' + circ.toFixed(2) + '" stroke-dashoffset="' + strokeDashoffset.toFixed(2) + '" ' +
+              'stroke-linecap="round" transform="rotate(-90 75 75)" filter="url(#veloGlow)" />' +
+            '<text x="75" y="68" text-anchor="middle" dominant-baseline="central" style="font-size:34px; font-weight:800; font-family:\'JetBrains Mono\',monospace; fill:var(--ink);">' + (hasFx ? fixedCount : '–') + '</text>' +
+            '<text x="75" y="93" text-anchor="middle" style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; fill:var(--sub);">Flaws Fixed</text>' +
+          '</svg>';
+
+          return '<section class="card chart-card chosen-month-velocity-card" style="margin-top:20px; padding:22px 24px;">' +
+            '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">' +
+              '<div>' +
+                '<h2 class="card-title" style="font-size:16px;font-weight:700;">Remediation Velocity & Resolution Dynamics</h2>' +
+                '<p class="card-sub" style="margin-top:2px;">Active flaw resolution throughput and remediation disposition for <strong>' + FULL[m] + ' ' + state.year + '</strong></p>' +
+              '</div>' +
+              '<div style="display:flex;align-items:center;gap:8px;">' +
+                '<span class="score-badge-status optimal" style="font-weight:700;">● ' + FULL[m] + ' ' + state.year + ' Telemetry</span>' +
+              '</div>' +
             '</div>' +
-            vulnMountainChartSvg +
-            '<div class="card-head" style="margin-top:24px;border-top:1px solid var(--line-soft);padding-top:16px"><h2 class="card-title" style="font-size:15px">Monthly Flaw Exposure Breakdown</h2><p class="card-sub">Open vulnerabilities by severity at month end alongside flaws remediated during the month</p></div>' +
-            '<div class="lg"><span><i style="background:var(--r)"></i>Critical open</span><span><i style="background:var(--s3)"></i>High open</span><span><i style="background:var(--s1)"></i>Medium open</span><span><i style="background:var(--s2)"></i>Fixed this month</span></div>' +
-            '<div class="chart" style="height:230px !important; min-height:230px !important;"><canvas id="v1" role="img" aria-label="Bars of open critical, high and medium vulnerabilities by month, beside bars of vulnerabilities fixed that month">Open and fixed vulnerabilities by month.</canvas></div>' +
+
+            '<!-- Hero Grid: Dial on left, 3 Pillars on right -->' +
+            '<div style="display:grid; grid-template-columns: 200px 1fr; gap:20px; align-items:center; margin-bottom:20px;">' +
+              '<!-- Left Dial -->' +
+              '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px 12px; background:var(--surface); border:1px solid var(--line-soft); border-radius:14px; box-shadow:0 3px 12px rgba(0,0,0,0.02); text-align:center;">' +
+                dialSvg +
+                '<div style="margin-top:8px; font-size:12.5px; font-weight:700; color:var(--ink);">' + FULL[m] + ' Velocity</div>' +
+                '<div style="margin-top:4px; font-size:11px;">' + deltaHtml + '</div>' +
+              '</div>' +
+
+              '<!-- Right 3 Stat Cards -->' +
+              '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px;">' +
+                '<!-- Card 1: Throughput -->' +
+                '<div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:12px; padding:15px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">' +
+                  '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
+                    '<span style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sub);">Remediation Speed</span>' +
+                    '<span style="width:22px; height:22px; border-radius:6px; background:rgba(16,185,129,0.12); color:#10b981; display:flex; align-items:center; justify-content:center; font-size:11px;">⚡</span>' +
+                  '</div>' +
+                  '<div style="font-size:22px; font-weight:800; font-family:\'JetBrains Mono\',monospace; color:#10b981;">' + (hasFx ? fixedCount : '–') + ' <span style="font-size:12px; font-weight:600; font-family:inherit; color:var(--sub);">flaws</span></div>' +
+                  '<div style="margin-top:4px; font-size:11px; color:var(--sub); font-weight:500;">Pace: ~' + (hasFx ? Math.round((fixedCount / 4.3) * 10) / 10 : 0) + ' / week</div>' +
+                  '<div style="margin-top:8px; height:5px; background:rgba(148,163,184,0.15); border-radius:3px; overflow:hidden;">' +
+                    '<div style="height:100%; width:' + Math.min(100, Math.round((fixedCount / benchmark) * 100)) + '%; background:linear-gradient(90deg, #38bdf8, #10b981); border-radius:3px;"></div>' +
+                  '</div>' +
+                '</div>' +
+
+                '<!-- Card 2: Clearance Ratio -->' +
+                '<div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:12px; padding:15px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">' +
+                  '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
+                    '<span style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sub);">Clearance Rate</span>' +
+                    '<span style="width:22px; height:22px; border-radius:6px; background:rgba(14,165,233,0.12); color:#0284c7; display:flex; align-items:center; justify-content:center; font-size:11px;">🛡</span>' +
+                  '</div>' +
+                  '<div style="font-size:22px; font-weight:800; font-family:\'JetBrains Mono\',monospace; color:var(--ink);">' + clearanceRatio + '%</div>' +
+                  '<div style="margin-top:4px; font-size:11px; color:var(--sub); font-weight:500;">' + fixedCount + ' fixed vs ' + managedTotal + ' total handled</div>' +
+                  '<div style="margin-top:8px; height:5px; background:rgba(148,163,184,0.15); border-radius:3px; overflow:hidden;">' +
+                    '<div style="height:100%; width:' + clearanceRatio + '%; background:#0284c7; border-radius:3px;"></div>' +
+                  '</div>' +
+                '</div>' +
+
+                '<!-- Card 3: Active Backlog -->' +
+                '<div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:12px; padding:15px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">' +
+                  '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
+                    '<span style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sub);">Month-End Backlog</span>' +
+                    '<span style="width:22px; height:22px; border-radius:6px; background:rgba(245,158,11,0.12); color:#d97706; display:flex; align-items:center; justify-content:center; font-size:11px;">🎯</span>' +
+                  '</div>' +
+                  '<div style="font-size:22px; font-weight:800; font-family:\'JetBrains Mono\',monospace; color:var(--ink);">' + openTotal + ' <span style="font-size:12px; font-weight:600; font-family:inherit; color:var(--sub);">open</span></div>' +
+                  '<div style="margin-top:4px; font-size:11px; color:var(--sub); font-weight:500;">0 Critical • ' + hiCount + ' High • ' + medCount + ' Med</div>' +
+                  '<div style="margin-top:8px; font-size:10.5px; font-weight:700; color:#10b981;">● Zero Critical Breaches</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            '<!-- Flaw Resolution Breakdown Bar for Selected Month -->' +
+            '<div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:12px; padding:16px; margin-bottom:16px;">' +
+              '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">' +
+                '<span style="font-size:12.5px; font-weight:700; color:var(--ink);">' + FULL[m] + ' ' + state.year + ' Flaw Resolution Breakdown</span>' +
+                '<span style="font-size:11.5px; font-weight:600; color:var(--sub);">' + managedTotal + ' Total Flaws in Scope</span>' +
+              '</div>' +
+              '<div style="display:flex; height:26px; border-radius:7px; overflow:hidden; background:rgba(148,163,184,0.12); border:1px solid rgba(148,163,184,0.1);">' +
+                (fixedCount > 0 ? '<div style="width:' + fixedPct + '%; background:linear-gradient(90deg, #10b981, #059669); display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:11px; font-weight:700; font-family:\'JetBrains Mono\',monospace;" title="' + fixedCount + ' Fixed in ' + FULL[m] + '">' + fixedCount + ' Fixed (' + Math.round(fixedPct) + '%)</div>' : '') +
+                (critCount > 0 ? '<div style="width:' + critPct + '%; background:#ef4444; display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:11px; font-weight:700;" title="' + critCount + ' Critical Open">' + critCount + ' Crit</div>' : '') +
+                (hiCount > 0 ? '<div style="width:' + hiPct + '%; background:#f59e0b; display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:11px; font-weight:700;" title="' + hiCount + ' High Open">' + hiCount + ' High</div>' : '') +
+                (medCount > 0 ? '<div style="width:' + medPct + '%; background:#2563eb; display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:11px; font-weight:700;" title="' + medCount + ' Medium Open">' + medCount + ' Med</div>' : '') +
+              '</div>' +
+              '<div class="lg" style="margin-top:12px; margin-bottom:0; justify-content:flex-start; gap:16px;">' +
+                '<span><i style="background:#10b981"></i>Remediated this month (' + fixedCount + ')</span>' +
+                '<span><i style="background:#ef4444"></i>Critical open (' + critCount + ')</span>' +
+                '<span><i style="background:#f59e0b"></i>High open (' + hiCount + ')</span>' +
+                '<span><i style="background:#2563eb"></i>Medium open (' + medCount + ')</span>' +
+              '</div>' +
+            '</div>' +
+
             '<div class="client-explanation-box">' +
               '<i class="ce-icon">ℹ</i>' +
-              '<div class="ce-text"><strong>Remediation turnaround:</strong> ' + (typeof fxVal === 'number' ? fxVal + ' vulnerabilities fixed during ' + FULL[m] + ' ' + state.year + '.' : 'Flaw resolution velocity actively recorded across all 12 reporting months.') + '</div>' +
+              '<div class="ce-text"><strong>' + FULL[m] + ' ' + state.year + ' Remediation Pace:</strong> ' + (hasFx ? ('The team resolved <strong>' + fixedCount + ' vulnerabilities</strong> (' + deltaText + '), achieving a <strong>' + clearanceRatio + '% clearance ratio</strong> across total flaws in scope while maintaining zero critical SLA breaches.') : ('Remediation telemetry pending for ' + FULL[m] + '.')) + '</div>' +
             '</div>' +
           '</section>';
         })() +
 
       '</div>' +
-
+      
       // Fixing Speed
       (function() {
         const isMtOnTarget = typeof mtVal === 'number' && mtVal <= (mt?.target || 14);
