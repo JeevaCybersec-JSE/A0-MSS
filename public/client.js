@@ -4659,6 +4659,8 @@
     const hasMd = (typeof md?.v[m] === 'number');
     const hasRans = (typeof rans?.v[m] === 'number');
     const hasP1 = (typeof p1?.v[m] === 'number');
+    const hasPv = (typeof pv?.v[m] === 'number');
+    const hasInc = (typeof inc?.v[m] === 'number');
     const hasSpeedData = hasTd && hasTr;
 
     const tdVal = hasTd ? td.v[m] : null;
@@ -4667,11 +4669,18 @@
     const mdVal = hasMd ? md.v[m] : null;
     const ransVal = hasRans ? rans.v[m] : null;
     const p1Val = hasP1 ? p1.v[m] : null;
+    const pvVal = hasPv ? pv.v[m] : null;
+    const incVal = hasInc ? inc.v[m] : null;
 
     const speedOnTarget = hasSpeedData && tdVal <= (td?.target || 1) && trVal <= (tr?.target || 4);
     const speedStatusBadge = hasSpeedData
       ? (speedOnTarget ? '<span class="score-badge-status optimal">● Within SLA Targets (≤1h / ≤4h)</span>' : '<span class="score-badge-status warning">● SLA Review Needed</span>')
       : '<span class="score-badge-status neutral">● Data Unavailable</span>';
+
+    const zeroBreaches = (p1Val === 0 && ransVal === 0);
+    const threatStatusBadge = zeroBreaches
+      ? '<span class="score-badge-status optimal">● 0 Zero-Tolerance Breaches</span>'
+      : '<span class="score-badge-status danger">● Active Breach</span>';
 
     return '<div class="stack">' +
       '<div class="sechead"><h2>Threats &amp; Response</h2><span class="sub">' + g + ' of ' + rs.length + ' scored metrics on target' + (bad ? ' · ' + bad + ' off target' : '') + '</span></div>' +
@@ -4680,47 +4689,53 @@
       '<div class="blk">' + bt('Zero tolerance', 'Any ransomware or P1 incident turns the month Red') +
         '<div class="row2">' + mcard(rans, m, lastBreach(rans, m)) + mcard(p1, m, lastBreach(p1, m)) + '</div></div>' +
 
-      // Triage & Response Speed SLA
-      '<div class="blk">' + bt('Response speed', 'Hours from alert to confirmed detection, and from detection to containment') +
+      // Threat Activity & Incident Telemetry (Transferred from bottom cards to top threat-chips)
+      '<div class="blk">' + bt('Threat activity &amp; incidents', 'What was detected, blocked, and raised across your protected environment') +
         '<section class="card threat-speed-card" style="margin-bottom:18px">' +
           '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
-            '<div><h2 class="card-title">Detection &amp; Response Velocity</h2><p class="card-sub">Realtime triage speed and containment SLA attainment</p></div>' +
-            speedStatusBadge +
+            '<div><h2 class="card-title">Threat Detection &amp; Incident Telemetry</h2><p class="card-sub">Realtime security detections blocked, malware events, and incident posture</p></div>' +
+            threatStatusBadge +
           '</div>' +
           '<div class="threat-speed-strip">' +
-            '<div class="threat-chip">' +
-              '<span class="threat-chip-lbl">Mean Time to Detect</span>' +
-              '<span class="threat-chip-val ' + (hasTd ? (tdVal <= 1 ? 'g' : 'r') : '') + '">' + (hasTd ? tdVal + ' h' : '–') + '</span>' +
-              '<span class="threat-chip-sub">Target: ≤ 1.0 h</span>' +
-            '</div>' +
-            '<div class="threat-chip">' +
-              '<span class="threat-chip-lbl">Mean Time to Respond</span>' +
-              '<span class="threat-chip-val ' + (hasTr ? (trVal <= 4 ? 'g' : 'r') : '') + '">' + (hasTr ? trVal + ' h' : '–') + '</span>' +
-              '<span class="threat-chip-sub">Target: ≤ 4.0 h</span>' +
-            '</div>' +
-            '<div class="threat-chip">' +
-              '<span class="threat-chip-lbl">Threats Neutralized</span>' +
+            '<button type="button" class="threat-chip" ' + (tb?.r ? 'data-open="' + tb.r + '"' : '') + ' title="Inspect Threats Blocked">' +
+              '<span class="threat-chip-lbl">Threats Blocked</span>' +
               '<span class="threat-chip-val b">' + (hasTb ? tbVal : '–') + '</span>' +
-              '<span class="threat-chip-sub">Blocked by Sophos</span>' +
-            '</div>' +
-            '<div class="threat-chip">' +
-              '<span class="threat-chip-lbl">Active P1 Incidents</span>' +
-              '<span class="threat-chip-val ' + (hasP1 ? (p1Val > 0 ? 'r' : 'g') : '') + '">' + (hasP1 ? p1Val : '–') + '</span>' +
-              '<span class="threat-chip-sub">Target: 0 (Veto)</span>' +
-            '</div>' +
+              '<span class="threat-chip-sub">' + (delta(tb, m) || 'Blocked by Sophos') + '</span>' +
+            '</button>' +
+            '<button type="button" class="threat-chip" ' + (md?.r ? 'data-open="' + md.r + '"' : '') + ' title="Inspect Malware Detections">' +
+              '<span class="threat-chip-lbl">Malware Detections</span>' +
+              '<span class="threat-chip-val ' + (hasMd ? (mdVal === 0 ? 'g' : 'a') : '') + '">' + (hasMd ? mdVal : '–') + '</span>' +
+              '<span class="threat-chip-sub">' + (delta(md, m) || 'Stopped across endpoints') + '</span>' +
+            '</button>' +
+            '<button type="button" class="threat-chip" ' + (inc?.r ? 'data-open="' + inc.r + '"' : '') + ' title="Inspect Security Incidents">' +
+              '<span class="threat-chip-lbl">Security Incidents Raised</span>' +
+              '<span class="threat-chip-val ' + (p1Val > 0 || ransVal > 0 ? 'r' : 'b') + '">' + (hasInc ? incVal : '–') + '</span>' +
+              '<span class="threat-chip-sub">P1: ' + (p1Val ?? 0) + ' · Ransomware: ' + (ransVal ?? 0) + (delta(inc, m) ? ' · ' + delta(inc, m) : '') + '</span>' +
+            '</button>' +
+            '<button type="button" class="threat-chip" ' + (pv?.r ? 'data-open="' + pv.r + '"' : '') + ' title="Inspect Policy Violations">' +
+              '<span class="threat-chip-lbl">Policy Violations</span>' +
+              '<span class="threat-chip-val ' + (pvVal === 0 ? 'g' : 'a') + '">' + (hasPv ? pvVal : '–') + '</span>' +
+              '<span class="threat-chip-sub">' + (delta(pv, m) || 'Monitored overrides') + '</span>' +
+            '</button>' +
           '</div>' +
-        '</section>' +
-        '<section class="card chart-card"><div class="card-head"><h2 class="card-title">Mean time to detect &amp; respond</h2><p class="card-sub">Average duration in hours from detection alert to confirmed triage, and from triage to containment</p></div>' +
+        '</section></div>' +
+
+      // Triage & Response Speed SLA
+      '<div class="blk">' + bt('Response speed', 'Hours from alert to confirmed detection, and from detection to containment') +
+        '<section class="card chart-card"><div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">' +
+          '<div><h2 class="card-title">Mean time to detect &amp; respond</h2><p class="card-sub">Average duration in hours from detection alert to confirmed triage, and from triage to containment</p></div>' +
+          speedStatusBadge +
+        '</div>' +
           '<div class="lg"><span><i style="background:var(--s1)"></i>Time to detect</span><span><i style="background:var(--s3)"></i>Time to respond</span></div>' +
           '<div class="chart"><canvas id="t1" role="img" aria-label="Lines for mean time to detect and respond in hours by month, with dashed target lines">Detect and respond hours by month.</canvas></div></section>' +
         '<div class="row2">' + mcard(td, m) + mcard(tr, m) + '</div></div>' +
 
       // Threat Activity
-      '<div class="blk">' + bt('Threat activity', 'What was detected and stopped across your protected endpoints') +
+      '<div class="blk">' + bt('Threat activity trajectory', 'Historical comparison of detections and malware stopped across your protected endpoints') +
         '<section class="card chart-card"><div class="card-head"><h2 class="card-title">Threat activity &amp; detections</h2><p class="card-sub">Total security detections blocked and malware events stopped across the protected environment</p></div>' +
           '<div class="lg"><span><i style="background:var(--s1)"></i>Threats blocked</span><span><i style="background:var(--s3)"></i>Malware detections</span></div>' +
           '<div class="chart"><canvas id="t2" role="img" aria-label="Bars of threats blocked and malware detections by month">Threats blocked and malware detections by month.</canvas></div></section>' +
-        '<div class="stats">' + mcard(tb, m) + mcard(md, m) + mcard(inc, m, 'P1: ' + p1.v[m] + ' · Ransomware: ' + rans.v[m]) + mcard(pv, m) + '</div></div>' +
+      '</div>' +
     '</div>';
   }
 
