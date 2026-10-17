@@ -5437,12 +5437,14 @@ button.sla-radial-card:hover {
   background: var(--surface-card, #ffffff) !important;
   border: 1px solid var(--line, #e2e8f0) !important;
   border-radius: 18px !important;
-  padding: 14px 16px 10px 16px !important;
+  padding: 12px 14px 10px 14px !important;
   box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 1px 3px 0 rgba(15, 23, 42, 0.02) !important;
   position: relative !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
-  margin: 8px 0 14px 0 !important;
+  max-width: 720px !important;
+  width: 100% !important;
+  margin: 8px auto 14px auto !important;
 }
 
 [data-theme="dark"] .dh-3d-stage {
@@ -5477,8 +5479,8 @@ button.sla-radial-card:hover {
 
 .dh-3d-stage .endpoint-month-card {
   position: absolute !important;
-  width: min(480px, calc(100% - 110px)) !important;
-  max-width: min(480px, calc(100% - 110px)) !important;
+  width: min(480px, calc(100% - 80px)) !important;
+  max-width: min(480px, calc(100% - 80px)) !important;
   height: 195px !important;
   min-height: 195px !important;
   box-sizing: border-box !important;
@@ -5551,7 +5553,7 @@ button.sla-radial-card:hover {
 }
 
 .dh-3d-stage .endpoint-month-card.pos-left {
-  transform: translateX(-85px) scale(0.92) !important;
+  transform: translateX(-95px) scale(0.92) !important;
   opacity: 0.62 !important;
   z-index: 4 !important;
   filter: blur(0.3px) !important;
@@ -5560,7 +5562,7 @@ button.sla-radial-card:hover {
 }
 
 .dh-3d-stage .endpoint-month-card.pos-right {
-  transform: translateX(85px) scale(0.92) !important;
+  transform: translateX(95px) scale(0.92) !important;
   opacity: 0.62 !important;
   z-index: 4 !important;
   filter: blur(0.3px) !important;
@@ -5581,7 +5583,7 @@ button.sla-radial-card:hover {
   filter: none !important;
 }
 
-/* Nav Circular Black Buttons matching Main Page Reference */
+/* Nav Circular Black Buttons positioned right beside the cards */
 .dh-3d-stage .ih-nav-btn {
   position: absolute !important;
   top: 50% !important;
@@ -5612,11 +5614,11 @@ button.sla-radial-card:hover {
 }
 
 .dh-3d-stage .ih-nav-btn.left {
-  left: 8px !important;
+  left: 6px !important;
 }
 
 .dh-3d-stage .ih-nav-btn.right {
-  right: 8px !important;
+  right: 6px !important;
 }
 
 [data-theme="dark"] .dh-3d-stage .ih-nav-btn {
@@ -5690,6 +5692,10 @@ button.sla-radial-card:hover {
 }
 
 @media (max-width: 768px) {
+  .dh-3d-stage {
+    max-width: 100% !important;
+    padding: 10px 8px !important;
+  }
   .dh-3d-stage .ih-carousel-wrapper {
     height: 220px !important;
   }
@@ -5699,11 +5705,11 @@ button.sla-radial-card:hover {
     height: 195px !important;
   }
   .dh-3d-stage .endpoint-month-card.pos-left {
-    transform: translateX(-35px) scale(0.9) !important;
+    transform: translateX(-25px) scale(0.9) !important;
     opacity: 0.3 !important;
   }
   .dh-3d-stage .endpoint-month-card.pos-right {
-    transform: translateX(35px) scale(0.9) !important;
+    transform: translateX(25px) scale(0.9) !important;
     opacity: 0.3 !important;
   }
 }
