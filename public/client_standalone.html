@@ -7996,7 +7996,8 @@ button.vuln-chip:hover {
   pointer-events: none !important;
 }
 
-.vuln-donut-card .donut-legend-grid {
+.vuln-donut-card .donut-legend-grid,
+.mfa-donut-card .donut-legend-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 
@@ -8009,7 +8010,8 @@ button.vuln-chip:hover {
 }
 
 @media (max-width: 900px) {
-  .vuln-donut-card .donut-legend-grid {
+  .vuln-donut-card .donut-legend-grid,
+  .mfa-donut-card .donut-legend-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
   .vuln-donut-flank-layout {
@@ -13455,55 +13457,43 @@ button.vuln-chip:hover {
       
       // 1. MFA Coverage Donut Chart Section
       '<div class="blk">' + bt('MFA coverage', 'Active Directory user population with mandatory 2-step verification enforced') +
-        '<div class="row2">' +
-          '<section class="card chart-card kpi-donut-card">' +
-            '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
-              '<div><h2 class="card-title">MFA Enforcement Posture</h2><p class="card-sub">Realtime proportion of enabled accounts with MFA protection</p></div>' +
-              (!hasMfaData ? '<span class="score-badge-status neutral">● Data Not Available</span>' : (mfaIsOnTarget ? '<span class="score-badge-status optimal">● 100% Policy Target Achieved</span>' : '<span class="score-badge-status warning">● Policy Gap (Target: 100%)</span>')) +
-            '</div>' +
-            '<div class="kpi-donut-wrapper">' +
-              '<div class="kpi-donut-canvas-box">' +
-                '<canvas id="mfa_donut" role="img" aria-label="MFA Coverage Donut Chart"></canvas>' +
-                '<div class="kpi-donut-center">' +
-                  '<span class="kpi-donut-center-num">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span>' +
-                  '<span class="kpi-donut-center-lbl">' + (hasMfaData ? 'MFA Enforced' : 'No Data') + '</span>' +
-                '</div>' +
-              '</div>' +
-            '</div>' +
-            '<div class="donut-legend-grid">' +
-              '<div class="donut-leg-item">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name">MFA Enforced</span></div>' +
-                '<div class="donut-leg-stats"><span class="donut-leg-val">' + (mfaEnabledCount !== null ? mfaEnabledCount : '–') + '</span><span class="donut-leg-pct">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span></div>' +
-              '</div>' +
-              '<div class="donut-leg-item">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name">MFA Not Enforced</span></div>' +
-                '<div class="donut-leg-stats"><span class="donut-leg-val">' + (mfaNotEnabledCount !== null ? mfaNotEnabledCount : '–') + '</span><span class="donut-leg-pct">' + (hasMfaData ? (100 - parseFloat(mfaPctVal)).toFixed(1) + '%' : '–') + '</span></div>' +
-              '</div>' +
-              '<div class="donut-leg-item">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name">Total Enabled Users</span></div>' +
-                '<div class="donut-leg-stats"><span class="donut-leg-val">' + (totalUsers !== null ? totalUsers : '–') + '</span><span class="donut-leg-pct">' + (hasMfaData ? '100% directory' : '–') + '</span></div>' +
-              '</div>' +
-              '<div class="donut-leg-item">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name">Mandatory SLA</span></div>' +
-                '<div class="donut-leg-stats"><span class="donut-leg-val">100%</span><span class="donut-leg-pct">' + (!hasMfaData ? '–' : (mfaNotEnabledCount > 0 ? mfaNotEnabledCount + ' gap' : 'Compliant')) + '</span></div>' +
-              '</div>' +
-            '</div>' +
-            '<div class="client-explanation-box">' +
-              '<i class="ce-icon">ℹ</i>' +
-              '<div class="ce-text">' + (hasMfaData ? ('<strong>' + mfaEnabledCount + ' of ' + totalUsers + ' active user accounts</strong> have mandatory multi-factor authentication enforced (' + mfaPctVal + '%). ' + (mfaNotEnabledCount > 0 ? 'The remaining ' + mfaNotEnabledCount + ' account' + (mfaNotEnabledCount === 1 ? '' : 's') + ' (' + (100 - parseFloat(mfaPctVal)).toFixed(1) + '%) represent an exposure gap against the 100% mandatory policy.' : 'All active user accounts are compliant with the 100% mandatory MFA policy.')) : 'Active directory telemetry is currently unavailable for this reporting period.') + '</div>' +
-            '</div>' +
-          '</section>' +
-
-          // Historical MFA Monthly Chart alongside KPI card
-          '<div style="display:flex;flex-direction:column;gap:18px;">' +
-            '<section class="card chart-card" style="margin-bottom:0">' +
-              '<div class="card-head"><h2 class="card-title">MFA Coverage Trend</h2><p class="card-sub">Monthly trend of enforced vs unenforced accounts with 100% target line</p></div>' +
-              '<div class="lg"><span><i style="background:var(--g)"></i>MFA enforced</span><span><i style="background:var(--r)"></i>Not enforced</span><span><i class="dash"></i>Target 100%</span></div>' +
-              '<div class="chart" style="height:220px !important; min-height:220px !important;"><canvas id="i1" role="img" aria-label="Stacked bars of users with and without MFA enforced by month with a 100 percent target line">MFA coverage by month.</canvas></div>' +
-            '</section>' +
-            mcard(mfa, m) +
+        '<section class="card chart-card kpi-donut-card mfa-donut-card">' +
+          '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
+            '<div><h2 class="card-title">MFA Enforcement Posture</h2><p class="card-sub">Realtime proportion of enabled accounts with MFA protection</p></div>' +
+            (!hasMfaData ? '<span class="score-badge-status neutral">● Data Not Available</span>' : (mfaIsOnTarget ? '<span class="score-badge-status optimal">● 100% Policy Target Achieved</span>' : '<span class="score-badge-status warning">● Policy Gap (Target: 100%)</span>')) +
           '</div>' +
-        '</div>' +
+          '<div class="kpi-donut-wrapper">' +
+            '<div class="kpi-donut-canvas-box">' +
+              '<canvas id="mfa_donut" role="img" aria-label="MFA Coverage Donut Chart"></canvas>' +
+              '<div class="kpi-donut-center">' +
+                '<span class="kpi-donut-center-num">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span>' +
+                '<span class="kpi-donut-center-lbl">' + (hasMfaData ? 'MFA Enforced' : 'No Data') + '</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="donut-legend-grid">' +
+            '<div class="donut-leg-item">' +
+              '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name">MFA Enforced</span></div>' +
+              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (mfaEnabledCount !== null ? mfaEnabledCount : '–') + '</span><span class="donut-leg-pct">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span></div>' +
+            '</div>' +
+            '<div class="donut-leg-item">' +
+              '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name">MFA Not Enforced</span></div>' +
+              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (mfaNotEnabledCount !== null ? mfaNotEnabledCount : '–') + '</span><span class="donut-leg-pct">' + (hasMfaData ? (100 - parseFloat(mfaPctVal)).toFixed(1) + '%' : '–') + '</span></div>' +
+            '</div>' +
+            '<div class="donut-leg-item">' +
+              '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name">Total Enabled Users</span></div>' +
+              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (totalUsers !== null ? totalUsers : '–') + '</span><span class="donut-leg-pct">' + (hasMfaData ? '100% directory' : '–') + '</span></div>' +
+            '</div>' +
+            '<div class="donut-leg-item">' +
+              '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name">Mandatory SLA</span></div>' +
+              '<div class="donut-leg-stats"><span class="donut-leg-val">100%</span><span class="donut-leg-pct">' + (!hasMfaData ? '–' : (mfaNotEnabledCount > 0 ? mfaNotEnabledCount + ' gap' : 'Compliant')) + '</span></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="client-explanation-box">' +
+            '<i class="ce-icon">ℹ</i>' +
+            '<div class="ce-text">' + (hasMfaData ? ('<strong>' + mfaEnabledCount + ' of ' + totalUsers + ' active user accounts</strong> have mandatory multi-factor authentication enforced (' + mfaPctVal + '%). ' + (mfaNotEnabledCount > 0 ? 'The remaining ' + mfaNotEnabledCount + ' account' + (mfaNotEnabledCount === 1 ? '' : 's') + ' (' + (100 - parseFloat(mfaPctVal)).toFixed(1) + '%) represent an exposure gap against the 100% mandatory policy.' : 'All active user accounts are compliant with the 100% mandatory MFA policy.')) : 'Active directory telemetry is currently unavailable for this reporting period.') + '</div>' +
+          '</div>' +
+        '</section>' +
       '</div>' +
 
       // 2. Sign-ins and Email Threat Activity
