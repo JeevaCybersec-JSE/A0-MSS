@@ -12978,7 +12978,7 @@ button.vuln-chip:hover {
               '</div>' +
             '</div>' +
             '<div class="donut-legend-grid">' +
-              '<button type="button" class="donut-leg-item" data-open="' + (cr?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Critical Vulnerabilities">' +
+              '<button type="button" class="donut-leg-item" data-open="' + (crit?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Critical Vulnerabilities">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name">Critical Open</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? critVal : '–') + '</span><span class="donut-leg-pct">' + critPct + '% (Target: 0)</span></div>' +
               '</button>' +
@@ -12986,7 +12986,7 @@ button.vuln-chip:hover {
                 '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name">High-Priority</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? hiVal : '–') + '</span><span class="donut-leg-pct">' + hiPct + '% (Target: ≤ 10)</span></div>' +
               '</button>' +
-              '<button type="button" class="donut-leg-item" data-open="' + (me?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Medium Vulnerabilities">' +
+              '<button type="button" class="donut-leg-item" data-open="' + (med?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Medium Vulnerabilities">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name">Medium Severity</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? medVal : '–') + '</span><span class="donut-leg-pct">' + medPct + '%</span></div>' +
               '</button>' +
