@@ -1835,6 +1835,7 @@
   ];
 
   const state = { tab: 'overview', m: 5, year: 2026, data: null };
+  let activeClientDetail = null;
   const byId = {};
   const flat = [];
 
