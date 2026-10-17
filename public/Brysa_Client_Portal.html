@@ -13498,22 +13498,6 @@ button.vuln-chip:hover {
 
       // 2. Sign-ins and Email Threat Activity
       '<div class="blk">' + bt('Sign-ins and email', 'Suspicious activity spotted, and what your staff reported') +
-        '<section class="card chart-card" style="margin-bottom:14px">' +
-          '<div class="card-head">' +
-            '<h2 class="card-title">Sign-in &amp; Email Threat Activity</h2>' +
-            '<p class="card-sub">Monthly trend comparing risky authentication events detected versus user-reported phishing</p>' +
-          '</div>' +
-          '<div class="image1-trend-heading">' + trendHeadline + '</div>' +
-          '<div class="chart"><canvas id="i_sec_trend" role="img" aria-label="Sign-in and email threat trends"></canvas></div>' +
-          '<div class="image1-legend">' +
-            '<span class="image1-lg-item"><i class="image1-dot blue"></i>Risky sign-ins</span>' +
-            '<span class="image1-lg-item"><i class="image1-dot purple"></i>User-reported phishing</span>' +
-          '</div>' +
-          '<div class="client-explanation-box">' +
-            '<i class="ce-icon">ℹ</i>' +
-            '<div class="ce-text"><strong>' + curVal + ' risky sign-in event' + (curVal === 1 ? '' : 's') + ' and ' + ((ph && typeof ph.v[m] === 'number') ? ph.v[m] : 1) + ' user-reported phishing attempt' + (((ph && typeof ph.v[m] === 'number') ? ph.v[m] : 1) === 1 ? '' : 's') + '</strong> logged in ' + FULL[m] + ' ' + state.year + '. Identity protection rules and staff security reporting remain active.</div>' +
-          '</div>' +
-        '</section>' +
         '<div class="row2">' + mcard(risky, m) + mcard(ph, m) + '</div></div>' +
 
       // 3. Complete Audit: Directory Governance & Account Lifecycle

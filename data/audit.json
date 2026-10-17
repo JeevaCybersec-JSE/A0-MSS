@@ -1,17 +1,6 @@
 {
   "events": [
     {
-      "id": "aud_1790856878705_mjqqv",
-      "timestamp": "2026-10-01T12:14:38.705Z",
-      "actor": "temp_operator_1790856878655",
-      "action": "LOGIN_BLOCKED_DISABLED",
-      "target": "temp_operator_1790856878655",
-      "result": "FAILED",
-      "details": {
-        "ip": "::1"
-      }
-    },
-    {
       "id": "aud_1790856878711_son90",
       "timestamp": "2026-10-01T12:14:38.711Z",
       "actor": "Jeeva",
@@ -10842,6 +10831,17 @@
       "result": "SUCCESS",
       "details": {
         "role": "viewer"
+      }
+    },
+    {
+      "id": "aud_1792133403857_a97lh",
+      "timestamp": "2026-10-16T06:50:03.857Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
       }
     }
   ]
