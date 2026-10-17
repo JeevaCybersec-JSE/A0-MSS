@@ -7996,6 +7996,16 @@ button.vuln-chip:hover {
   pointer-events: none !important;
 }
 
+.vuln-donut-card .donut-legend-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 900px) {
+  .vuln-donut-card .donut-legend-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -12961,62 +12971,44 @@ button.vuln-chip:hover {
 
       // Severity Breakdown & Remediation Posture
       '<div class="blk">' + bt('Severity breakdown', 'Active unpatched vulnerabilities by severity class and remediation turnaround') +
-        '<div class="row2">' +
-          // 1. Redesigned Vulnerability Severity Donut Card
-          '<section class="card chart-card kpi-donut-card">' +
-            '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
-              '<div><h2 class="card-title">Vulnerability Exposure by Severity</h2><p class="card-sub">Distribution of recorded vulnerabilities across severity levels for the selected reporting month.</p></div>' +
-              vulnStatusBadge +
-            '</div>' +
-            '<div class="kpi-donut-wrapper">' +
-              '<div class="kpi-donut-canvas-box">' +
-                '<canvas id="vuln_donut" role="img" aria-label="Vulnerability Severity Donut Chart"></canvas>' +
-                '<div class="kpi-donut-center">' +
-                  '<span class="kpi-donut-center-num">' + (hasData ? totalOpen : '–') + '</span>' +
-                  '<span class="kpi-donut-center-lbl">' + (hasData ? 'Total Flaws Open' : 'No Telemetry') + '</span>' +
-                '</div>' +
+        // Vulnerability Exposure by Severity Card
+        '<section class="card chart-card kpi-donut-card vuln-donut-card" style="margin-bottom:18px;">' +
+          '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
+            '<div><h2 class="card-title">Vulnerability Exposure by Severity</h2><p class="card-sub">Distribution of recorded vulnerabilities across severity levels for the selected reporting month.</p></div>' +
+            vulnStatusBadge +
+          '</div>' +
+          '<div class="kpi-donut-wrapper">' +
+            '<div class="kpi-donut-canvas-box">' +
+              '<canvas id="vuln_donut" role="img" aria-label="Vulnerability Severity Donut Chart"></canvas>' +
+              '<div class="kpi-donut-center">' +
+                '<span class="kpi-donut-center-num">' + (hasData ? totalOpen : '–') + '</span>' +
+                '<span class="kpi-donut-center-lbl">' + (hasData ? 'Total Flaws Open' : 'No Telemetry') + '</span>' +
               '</div>' +
             '</div>' +
-            '<div class="donut-legend-grid">' +
-              '<button type="button" class="donut-leg-item" data-open="' + (crit?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Critical Vulnerabilities">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name">Critical Open</span></div>' +
-                '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? critVal : '–') + '</span><span class="donut-leg-pct">' + critPct + '% (Target: 0)</span></div>' +
-              '</button>' +
-              '<button type="button" class="donut-leg-item" data-open="' + (hi?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect High-Priority Vulnerabilities">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name">High-Priority</span></div>' +
-                '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? hiVal : '–') + '</span><span class="donut-leg-pct">' + hiPct + '% (Target: ≤ 10)</span></div>' +
-              '</button>' +
-              '<button type="button" class="donut-leg-item" data-open="' + (med?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Medium Vulnerabilities">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name">Medium Severity</span></div>' +
-                '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? medVal : '–') + '</span><span class="donut-leg-pct">' + medPct + '%</span></div>' +
-              '</button>' +
-              '<div class="donut-leg-item">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name">Critical SLA</span></div>' +
-                '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? (critVal === 0 ? 'Clear' : critVal + ' Breach') : '–') + '</span><span class="donut-leg-pct">Zero tolerance</span></div>' +
-              '</div>' +
+          '</div>' +
+          '<div class="donut-legend-grid">' +
+            '<button type="button" class="donut-leg-item" data-open="' + (crit?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Critical Vulnerabilities">' +
+              '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name">Critical Open</span></div>' +
+              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? critVal : '–') + '</span><span class="donut-leg-pct">' + critPct + '% (Target: 0)</span></div>' +
+            '</button>' +
+            '<button type="button" class="donut-leg-item" data-open="' + (hi?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect High-Priority Vulnerabilities">' +
+              '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name">High-Priority</span></div>' +
+              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? hiVal : '–') + '</span><span class="donut-leg-pct">' + hiPct + '% (Target: ≤ 10)</span></div>' +
+            '</button>' +
+            '<button type="button" class="donut-leg-item" data-open="' + (med?.r || '') + '" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Medium Vulnerabilities">' +
+              '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name">Medium Severity</span></div>' +
+              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? medVal : '–') + '</span><span class="donut-leg-pct">' + medPct + '%</span></div>' +
+            '</button>' +
+            '<div class="donut-leg-item">' +
+              '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name">Critical SLA</span></div>' +
+              '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? (critVal === 0 ? 'Clear' : critVal + ' Breach') : '–') + '</span><span class="donut-leg-pct">Zero tolerance</span></div>' +
             '</div>' +
-            '<div class="client-explanation-box">' +
-              '<i class="ce-icon">ℹ</i>' +
-              '<div class="ce-text">' + (hasData ? ('<strong>' + totalOpen + ' active vulnerabilities open</strong> under management for ' + FULL[m] + ' ' + state.year + '. Critical exposure is ' + (critVal === 0 ? 'fully resolved (0 open)' : critVal + ' breach requiring immediate action') + '. ' + hiVal + ' high-priority flaws ' + (hiVal <= 10 ? 'remain within the ≤ 10 tolerance.' : 'exceed the ≤ 10 threshold and require remediation cycle inclusion.')) : ('No vulnerability scans recorded for ' + FULL[m] + ' ' + state.year + '.')) + '</div>' +
-            '</div>' +
-          '</section>' +
-
-          // 2. Ranked Glowing Capsule Progress Bars
-          '<section class="card chart-card glowing-capsule-card">' +
-            '<div class="card-head" style="margin-bottom:14px;">' +
-              '<h2 class="card-title">Ranked Vulnerability Exposure</h2>' +
-              '<p class="card-sub">Vulnerabilities ranked by volume across recorded severity categories for the selected reporting month.</p>' +
-            '</div>' +
-            '<div class="glowing-capsules-list">' +
-              rankedRowsHtml +
-              remediationRowHtml +
-            '</div>' +
-            '<div class="client-explanation-box" style="margin-top:16px;">' +
-              '<i class="ce-icon">ℹ</i>' +
-              '<div class="ce-text">' + (hasData ? ('Categories ranked by live vulnerability volume. ' + rankedCategories[0].name.toLowerCase() + ' represent <strong>' + rankedCategories[0].pct + '%</strong> of open exposure for ' + FULL[m] + ' ' + state.year + '.') : ('Telemetry will populate when scan data is imported.')) + '</div>' +
-            '</div>' +
-          '</section>' +
-        '</div>' +
+          '</div>' +
+          '<div class="client-explanation-box">' +
+            '<i class="ce-icon">ℹ</i>' +
+            '<div class="ce-text">' + (hasData ? ('<strong>' + totalOpen + ' active vulnerabilities open</strong> under management for ' + FULL[m] + ' ' + state.year + '. Critical exposure is ' + (critVal === 0 ? 'fully resolved (0 open)' : critVal + ' breach requiring immediate action') + '. ' + hiVal + ' high-priority flaws ' + (hiVal <= 10 ? 'remain within the ≤ 10 tolerance.' : 'exceed the ≤ 10 threshold and require remediation cycle inclusion.')) : ('No vulnerability scans recorded for ' + FULL[m] + ' ' + state.year + '.')) + '</div>' +
+          '</div>' +
+        '</section>' +
         '<div id="vuln-donut-detail-slot" style="display:none; width:100%; margin-top:20px;"></div>' +
 
         // Monthly Historical Open vs Fixed with Luminous Mountain Ridge

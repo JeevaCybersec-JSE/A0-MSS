@@ -7981,3 +7981,13 @@ button.vuln-chip:hover {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+.vuln-donut-card .donut-legend-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 900px) {
+  .vuln-donut-card .donut-legend-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
