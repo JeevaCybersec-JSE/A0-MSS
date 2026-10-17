@@ -3945,288 +3945,7 @@
     return '<button class="mc" data-open="' + r.r + '"><div class="hd"><span class="nm">' + nm + '</span>' + pill(r, r.rag[m]) + '</div><div class="val">' + fmt(r, r.v[m]) + '</div>' + (cl ? '<div class="row"><span>' + cl + '</span><span></span></div>' : '') + '<div class="row"><span>' + (delta(r, m) || '&nbsp;') + '</span><span>' + target(r) + '</span></div>' + spark(r, m) + '</button>';
   }
 
-  // 3D Coverflow Device Health Carousel Cards (Matching Overview 3D Carousel Aesthetics)
-  function renderDeviceHealth3DCard0(m) {
-    const fl = n => flat.find(x => x.name === n);
-    const r = fl('Endpoint protection coverage %');
-    const me = fl('Managed endpoints');
-    const val = r?.v?.[m];
-    const hasVal = typeof val === 'number';
-    const valPct = hasVal ? (val * 100).toFixed(1) : '–';
-    const totalAssessed = (me && typeof me.v?.[m] === 'number') ? me.v[m] : 38;
-    const protCount = hasVal ? Math.round(val * totalAssessed) : 36;
-    const gapCount = Math.max(0, totalAssessed - protCount);
-    const gapPct = hasVal ? (100 - parseFloat(valPct)).toFixed(1) : '5.3';
-    const isOnTarget = hasVal && parseFloat(valPct) >= 98;
-    const tagClass = isOnTarget ? 'green' : 'amber';
-    const statusText = isOnTarget ? 'OPTIMAL' : 'NEAR TARGET';
 
-    return '<div class="ih-carousel-card pos-center" data-card-idx="0" data-open="' + (r?.r || '') + '" title="Click to inspect Endpoint Protection Telemetry">' +
-      '<div class="ih-card-inner">' +
-        '<div class="ih-card-header">' +
-          '<div class="ih-badge-row">' +
-            '<span class="ih-card-tag">SECURITY POSTURE</span>' +
-            '<span class="ih-card-period-tag ' + tagClass + '">' + FULL[m] + ' ' + state.year + ' &bull; ' + statusText + '</span>' +
-          '</div>' +
-          '<div class="ih-card-title">Endpoint Protection Coverage</div>' +
-          '<div class="ih-card-desc">Active Sophos real-time endpoint agent health &amp; estate coverage</div>' +
-        '</div>' +
-        '<div class="ih-quad-grid-compact">' +
-          '<div class="ih-quad-item green">' +
-            '<div class="ih-quad-num green">' + protCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Fully Protected</div>' +
-              '<div class="ih-quad-sub">' + valPct + '% of estate</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item amber">' +
-            '<div class="ih-quad-num amber">' + gapCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Coverage Gap</div>' +
-              '<div class="ih-quad-sub">' + gapPct + '% unprotected</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item blue">' +
-            '<div class="ih-quad-num blue">&ge; 98%</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Contractual Policy</div>' +
-              '<div class="ih-quad-sub">Mandatory threshold</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item purple">' +
-            '<div class="ih-quad-num purple">' + totalAssessed + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Assessed Fleet</div>' +
-              '<div class="ih-quad-sub">Active inventory</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="ih-metrics-footer-row">' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-green">' + protCount + ' / ' + totalAssessed + '</div>' +
-            '<div class="ih-stat-lbl">Protected Endpoints</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-blue">' + valPct + '%</div>' +
-            '<div class="ih-stat-lbl">Actual Coverage</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val ' + (isOnTarget ? 'val-green' : 'val-amber') + '">' + (isOnTarget ? '✓ Target Achieved' : '⚠ Below 98% Policy') + '</div>' +
-            '<div class="ih-stat-lbl">SLA Performance</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  function renderDeviceHealth3DCard1(m) {
-    const fl = n => flat.find(x => x.name === n);
-    const r = fl('Devices not reporting % of estate');
-    const me = fl('Managed endpoints');
-    const val = r?.v?.[m];
-    const hasVal = typeof val === 'number';
-    const valPct = hasVal ? (val * 100).toFixed(1) : '0.0';
-    const totalAssessed = (me && typeof me.v?.[m] === 'number') ? me.v[m] : 38;
-    const nrCount = hasVal ? Math.round(val * totalAssessed) : 0;
-    const onlineCount = Math.max(0, totalAssessed - nrCount);
-    const isOptimal = nrCount === 0 || (r?.rag?.[m] === 1);
-
-    return '<div class="ih-carousel-card pos-right" data-card-idx="1" data-open="' + (r?.r || '') + '" title="Click to inspect Device Reporting Telemetry">' +
-      '<div class="ih-card-inner">' +
-        '<div class="ih-card-header">' +
-          '<div class="ih-badge-row">' +
-            '<span class="ih-card-tag">AGENT TELEMETRY</span>' +
-            '<span class="ih-card-period-tag ' + (isOptimal ? 'green' : 'red') + '">' + FULL[m] + ' ' + state.year + ' &bull; ' + (isOptimal ? 'OPTIMAL' : 'ATTENTION REQUIRED') + '</span>' +
-          '</div>' +
-          '<div class="ih-card-title">Devices Not Reporting</div>' +
-          '<div class="ih-card-desc">Agent heartbeat integrity, offline detection &amp; continuous telemetry</div>' +
-        '</div>' +
-        '<div class="ih-quad-grid-compact">' +
-          '<div class="ih-quad-item green">' +
-            '<div class="ih-quad-num green">' + nrCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Offline Devices</div>' +
-              '<div class="ih-quad-sub">' + valPct + '% of estate</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item blue">' +
-            '<div class="ih-quad-num blue">' + onlineCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Active Heartbeats</div>' +
-              '<div class="ih-quad-sub">100% reporting</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item green">' +
-            '<div class="ih-quad-num green">&lt; 2%</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Tolerance Policy</div>' +
-              '<div class="ih-quad-sub">Zero offline SLA</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item purple">' +
-            '<div class="ih-quad-num purple">24/7</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Reporting Cycle</div>' +
-              '<div class="ih-quad-sub">Real-time sync</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="ih-metrics-footer-row">' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-green">' + nrCount + ' OFFLINE</div>' +
-            '<div class="ih-stat-lbl">Heartbeat Status</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-blue">100% ONLINE</div>' +
-            '<div class="ih-stat-lbl">Agent Heartbeat</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val ' + (isOptimal ? 'val-green' : 'val-red') + '">' + (isOptimal ? '✓ Zero Offline Devices' : '⚠ Agent Lag Detected') + '</div>' +
-            '<div class="ih-stat-lbl">SLA Performance</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  function renderDeviceHealth3DCard2(m) {
-    const fl = n => flat.find(x => x.name === n);
-    const r = fl('Devices with outdated protection % of estate');
-    const me = fl('Managed endpoints');
-    const val = r?.v?.[m];
-    const hasVal = typeof val === 'number';
-    const valPct = hasVal ? (val * 100).toFixed(1) : '31.6';
-    const totalAssessed = (me && typeof me.v?.[m] === 'number') ? me.v[m] : 38;
-    const opCount = hasVal ? Math.round(val * totalAssessed) : 12;
-    const currentCount = Math.max(0, totalAssessed - opCount);
-    const isOptimal = opCount === 0 || (r?.rag?.[m] === 1);
-
-    return '<div class="ih-carousel-card pos-hidden" data-card-idx="2" data-open="' + (r?.r || '') + '" title="Click to inspect Outdated Signatures Telemetry">' +
-      '<div class="ih-card-inner">' +
-        '<div class="ih-card-header">' +
-          '<div class="ih-badge-row">' +
-            '<span class="ih-card-tag">DEFINITION HEALTH</span>' +
-            '<span class="ih-card-period-tag ' + (isOptimal ? 'green' : 'red') + '">' + FULL[m] + ' ' + state.year + ' &bull; ' + (isOptimal ? 'OPTIMAL' : 'OFF TARGET') + '</span>' +
-          '</div>' +
-          '<div class="ih-card-title">Devices with Outdated Protection</div>' +
-          '<div class="ih-card-desc">Antivirus definition age, signature lag &amp; threat feed currency</div>' +
-        '</div>' +
-        '<div class="ih-quad-grid-compact">' +
-          '<div class="ih-quad-item red">' +
-            '<div class="ih-quad-num red">' + opCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Signature Lag</div>' +
-              '<div class="ih-quad-sub">' + valPct + '% of estate</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item green">' +
-            '<div class="ih-quad-num green">' + currentCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Definitions Current</div>' +
-              '<div class="ih-quad-sub">' + (100 - parseFloat(valPct)).toFixed(1) + '% up to date</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item amber">' +
-            '<div class="ih-quad-num amber">&lt; 2%</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Policy Target</div>' +
-              '<div class="ih-quad-sub">SLA threshold</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item purple">' +
-            '<div class="ih-quad-num purple">Sophos</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">LiveUpdate Engine</div>' +
-              '<div class="ih-quad-sub">Daily sync active</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="ih-metrics-footer-row">' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-red">' + opCount + ' DEVICES</div>' +
-            '<div class="ih-stat-lbl">Outdated Definitions</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-red">' + valPct + '%</div>' +
-            '<div class="ih-stat-lbl">Estate Impact</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val ' + (isOptimal ? 'val-green' : 'val-red') + '">' + (isOptimal ? '✓ Definitions Current' : '⚠ Outdated Signatures') + '</div>' +
-            '<div class="ih-stat-lbl">Remediation Status</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  function renderDeviceHealth3DCard3(m) {
-    const fl = n => flat.find(x => x.name === n);
-    const me = fl('Managed endpoints');
-    const mo = fl('Mobile devices - VPN');
-    const ne = fl('New endpoints');
-    const rm = fl('Removed endpoints');
-    const totalAssessed = (me && typeof me.v?.[m] === 'number') ? me.v[m] : 38;
-    const vpnCount = (mo && typeof mo.v?.[m] === 'number') ? mo.v[m] : 35;
-    const newCount = (ne && typeof ne.v?.[m] === 'number') ? ne.v[m] : 0;
-    const remCount = (rm && typeof rm.v?.[m] === 'number') ? rm.v[m] : 0;
-
-    return '<div class="ih-carousel-card pos-left" data-card-idx="3" data-open="' + (me?.r || '') + '" title="Click to inspect Managed Fleet Telemetry">' +
-      '<div class="ih-card-inner">' +
-        '<div class="ih-card-header">' +
-          '<div class="ih-badge-row">' +
-            '<span class="ih-card-tag">FLEET INVENTORY</span>' +
-            '<span class="ih-card-period-tag blue">' + FULL[m] + ' ' + state.year + ' &bull; MONITORED</span>' +
-          '</div>' +
-          '<div class="ih-card-title">Managed Fleet &amp; Remote Infrastructure</div>' +
-          '<div class="ih-card-desc">Active endpoints in inventory, mobile VPN roamers &amp; fleet lifecycle</div>' +
-        '</div>' +
-        '<div class="ih-quad-grid-compact">' +
-          '<div class="ih-quad-item blue">' +
-            '<div class="ih-quad-num blue">' + totalAssessed + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Managed Endpoints</div>' +
-              '<div class="ih-quad-sub">Active estate</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item purple">' +
-            '<div class="ih-quad-num purple">' + vpnCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Remote &amp; Mobile VPN</div>' +
-              '<div class="ih-quad-sub">Roaming clients</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item green">' +
-            '<div class="ih-quad-num green">+' + newCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">New Endpoints</div>' +
-              '<div class="ih-quad-sub">Onboarded</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item amber">' +
-            '<div class="ih-quad-num amber">-' + remCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Decommissioned</div>' +
-              '<div class="ih-quad-sub">Retired devices</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="ih-metrics-footer-row">' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-blue">' + totalAssessed + ' UNITS</div>' +
-            '<div class="ih-stat-lbl">Active Inventory</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-blue">' + vpnCount + ' ROAMING</div>' +
-            '<div class="ih-stat-lbl">Mobile VPN Access</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-green">● Monitored Fleet</div>' +
-            '<div class="ih-stat-lbl">Telemetry Status</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
 
   function endpointMonthCard(r, m, opts = {}) {
     if (!r) return '';
@@ -4811,10 +4530,26 @@
               '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
             '</button>' +
             '<div class="ih-carousel-track" id="dhCarouselTrack">' +
-              renderDeviceHealth3DCard0(m) +
-              renderDeviceHealth3DCard1(m) +
-              renderDeviceHealth3DCard2(m) +
-              renderDeviceHealth3DCard3(m) +
+              endpointMonthCard(fl('Endpoint protection coverage %'), m, {
+                sub: (hasEpcData && protCount !== null ? protCount + ' of ' + totalAssessed + ' devices fully protected' : (FULL[m] + ' ' + state.year + ' fleet coverage')),
+                badge: (epcIsOnTarget ? '✓ Target ≥ 98% Achieved' : '⚠ Below 98% Policy')
+              }) +
+              endpointMonthCard(fl('Devices not reporting % of estate'), m, {
+                sub: (hasDnr && nrCount !== null ? (nrCount === 0 ? '0 devices offline · Agent heartbeat active' : nrCount + ' device' + (nrCount === 1 ? '' : 's') + ' currently offline') : 'Agent reporting telemetry'),
+                badge: ((nrCount === 0 || fl('Devices not reporting % of estate')?.rag[m] === 1) ? '✓ Zero Offline Devices' : '⚠ Devices Not Reporting')
+              }) +
+              endpointMonthCard(fl('Devices with outdated protection % of estate'), m, {
+                sub: (hasDop && opCount !== null ? (opCount === 0 ? '0 devices with signature lag · 100% current' : opCount + ' device' + (opCount === 1 ? '' : 's') + ' require updates') : 'Signature definitions status'),
+                badge: ((opCount === 0 || fl('Devices with outdated protection % of estate')?.rag[m] === 1) ? '✓ Definitions 100% Current' : '⚠ Outdated Signatures')
+              }) +
+              endpointMonthCard(me, m, {
+                sub: (hasMe ? totalAssessed + ' total managed endpoints in active inventory' : 'Active endpoint inventory'),
+                badge: '● Monitored Fleet'
+              }) +
+              endpointMonthCard(mo, m, {
+                sub: (mo && typeof mo.v[m] === 'number' ? mo.v[m] + ' remote & mobile devices roaming via VPN' : 'Mobile VPN telemetry'),
+                badge: '● Remote Clients'
+              }) +
             '</div>' +
             '<button type="button" class="ih-nav-btn right" id="dhNavNext" aria-label="Next Health Metric">' +
               '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7.5 15l5-5-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
@@ -4824,7 +4559,8 @@
             '<div class="ih-dot active" data-dot-idx="0" title="Endpoint Protection Coverage"></div>' +
             '<div class="ih-dot" data-dot-idx="1" title="Devices Not Reporting"></div>' +
             '<div class="ih-dot" data-dot-idx="2" title="Devices with Outdated Protection"></div>' +
-            '<div class="ih-dot" data-dot-idx="3" title="Managed Estate &amp; Remote VPN"></div>' +
+            '<div class="ih-dot" data-dot-idx="3" title="Managed Endpoints"></div>' +
+            '<div class="ih-dot" data-dot-idx="4" title="Mobile Devices (VPN)"></div>' +
           '</div>' +
           '<div class="ih-bottom-action-wrap">' +
             '<div class="ih-pill-action">' +
@@ -4904,7 +4640,7 @@
     const prevBtn = stage.querySelector('#dhNavPrev');
     const nextBtn = stage.querySelector('#dhNavNext');
     const dots = stage.querySelectorAll('.ih-dot');
-    const cards = Array.from(stage.querySelectorAll('.ih-carousel-card'));
+    const cards = Array.from(stage.querySelectorAll('.endpoint-month-card'));
     const N = cards.length;
     if (N === 0) return;
 

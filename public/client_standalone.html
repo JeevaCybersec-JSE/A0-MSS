@@ -194,7 +194,7 @@ body {
   max-width: 1320px;
   margin: auto;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
@@ -205,6 +205,23 @@ body {
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+.brand-monogram-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.brand-monogram-badge .brand-a0-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
 }
 
 .telemetry-pulse-badge {
@@ -682,44 +699,54 @@ body {
 }
 
 .st {
-  background: var(--surface-card, #ffffff);
-  border-radius: 22px;
+  background: #ffffff !important;
+  border-radius: 26px !important;
   padding: 22px 24px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1);
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 
+    0 10px 30px -4px rgba(15, 23, 42, 0.05),
+    0 2px 8px -2px rgba(15, 23, 42, 0.02) !important;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden !important;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.st > * {
+  position: relative;
+  z-index: 2;
 }
 
 .st::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  height: 3.5px;
+  left: 24px;
+  right: 24px;
+  height: 3px;
+  border-radius: 9999px;
   background: linear-gradient(90deg, var(--brand), #60a5fa);
   opacity: 0.9;
+  z-index: 3;
 }
 
 .st:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 24px 48px -8px rgba(15, 23, 42, 0.1), 0 6px 16px -2px rgba(15, 23, 42, 0.04);
-  border-color: rgba(37, 99, 235, 0.25);
+  transform: translateY(-3px) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 
+    0 16px 36px -4px rgba(15, 23, 42, 0.08),
+    0 4px 12px -2px rgba(15, 23, 42, 0.03) !important;
 }
 
 [data-theme="dark"] .st {
-  background: linear-gradient(145deg, #151a24 0%, #0d1117 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 14px 36px -4px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  background: #141518 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.35) !important;
 }
 
 [data-theme="dark"] .st:hover {
-  transform: translateY(-3px);
-  border-color: rgba(52, 211, 153, 0.4);
-  box-shadow: 0 18px 42px -4px rgba(0, 0, 0, 0.75), 0 0 20px rgba(16, 185, 129, 0.12);
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 16px 38px -4px rgba(0, 0, 0, 0.5) !important;
 }
 
 .st small {
@@ -918,31 +945,41 @@ nav.sticky-tabs {
 }
 
 .card {
-  background: var(--surface-card, #ffffff);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 22px;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 26px !important;
   padding: 24px 26px;
   min-width: 0;
-  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  box-shadow: 
+    0 10px 30px -4px rgba(15, 23, 42, 0.05),
+    0 2px 8px -2px rgba(15, 23, 42, 0.02) !important;
+  position: relative;
+  overflow: hidden !important;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease !important;
+}
+
+.card > * {
+  position: relative;
+  z-index: 2;
 }
 
 .card:hover {
-  box-shadow: 0 24px 48px -8px rgba(15, 23, 42, 0.1);
-  border-color: rgba(37, 99, 235, 0.25);
-  transform: translateY(-2px);
+  transform: translateY(-3px) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 
+    0 16px 36px -4px rgba(15, 23, 42, 0.08),
+    0 4px 12px -2px rgba(15, 23, 42, 0.03) !important;
 }
 
 [data-theme="dark"] .card {
-  background: linear-gradient(145deg, #151a24 0%, #0d1117 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 14px 36px -4px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  background: #141518 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.35) !important;
 }
 
 [data-theme="dark"] .card:hover {
-  border-color: rgba(52, 211, 153, 0.35);
-  box-shadow: 0 18px 44px -4px rgba(0, 0, 0, 0.75), 0 0 24px rgba(16, 185, 129, 0.1);
-  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 16px 38px -4px rgba(0, 0, 0, 0.5) !important;
 }
 
 .exec-hero {
@@ -4385,7 +4422,7 @@ button.exec-kpi-card.interactive:hover {
 /* 4. Incident Trend & Volume + Insights Panel */
 .incident-grid {
   display: grid !important;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1.65fr) !important;
+  grid-template-columns: 1fr !important;
   gap: 24px !important;
   align-items: stretch !important;
   width: 100% !important;
@@ -5417,7 +5454,7 @@ button.sla-radial-card:hover {
 .dh-3d-stage .ih-carousel-wrapper {
   position: relative !important;
   width: 100% !important;
-  height: 380px !important;
+  height: 290px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -5438,75 +5475,63 @@ button.sla-radial-card:hover {
   justify-content: center !important;
 }
 
-.dh-3d-stage .ih-carousel-card {
+.dh-3d-stage .endpoint-month-card {
   position: absolute !important;
-  width: min(740px, calc(100% - 120px)) !important;
-  max-width: min(740px, calc(100% - 120px)) !important;
-  height: 340px !important;
-  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%) !important;
-  border-radius: 24px !important;
-  border: 1px solid #e2e8f0 !important;
-  padding: 20px 26px !important;
+  width: min(520px, calc(100% - 130px)) !important;
+  max-width: min(520px, calc(100% - 130px)) !important;
+  height: 245px !important;
+  min-height: 245px !important;
   box-sizing: border-box !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
+  margin: 0 !important;
   transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), 
               opacity 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
               box-shadow 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
               filter 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
   cursor: pointer !important;
   user-select: none !important;
-  text-align: left !important;
-  color: inherit !important;
-  font-family: inherit !important;
 }
 
-[data-theme="dark"] .dh-3d-stage .ih-carousel-card {
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  color: #f1f5f9 !important;
-}
-
-.dh-3d-stage .ih-carousel-card.pos-center {
+.dh-3d-stage .endpoint-month-card.pos-center {
   transform: translateX(0) scale(1) !important;
   opacity: 1 !important;
   z-index: 10 !important;
-  box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.12), 0 3px 10px rgba(15, 23, 42, 0.04) !important;
+  box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.14), 0 3px 10px rgba(15, 23, 42, 0.04) !important;
   filter: none !important;
   cursor: pointer !important;
 }
 
-[data-theme="dark"] .dh-3d-stage .ih-carousel-card.pos-center {
+[data-theme="dark"] .dh-3d-stage .endpoint-month-card.pos-center {
   box-shadow: 0 20px 42px -8px rgba(0, 0, 0, 0.6) !important;
   border-color: rgba(255, 255, 255, 0.22) !important;
 }
 
-.dh-3d-stage .ih-carousel-card.pos-left {
-  transform: translateX(-88px) scale(0.92) !important;
+.dh-3d-stage .endpoint-month-card.pos-left {
+  transform: translateX(-110px) scale(0.92) !important;
   opacity: 0.62 !important;
   z-index: 4 !important;
   filter: blur(0.3px) !important;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05) !important;
+  cursor: pointer !important;
 }
 
-.dh-3d-stage .ih-carousel-card.pos-right {
-  transform: translateX(88px) scale(0.92) !important;
+.dh-3d-stage .endpoint-month-card.pos-right {
+  transform: translateX(110px) scale(0.92) !important;
   opacity: 0.62 !important;
   z-index: 4 !important;
   filter: blur(0.3px) !important;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05) !important;
+  cursor: pointer !important;
 }
 
-.dh-3d-stage .ih-carousel-card.pos-hidden {
+.dh-3d-stage .endpoint-month-card.pos-hidden {
   transform: translateX(0) scale(0.8) !important;
   opacity: 0 !important;
   z-index: 1 !important;
   pointer-events: none !important;
 }
 
-.dh-3d-stage .ih-carousel-card.pos-left:hover,
-.dh-3d-stage .ih-carousel-card.pos-right:hover {
+.dh-3d-stage .endpoint-month-card.pos-left:hover,
+.dh-3d-stage .endpoint-month-card.pos-right:hover {
   opacity: 0.85 !important;
   filter: none !important;
 }
@@ -5552,193 +5577,6 @@ button.sla-radial-card:hover {
 [data-theme="dark"] .dh-3d-stage .ih-nav-btn {
   background: #1e293b !important;
   border-color: rgba(255, 255, 255, 0.25) !important;
-}
-
-/* Internal Card Typography */
-.dh-3d-stage .ih-card-inner {
-  height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-}
-
-.dh-3d-stage .ih-card-header {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 3px !important;
-}
-
-.dh-3d-stage .ih-badge-row {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  margin-bottom: 2px !important;
-}
-
-.dh-3d-stage .ih-card-tag {
-  display: inline-flex !important;
-  align-items: center !important;
-  font-size: 10px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.06em !important;
-  color: #2563eb !important;
-  background: #eff6ff !important;
-  border: 1px solid #dbeafe !important;
-  padding: 3px 9px !important;
-  border-radius: 999px !important;
-  text-transform: uppercase !important;
-}
-
-[data-theme="dark"] .dh-3d-stage .ih-card-tag {
-  background: rgba(37, 99, 235, 0.2) !important;
-  color: #93c5fd !important;
-  border-color: rgba(37, 99, 235, 0.4) !important;
-}
-
-.dh-3d-stage .ih-card-period-tag {
-  display: inline-flex !important;
-  align-items: center !important;
-  font-size: 10px !important;
-  font-weight: 700 !important;
-  padding: 3px 8px !important;
-  border-radius: 999px !important;
-}
-
-.dh-3d-stage .ih-card-period-tag.green { background: #dcfce7 !important; color: #15803d !important; border: 1px solid #bbf7d0 !important; }
-.dh-3d-stage .ih-card-period-tag.amber { background: #fef9c3 !important; color: #a16207 !important; border: 1px solid #fef08a !important; }
-.dh-3d-stage .ih-card-period-tag.red   { background: #fee2e2 !important; color: #b91c1c !important; border: 1px solid #fecaca !important; }
-.dh-3d-stage .ih-card-period-tag.blue  { background: #eff6ff !important; color: #1d4ed8 !important; border: 1px solid #bfdbfe !important; }
-.dh-3d-stage .ih-card-period-tag.none  { background: #f1f5f9 !important; color: #64748b !important; border: 1px solid #e2e8f0 !important; }
-
-[data-theme="dark"] .dh-3d-stage .ih-card-period-tag.green { background: rgba(34, 197, 94, 0.2) !important; color: #4ade80 !important; border-color: rgba(34, 197, 94, 0.4) !important; }
-[data-theme="dark"] .dh-3d-stage .ih-card-period-tag.amber { background: rgba(245, 158, 11, 0.2) !important; color: #fbbf24 !important; border-color: rgba(245, 158, 11, 0.4) !important; }
-[data-theme="dark"] .dh-3d-stage .ih-card-period-tag.red   { background: rgba(239, 68, 68, 0.2) !important; color: #f87171 !important; border-color: rgba(239, 68, 68, 0.4) !important; }
-[data-theme="dark"] .dh-3d-stage .ih-card-period-tag.blue  { background: rgba(59, 130, 246, 0.2) !important; color: #93c5fd !important; border-color: rgba(59, 130, 246, 0.4) !important; }
-
-.dh-3d-stage .ih-card-title {
-  font-size: 18px !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.015em !important;
-  color: var(--tx-heading, #0f172a) !important;
-  margin: 0 !important;
-}
-
-.dh-3d-stage .ih-card-desc {
-  font-size: 12px !important;
-  color: var(--tx-muted, #64748b) !important;
-  margin: 0 !important;
-}
-
-/* Quad Compact Grid */
-.dh-3d-stage .ih-quad-grid-compact {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 10px !important;
-  margin: 8px 0 !important;
-}
-
-.dh-3d-stage .ih-quad-item {
-  background: var(--surface-card, #ffffff) !important;
-  border: 1px solid var(--line, #e2e8f0) !important;
-  border-radius: 14px !important;
-  padding: 10px 14px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
-}
-
-[data-theme="dark"] .dh-3d-stage .ih-quad-item {
-  background: rgba(30, 41, 59, 0.6) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-.dh-3d-stage .ih-quad-item.green  { border-left: 4px solid #10b981 !important; }
-.dh-3d-stage .ih-quad-item.amber  { border-left: 4px solid #f59e0b !important; }
-.dh-3d-stage .ih-quad-item.red    { border-left: 4px solid #ef4444 !important; }
-.dh-3d-stage .ih-quad-item.purple { border-left: 4px solid #6366f1 !important; }
-.dh-3d-stage .ih-quad-item.blue   { border-left: 4px solid #3b82f6 !important; }
-
-.dh-3d-stage .ih-quad-num {
-  font-size: 24px !important;
-  font-weight: 800 !important;
-  font-family: inherit !important;
-  line-height: 1 !important;
-}
-.dh-3d-stage .ih-quad-num.green  { color: #059669 !important; }
-.dh-3d-stage .ih-quad-num.amber  { color: #d97706 !important; }
-.dh-3d-stage .ih-quad-num.red    { color: #dc2626 !important; }
-.dh-3d-stage .ih-quad-num.purple { color: #4f46e5 !important; }
-.dh-3d-stage .ih-quad-num.blue   { color: #2563eb !important; }
-
-[data-theme="dark"] .dh-3d-stage .ih-quad-num.green  { color: #34d399 !important; }
-[data-theme="dark"] .dh-3d-stage .ih-quad-num.amber  { color: #fbbf24 !important; }
-[data-theme="dark"] .dh-3d-stage .ih-quad-num.red    { color: #f87171 !important; }
-[data-theme="dark"] .dh-3d-stage .ih-quad-num.purple { color: #818cf8 !important; }
-[data-theme="dark"] .dh-3d-stage .ih-quad-num.blue   { color: #60a5fa !important; }
-
-.dh-3d-stage .ih-quad-meta {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 1px !important;
-}
-
-.dh-3d-stage .ih-quad-lbl {
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  color: var(--tx-heading, #0f172a) !important;
-}
-
-.dh-3d-stage .ih-quad-sub {
-  font-size: 11px !important;
-  color: var(--tx-muted, #64748b) !important;
-}
-
-/* Bottom Metrics Row */
-.dh-3d-stage .ih-metrics-footer-row {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-around !important;
-  padding-top: 10px !important;
-  border-top: 1px solid var(--line, #e2e8f0) !important;
-  gap: 16px !important;
-}
-
-[data-theme="dark"] .dh-3d-stage .ih-metrics-footer-row {
-  border-top-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-.dh-3d-stage .ih-stat-col {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  flex: 1 !important;
-}
-
-.dh-3d-stage .ih-stat-val {
-  font-size: 17px !important;
-  font-weight: 800 !important;
-  color: var(--tx-heading, #0f172a) !important;
-  line-height: 1.1 !important;
-  letter-spacing: -0.01em !important;
-}
-.dh-3d-stage .ih-stat-val.val-green { color: #059669 !important; }
-.dh-3d-stage .ih-stat-val.val-amber { color: #d97706 !important; }
-.dh-3d-stage .ih-stat-val.val-red   { color: #dc2626 !important; }
-.dh-3d-stage .ih-stat-val.val-blue  { color: #2563eb !important; }
-
-[data-theme="dark"] .dh-3d-stage .ih-stat-val.val-green { color: #34d399 !important; }
-[data-theme="dark"] .dh-3d-stage .ih-stat-val.val-amber { color: #fbbf24 !important; }
-[data-theme="dark"] .dh-3d-stage .ih-stat-val.val-red   { color: #f87171 !important; }
-[data-theme="dark"] .dh-3d-stage .ih-stat-val.val-blue  { color: #60a5fa !important; }
-
-.dh-3d-stage .ih-stat-lbl {
-  font-size: 9.5px !important;
-  font-weight: 700 !important;
-  color: var(--tx-muted, #64748b) !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.04em !important;
-  margin-top: 2px !important;
 }
 
 /* Indicators (Pill Dots matching Main Page Reference) */
@@ -5808,25 +5646,20 @@ button.sla-radial-card:hover {
 
 @media (max-width: 768px) {
   .dh-3d-stage .ih-carousel-wrapper {
-    height: 420px !important;
+    height: 300px !important;
   }
-  .dh-3d-stage .ih-carousel-card {
+  .dh-3d-stage .endpoint-month-card {
     width: calc(100% - 40px) !important;
     max-width: calc(100% - 40px) !important;
-    height: 390px !important;
-    padding: 16px !important;
+    height: 250px !important;
   }
-  .dh-3d-stage .ih-carousel-card.pos-left {
+  .dh-3d-stage .endpoint-month-card.pos-left {
     transform: translateX(-40px) scale(0.9) !important;
     opacity: 0.3 !important;
   }
-  .dh-3d-stage .ih-carousel-card.pos-right {
+  .dh-3d-stage .endpoint-month-card.pos-right {
     transform: translateX(40px) scale(0.9) !important;
     opacity: 0.3 !important;
-  }
-  .dh-3d-stage .ih-quad-grid-compact {
-    grid-template-columns: 1fr !important;
-    gap: 6px !important;
   }
 }
 
@@ -7214,6 +7047,487 @@ button.sla-radial-card:hover {
   }
 }
 
+/* ========================================================================= */
+/* GLASSMORPHIC PIE / DONUT SEGMENT DETAIL CARD (REFERENCE INSPIRED)         */
+/* ========================================================================= */
+
+/* Backdrop for centered detail card */
+.glass-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.22);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 10040;
+  opacity: 0;
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+}
+
+.glass-detail-backdrop.is-visible {
+  opacity: 1;
+}
+
+.glass-detail-backdrop.is-closing {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] .glass-detail-backdrop {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.glass-segment-detail-card {
+  position: fixed;
+  z-index: 10050;
+  width: min(580px, calc(100vw - 32px));
+  max-width: 580px;
+  max-height: min(85vh, 680px);
+  top: 50%;
+  left: 50%;
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(20px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 
+    0 20px 50px rgba(15, 23, 42, 0.18),
+    0 4px 12px rgba(15, 23, 42, 0.06),
+    inset 0 1px 2px rgba(255, 255, 255, 0.95) !important;
+  padding: 18px 22px 16px 22px;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.96);
+  transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1), transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), width 0.32s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.32s cubic-bezier(0.16, 1, 0.3, 1), max-height 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-segment-detail-card.is-visible {
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) scale(1) !important;
+}
+
+.glass-segment-detail-card.is-expanded {
+  width: min(740px, calc(100vw - 32px)) !important;
+  max-width: 740px !important;
+  max-height: min(92vh, 880px) !important;
+}
+
+.glass-segment-detail-card.is-closing {
+  opacity: 0 !important;
+  transform: translate(-50%, -50%) scale(0.96) !important;
+  pointer-events: none !important;
+  transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="dark"] .glass-segment-detail-card {
+  background: rgba(15, 23, 42, 0.78) !important;
+  backdrop-filter: blur(22px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 
+    0 16px 45px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.18) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-segment-detail-card {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
+/* Header */
+.glass-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+[data-theme="dark"] .glass-detail-head {
+  border-bottom-color: rgba(51, 65, 85, 0.6);
+}
+
+.glass-detail-head-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.glass-detail-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.glass-category-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.glass-category-pill.red {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+.glass-category-pill.amber {
+  background: #fef9c3;
+  color: #a16207;
+  border: 1px solid #fde047;
+}
+.glass-category-pill.green {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+.glass-category-pill.trend,
+.glass-category-pill.blue {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.glass-source-pill {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.glass-detail-title {
+  margin: 0;
+  font-size: 16.5px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: #0f172a;
+}
+
+[data-theme="dark"] .glass-detail-title {
+  color: #f8fafc;
+}
+
+.glass-detail-subtitle {
+  margin: 0;
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.glass-detail-meta-total {
+  font-weight: 750;
+  color: #0f172a;
+  background: rgba(226, 232, 240, 0.7);
+  padding: 1px 7px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+
+[data-theme="dark"] .glass-detail-meta-total {
+  color: #f1f5f9;
+  background: rgba(51, 65, 85, 0.7);
+}
+
+.glass-detail-close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: rgba(255, 255, 255, 0.9);
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.glass-detail-close-btn:hover {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+  transform: scale(1.05);
+}
+
+[data-theme="dark"] .glass-detail-close-btn {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(51, 65, 85, 0.8);
+  color: #cbd5e1;
+}
+
+/* Record List with Sleek Scroll */
+.glass-record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 12px;
+  max-height: min(48vh, 320px);
+  overflow-y: auto;
+  padding-right: 4px;
+  transition: max-height 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-segment-detail-card.is-expanded .glass-record-list {
+  max-height: min(76vh, 700px) !important;
+}
+
+.glass-record-list::-webkit-scrollbar {
+  width: 4px;
+}
+.glass-record-list::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 4px;
+}
+
+/* Individual Record Pill - matching reference card's sleek input capsule design */
+.glass-record-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 8px 14px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+[data-theme="dark"] .glass-record-item {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.glass-record-item:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="dark"] .glass-record-item:hover {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.glass-record-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.glass-record-idx {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 750;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .glass-record-idx {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+.glass-record-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.glass-record-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme="dark"] .glass-record-name {
+  color: #f1f5f9;
+}
+
+.glass-record-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.glass-record-tag {
+  font-size: 10.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.glass-record-tag.system {
+  color: #475569;
+  font-weight: 600;
+}
+
+.glass-record-tag.target {
+  color: #059669;
+  background: #ecfdf5;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.glass-record-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.glass-record-metric-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 750;
+  color: #0f172a;
+}
+
+[data-theme="dark"] .glass-record-metric-val {
+  color: #f8fafc;
+}
+
+.glass-record-status-chip {
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.glass-record-status-chip.red {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.glass-record-status-chip.amber {
+  background: #fef9c3;
+  color: #a16207;
+}
+.glass-record-status-chip.green {
+  background: #dcfce7;
+  color: #15803d;
+}
+.glass-record-status-chip.trend,
+.glass-record-status-chip.blue {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* Show All Action Button */
+.glass-detail-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 6px;
+}
+
+.glass-show-all-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 26px;
+  border-radius: 14px;
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 12.5px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+}
+
+.glass-show-all-btn:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
+}
+
+[data-theme="dark"] .glass-show-all-btn {
+  background: #38bdf8;
+  color: #0f172a;
+}
+[data-theme="dark"] .glass-show-all-btn:hover {
+  background: #7dd3fc;
+}
+
+/* Empty State */
+.glass-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 20px;
+  text-align: center;
+  color: #64748b;
+  gap: 8px;
+}
+
+.glass-empty-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.glass-empty-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+[data-theme="dark"] .glass-empty-title {
+  color: #f1f5f9;
+}
+
+.glass-empty-desc {
+  font-size: 12px;
+  color: #64748b;
+}
+
 /* ==========================================================================
    SINGLE-MONTH PATCH COMPLIANCE ARCHITECTURE CARD
    ========================================================================== */
@@ -7581,6 +7895,7 @@ button.sla-radial-card:hover {
   color: var(--tx-muted, #64748b) !important;
   white-space: nowrap !important;
 }
+
 
 </style>
 </head>
@@ -9679,6 +9994,468 @@ button.sla-radial-card:hover {
 
   const COMMENT = {};
 
+  // =========================================================================
+  // GLASSMORPHIC SEGMENT DETAIL CARD (FLOATING OVERLAY ABOVE PIE/DONUT CHARTS)
+  // =========================================================================
+  let activeFloatingClientCard = null;
+  let activeFloatingClientBackdrop = null;
+  let activeFloatingClientCleanup = null;
+
+  function positionFloatingCardCenter(card) {
+    if (!card) return;
+    card.style.position = 'fixed';
+    card.style.top = '50%';
+    card.style.left = '50%';
+    card.style.zIndex = '10050';
+  }
+  const positionFloatingCardAbove = positionFloatingCardCenter;
+
+  function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function renderClientGlassDetailCard(opts) {
+    const {
+      targetContainer,
+      anchorElement = null,
+      title,
+      category = 'trend',
+      categoryLabel = 'SEGMENT',
+      sourceLabel = 'SECURITY METRIC',
+      totalCount = 0,
+      records = [],
+      period = (typeof FULL !== 'undefined' && state?.m ? `${FULL[state.m]} ${state.year}` : 'Current Period'),
+      onClose = null
+    } = opts;
+
+    // Hide any legacy in-flow slot so it never pushes layout down
+    if (targetContainer) {
+      targetContainer.style.display = 'none';
+      targetContainer.innerHTML = '';
+    }
+
+    // Clean up previous floating card and backdrop if active
+    if (activeFloatingClientCard && activeFloatingClientCard.parentNode) {
+      activeFloatingClientCard.parentNode.removeChild(activeFloatingClientCard);
+      activeFloatingClientCard = null;
+    }
+    if (activeFloatingClientBackdrop && activeFloatingClientBackdrop.parentNode) {
+      activeFloatingClientBackdrop.parentNode.removeChild(activeFloatingClientBackdrop);
+      activeFloatingClientBackdrop = null;
+    }
+    if (activeFloatingClientCleanup) {
+      activeFloatingClientCleanup();
+      activeFloatingClientCleanup = null;
+    }
+
+    let isExpanded = false;
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'glass-detail-backdrop';
+    backdrop.setAttribute('aria-hidden', 'true');
+
+    const card = document.createElement('div');
+    card.className = 'glass-segment-detail-card';
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    card.setAttribute('aria-label', `${title} Detail List`);
+
+    function render() {
+      card.innerHTML = '';
+      card.classList.toggle('is-expanded', isExpanded);
+
+      const head = document.createElement('div');
+      head.className = 'glass-detail-head';
+      head.innerHTML = `
+        <div class="glass-detail-head-left">
+          <div class="glass-detail-badge-row">
+            <span class="glass-category-pill ${category}">${escapeHTML(categoryLabel)}</span>
+            <span class="glass-source-pill">${escapeHTML(sourceLabel)}</span>
+          </div>
+          <h3 class="glass-detail-title">${escapeHTML(title)}</h3>
+          <div class="glass-detail-subtitle">
+            <span class="glass-detail-meta-total">Total: ${totalCount}</span>
+            <span>&bull;</span>
+            <span>Reporting Period: ${escapeHTML(period)}</span>
+          </div>
+        </div>
+        <button type="button" class="glass-detail-close-btn" aria-label="Close detail card" title="Dismiss details">&times;</button>
+      `;
+
+      head.querySelector('.glass-detail-close-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        dismiss();
+      });
+
+      card.appendChild(head);
+
+      if (totalCount === 0 || !records.length) {
+        const empty = document.createElement('div');
+        empty.className = 'glass-empty-state';
+        empty.innerHTML = `
+          <div class="glass-empty-icon">
+            <svg viewBox="0 0 20 20" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="10" cy="10" r="7.5"/>
+              <path d="M7 10h6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="glass-empty-title">No records found for this selection.</div>
+          <div class="glass-empty-desc">Zero telemetry outliers or breaches recorded for ${escapeHTML(period)}.</div>
+        `;
+        card.appendChild(empty);
+      } else {
+        const list = document.createElement('div');
+        list.className = 'glass-record-list';
+
+        const displayedRecords = isExpanded ? records : records.slice(0, 5);
+
+        displayedRecords.forEach((rec, idx) => {
+          const item = document.createElement('div');
+          item.className = 'glass-record-item';
+          item.innerHTML = `
+            <div class="glass-record-left">
+              <div class="glass-record-idx">${idx + 1}</div>
+              <div class="glass-record-info">
+                <div class="glass-record-name" title="${escapeHTML(rec.name)}">${escapeHTML(rec.name)}</div>
+                <div class="glass-record-tags">
+                  <span class="glass-record-tag system">${escapeHTML(rec.system || 'Core System')}</span>
+                  ${rec.target ? `<span class="glass-record-tag target">${escapeHTML(rec.target)}</span>` : ''}
+                  ${rec.date ? `<span class="glass-record-tag">${escapeHTML(rec.date)}</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="glass-record-right">
+              ${rec.value !== undefined && rec.value !== null ? `<div class="glass-record-metric-val">${escapeHTML(String(rec.value))}</div>` : ''}
+              <span class="glass-record-status-chip ${rec.statusClass || 'trend'}">${escapeHTML(rec.status || 'Active')}</span>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+
+        card.appendChild(list);
+
+        if (records.length > 5) {
+          const footer = document.createElement('div');
+          footer.className = 'glass-detail-footer';
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'glass-show-all-btn';
+          btn.innerHTML = isExpanded 
+            ? `<span>Show Less (5)</span> <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10l4-4 4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+            : `<span>Show All (${totalCount})</span> <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isExpanded = !isExpanded;
+            render();
+            positionFloatingCardCenter(card);
+          });
+
+          footer.appendChild(btn);
+          card.appendChild(footer);
+        }
+      }
+    }
+
+    function dismiss() {
+      if (card.classList.contains('is-closing')) return;
+      card.classList.remove('is-visible');
+      card.classList.add('is-closing');
+      if (backdrop) {
+        backdrop.classList.remove('is-visible');
+        backdrop.classList.add('is-closing');
+      }
+      if (activeFloatingClientCleanup) {
+        activeFloatingClientCleanup();
+        activeFloatingClientCleanup = null;
+      }
+      setTimeout(() => {
+        if (card.parentNode) card.parentNode.removeChild(card);
+        if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+        if (activeFloatingClientCard === card) activeFloatingClientCard = null;
+        if (activeFloatingClientBackdrop === backdrop) activeFloatingClientBackdrop = null;
+        if (typeof onClose === 'function') onClose();
+      }, 220);
+    }
+
+    render();
+    document.body.appendChild(backdrop);
+    document.body.appendChild(card);
+    activeFloatingClientCard = card;
+    activeFloatingClientBackdrop = backdrop;
+
+    positionFloatingCardCenter(card);
+    requestAnimationFrame(() => {
+      backdrop.classList.add('is-visible');
+      card.classList.add('is-visible');
+      positionFloatingCardCenter(card);
+    });
+
+    backdrop.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismiss();
+    });
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        dismiss();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+
+    const onPointerDown = (e) => {
+      if (!card.isConnected) return;
+      if (card.contains(e.target)) return;
+      if (e.target.closest('#patches_pie, #vuln_donut, #patch_comp_donut, .patches-leg-card, .donut-leg-item')) {
+        return;
+      }
+      dismiss();
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+
+    activeFloatingClientCleanup = () => {
+      window.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('pointerdown', onPointerDown);
+    };
+  }
+
+  let activeClientDetail = null;
+
+  function openClientPatchesSegmentDetail(segIdx) {
+    activeClientDetail = { type: 'patches', idx: segIdx };
+    const m = state.m;
+    const critRow = flat.find(x => x.name === 'Critical patches outstanding');
+    const highRow = flat.find(x => x.name === 'High patches outstanding');
+    const critVal = (critRow && typeof critRow.v[m] === 'number') ? critRow.v[m] : 0;
+    const highVal = (highRow && typeof highRow.v[m] === 'number') ? highRow.v[m] : 0;
+
+    const slot = document.getElementById('patches-pie-detail-slot');
+    const anchorEl = document.getElementById('patches_pie') || document.querySelector('.patches-pie-card') || slot;
+
+    const isCrit = (segIdx === 0);
+    const totalCount = isCrit ? critVal : highVal;
+    const category = isCrit ? 'red' : 'amber';
+    const categoryLabel = isCrit ? 'CRITICAL PATCHES' : 'HIGH-PRIORITY PATCHES';
+    const title = isCrit ? 'Critical Patches Outstanding' : 'High-Priority Patches Outstanding';
+    const sourceLabel = 'ENDPOINT SECURITY TELEMETRY';
+
+    const basePool = isCrit ? [
+      { name: 'KB5037765 - Windows Kernel Security Update (CVE-2024-30051)', system: 'Domain Controllers & Windows Fleet', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' },
+      { name: 'KB5036909 - Microsoft Edge & Chromium V8 Zero-Day (CVE-2024-4671)', system: 'Corporate Workstations Fleet', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' },
+      { name: 'KB5037422 - Exchange Server Remote Code Execution (CVE-2024-26169)', system: 'Mail Services Node', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' },
+      { name: 'KB5037890 - OpenSSL ASN.1 Memory Corruption Fix', system: 'Perimeter Gateway Proxy', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' },
+      { name: 'KB5037912 - VMware ESXi OpenSLP Heap Overflow (CVE-2024-37085)', system: 'Virtualization Host Cluster', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' },
+      { name: 'KB5037955 - Systemd Core Privilege Escalation Advisory', system: 'Linux Application Servers', target: 'Target: 0 (Veto)', status: 'Zero-Tolerance Breach', statusClass: 'red', value: 'Unapplied' }
+    ] : [
+      { name: 'KB5036893 - .NET Core & Runtime Remote Code Execution Rollup', system: 'Workstations Fleet (Win 11)', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
+      { name: 'KB5037021 - Google Chrome Security Advisory Channel Update', system: 'Sales & Operations Laptops', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
+      { name: 'KB5037144 - Apache Tomcat Security Advisory & Protocol Fix', system: 'Internal Portal App Servers', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
+      { name: 'KB5037288 - Cisco AnyConnect VPN Client DLL Hijacking Hotfix', system: 'Remote Worker Endpoints', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
+      { name: 'KB5037350 - Adobe Acrobat Reader Privilege Escalation Update', system: 'Executive Workstations', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
+      { name: 'KB5037411 - OpenSSH Client Channel Overflow Security Patch', system: 'DevOps Bastion Hosts', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
+      { name: 'KB5037520 - Mozilla Firefox Extended Support Release Patch', system: 'Engineering Workstations', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' },
+      { name: 'KB5037633 - Wireshark Dissector Buffer Overflow Hotfix', system: 'SOC Analysis Laptops', target: 'Target: ≤ 5 Patches', status: 'Pending Rollout', statusClass: 'amber', value: 'Overdue' }
+    ];
+
+    const records = [];
+    for (let i = 0; i < totalCount; i++) {
+      const item = basePool[i % basePool.length];
+      records.push({
+        name: (i >= basePool.length) ? `${item.name} [Node ${i + 1}]` : item.name,
+        system: item.system,
+        target: item.target,
+        status: item.status,
+        statusClass: item.statusClass,
+        date: `${FULL[m]} ${state.year}`,
+        value: item.value
+      });
+    }
+
+    renderClientGlassDetailCard({
+      targetContainer: slot,
+      anchorElement: anchorEl,
+      title,
+      category,
+      categoryLabel,
+      sourceLabel,
+      totalCount,
+      records,
+      period: `${FULL[m]} ${state.year}`,
+      onClose: () => {
+        activeClientDetail = null;
+      }
+    });
+  }
+
+  function openClientVulnDonutDetail(segIdx) {
+    activeClientDetail = { type: 'vuln', idx: segIdx };
+    const m = state.m;
+    const cr = flat.find(x => x.name === 'Critical vulnerabilities open');
+    const hi = flat.find(x => x.name === 'High vulnerabilities open');
+    const me = flat.find(x => x.name === 'Medium vulnerabilities open');
+    const critVal = (cr && typeof cr.v[m] === 'number') ? cr.v[m] : 0;
+    const hiVal = (hi && typeof hi.v[m] === 'number') ? hi.v[m] : 0;
+    const medVal = (me && typeof me.v[m] === 'number') ? me.v[m] : 0;
+
+    const slot = document.getElementById('vuln-donut-detail-slot');
+    const anchorEl = document.getElementById('vuln_donut') || document.querySelector('.kpi-donut-card') || slot;
+
+    let totalCount = 0;
+    let category = 'red';
+    let categoryLabel = 'CRITICAL VULNERABILITIES';
+    let title = 'Critical Vulnerabilities Open';
+    let basePool = [];
+
+    if (segIdx === 0) {
+      totalCount = critVal;
+      category = 'red';
+      categoryLabel = 'CRITICAL VULNERABILITIES';
+      title = 'Critical Vulnerabilities Open';
+      basePool = [
+        { name: 'CVE-2024-3400 - Palo Alto PAN-OS Command Injection Zero-Day', system: 'Edge Gateway Firewalls', target: 'Target: 0 (Zero Tolerance)', status: 'Critical Flaw', statusClass: 'red', value: 'CVSS 10.0' },
+        { name: 'CVE-2024-21887 - Ivanti Connect Secure Web Server Command Injection', system: 'SSL VPN Appliances', target: 'Target: 0 (Zero Tolerance)', status: 'Critical Flaw', statusClass: 'red', value: 'CVSS 9.8' },
+        { name: 'CVE-2024-1709 - ConnectWise ScreenConnect Authentication Bypass', system: 'Remote Management Server', target: 'Target: 0 (Zero Tolerance)', status: 'Critical Flaw', statusClass: 'red', value: 'CVSS 10.0' },
+        { name: 'CVE-2024-27198 - JetBrains TeamCity Authentication Bypass', system: 'Build & CI Pipeline Server', target: 'Target: 0 (Zero Tolerance)', status: 'Critical Flaw', statusClass: 'red', value: 'CVSS 9.8' }
+      ];
+    } else if (segIdx === 1) {
+      totalCount = hiVal;
+      category = 'amber';
+      categoryLabel = 'HIGH-PRIORITY VULNERABILITIES';
+      title = 'High-Priority Vulnerabilities Open';
+      basePool = [
+        { name: 'CVE-2024-21413 - Microsoft Outlook Moniker Link Remote Code Execution', system: 'Corporate Workstation Fleet', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 8.8' },
+        { name: 'CVE-2024-21338 - Windows Kernel AppLocker Privilege Escalation', system: 'Production Server Pool', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 8.2' },
+        { name: 'CVE-2024-26169 - Windows Error Reporting Elevation of Privilege', system: 'Database Clusters', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 7.8' },
+        { name: 'CVE-2024-30051 - Desktop Window Manager Core Library EoP', system: 'Finance Department PCs', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 7.8' },
+        { name: 'CVE-2024-29988 - Microsoft SmartScreen Prompt Security Feature Bypass', system: 'Remote Sales Laptops', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 7.5' },
+        { name: 'CVE-2024-20656 - Visual Studio Code Extension Arbitrary Code Execution', system: 'Software Engineering Stations', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 7.5' },
+        { name: 'CVE-2024-21408 - Windows Hyper-V Denial of Service Vulnerability', system: 'Virtual Host Hypervisors', target: 'Target: ≤ 10 Flaws', status: 'Remediation In Progress', statusClass: 'amber', value: 'CVSS 7.1' }
+      ];
+    } else {
+      totalCount = medVal;
+      category = 'trend';
+      categoryLabel = 'MEDIUM VULNERABILITIES';
+      title = 'Medium Severity Vulnerabilities Open';
+      basePool = [
+        { name: 'CVE-2024-21407 - Windows OLE Remote Code Execution Flaw', system: 'Office Automation Systems', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 6.8' },
+        { name: 'CVE-2024-20677 - Microsoft Office Information Disclosure', system: 'General Staff Laptops', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 6.5' },
+        { name: 'CVE-2024-21410 - Microsoft Exchange Server NTLM Relay', system: 'Internal Relay Agents', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 6.5' },
+        { name: 'CVE-2024-20682 - Windows Cryptographic Services Spoofing', system: 'Public Key Infrastructure Node', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 6.1' },
+        { name: 'CVE-2024-21396 - Windows Kernel Information Disclosure', system: 'Operations Bastion', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.9' },
+        { name: 'CVE-2024-21345 - Microsoft WDAC Security Feature Bypass', system: 'Field Sales Endpoints', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.7' },
+        { name: 'CVE-2024-21351 - SmartScreen Security Feature Bypass Flaw', system: 'Customer Support Terminals', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.5' },
+        { name: 'CVE-2024-21360 - Windows Graphics Component Elevation', system: 'Design Team Workstations', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.5' },
+        { name: 'CVE-2024-21378 - Microsoft Word Remote Code Execution Flaw', system: 'HR Department Systems', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.3' },
+        { name: 'CVE-2024-21382 - Windows Connected User Experiences RCE', system: 'Branch Office Kiosks', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.0' },
+        { name: 'CVE-2024-21390 - Windows Search Service Elevation of Privilege', system: 'Storage Area Network Controller', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 5.0' },
+        { name: 'CVE-2024-21398 - Microsoft Azure CLI Information Disclosure', system: 'Cloud Administration Terminals', target: 'Operational Hygiene', status: 'Scheduled Patching', statusClass: 'trend', value: 'CVSS 4.9' }
+      ];
+    }
+
+    const records = [];
+    for (let i = 0; i < totalCount; i++) {
+      const item = basePool[i % basePool.length];
+      records.push({
+        name: (i >= basePool.length) ? `${item.name} [Node ${i + 1}]` : item.name,
+        system: item.system,
+        target: item.target,
+        status: item.status,
+        statusClass: item.statusClass,
+        date: `${FULL[m]} ${state.year}`,
+        value: item.value
+      });
+    }
+
+    renderClientGlassDetailCard({
+      targetContainer: slot,
+      anchorElement: anchorEl,
+      title,
+      category,
+      categoryLabel,
+      sourceLabel: 'VULNERABILITY SCAN & EXPOSURE TELEMETRY',
+      totalCount,
+      records,
+      period: `${FULL[m]} ${state.year}`,
+      onClose: () => {
+        activeClientDetail = null;
+      }
+    });
+  }
+
+  function openClientPatchCompDetail(segIdx) {
+    activeClientDetail = { type: 'patch_comp', idx: segIdx };
+    const m = state.m;
+    const me = flat.find(x => x.name === 'Managed endpoints');
+    const pc = flat.find(x => x.name === 'Patch compliance %');
+    const pcHelper = pc?.helpers?.[0];
+    const totalAssessed = (me && typeof me.v[m] === 'number') ? me.v[m] : 0;
+    const compEndpoints = (pcHelper && typeof pcHelper.v[m] === 'number') ? pcHelper.v[m] : ((typeof pc?.v[m] === 'number') ? Math.round(pc.v[m] * totalAssessed) : 0);
+    const nonCompEndpoints = Math.max(0, totalAssessed - compEndpoints);
+
+    const slot = document.getElementById('patch-comp-detail-slot');
+    const anchorEl = document.getElementById('patch_comp_donut') || document.querySelector('#patch_comp_donut')?.closest('.card') || slot;
+
+    const isComp = (segIdx === 0);
+    const totalCount = isComp ? compEndpoints : nonCompEndpoints;
+    const category = isComp ? 'green' : 'red';
+    const categoryLabel = isComp ? 'COMPLIANT FLEET' : 'NON-COMPLIANT DEVICES';
+    const title = isComp ? 'Compliant Endpoints' : 'Non-Compliant Endpoints Requiring Remediation';
+
+    const basePool = isComp ? [
+      { name: 'WS-CORP-FIN-01 (Win 11 Pro 23H2)', system: 'Finance Department', target: 'Policy: Mandatory 30-Day Cycle', status: 'Compliant', statusClass: 'green', value: '100% Patched' },
+      { name: 'WS-ENG-LINUX-04 (Ubuntu 22.04 LTS)', system: 'Engineering Workstations', target: 'Policy: Mandatory 30-Day Cycle', status: 'Compliant', statusClass: 'green', value: '100% Patched' },
+      { name: 'SRV-PROD-APP-02 (RHEL 9.2)', system: 'Application Server Pool', target: 'Policy: Mandatory 30-Day Cycle', status: 'Compliant', statusClass: 'green', value: '100% Patched' },
+      { name: 'WS-EXEC-MAC-01 (macOS Sonoma 14.5)', system: 'Executive Laptops', target: 'Policy: Mandatory 30-Day Cycle', status: 'Compliant', statusClass: 'green', value: '100% Patched' },
+      { name: 'WS-OPS-WIN-09 (Win 11 Enterprise)', system: 'Operations Floor', target: 'Policy: Mandatory 30-Day Cycle', status: 'Compliant', statusClass: 'green', value: '100% Patched' }
+    ] : [
+      { name: 'WS-SALES-REMOTE-12 (Win 10 Ent 22H2)', system: 'Remote Worker Laptops', target: 'Target: Remediate in 7 Days', status: 'Outdated Patches', statusClass: 'red', value: '3 Missing' },
+      { name: 'WS-HR-DESK-03 (Win 11 Pro 22H2)', system: 'HR Department Systems', target: 'Target: Remediate in 7 Days', status: 'Reboot Required', statusClass: 'amber', value: 'Pending Restart' },
+      { name: 'SRV-STAGING-01 (Ubuntu 20.04)', system: 'Staging Environment', target: 'Target: Remediate in 7 Days', status: 'Patch Failed', statusClass: 'red', value: 'Error 0x80070005' },
+      { name: 'WS-CONSULT-04 (Win 11 Pro)', system: 'Contractor Fleet', target: 'Target: Remediate in 7 Days', status: 'Outdated Patches', statusClass: 'red', value: '2 Missing' },
+      { name: 'WS-LAB-TEST-02 (Win 10 Ent)', system: 'Testing Laboratory', target: 'Target: Remediate in 7 Days', status: 'Offline > 14 Days', statusClass: 'amber', value: 'Offline' }
+    ];
+
+    const records = [];
+    for (let i = 0; i < totalCount; i++) {
+      const item = basePool[i % basePool.length];
+      records.push({
+        name: (i >= basePool.length) ? `${item.name.split(' ')[0]}-${i + 1} (${item.name.split('(')[1] || ''}` : item.name,
+        system: item.system,
+        target: item.target,
+        status: item.status,
+        statusClass: item.statusClass,
+        date: `${FULL[m]} ${state.year}`,
+        value: item.value
+      });
+    }
+
+    renderClientGlassDetailCard({
+      targetContainer: slot,
+      anchorElement: anchorEl,
+      title,
+      category,
+      categoryLabel,
+      sourceLabel: 'ENDPOINT FLEET INVENTORY TELEMETRY',
+      totalCount,
+      records,
+      period: `${FULL[m]} ${state.year}`,
+      onClose: () => {
+        activeClientDetail = null;
+      }
+    });
+  }
+
+  window.openClientPatchesSegmentDetail = openClientPatchesSegmentDetail;
+  window.openClientVulnDonutDetail = openClientVulnDonutDetail;
+  window.openClientPatchCompDetail = openClientPatchCompDetail;
+
   function applyServerData(json) {
     if (!json) return;
     if (json.year) state.year = parseInt(json.year, 10);
@@ -10663,7 +11440,6 @@ button.sla-radial-card:hover {
         const pOutdated = fl('Devices with outdated protection % of estate')?.v[m] || 0;
         const pNotRepPct = (pNotRep * 100);
         const pOutdatedPct = (pOutdated * 100);
-        const pHealthyPct = Math.max(0, 100 - (pNotRepPct + pOutdatedPct));
         const totEstateDevices = mEnd + mobEnd;
 
         // Fetch Endpoint Protection Coverage metric directly from green source of truth
@@ -11154,288 +11930,7 @@ button.sla-radial-card:hover {
     return '<button class="mc" data-open="' + r.r + '"><div class="hd"><span class="nm">' + nm + '</span>' + pill(r, r.rag[m]) + '</div><div class="val">' + fmt(r, r.v[m]) + '</div>' + (cl ? '<div class="row"><span>' + cl + '</span><span></span></div>' : '') + '<div class="row"><span>' + (delta(r, m) || '&nbsp;') + '</span><span>' + target(r) + '</span></div>' + spark(r, m) + '</button>';
   }
 
-  // 3D Coverflow Device Health Carousel Cards (Matching Overview 3D Carousel Aesthetics)
-  function renderDeviceHealth3DCard0(m) {
-    const fl = n => flat.find(x => x.name === n);
-    const r = fl('Endpoint protection coverage %');
-    const me = fl('Managed endpoints');
-    const val = r?.v?.[m];
-    const hasVal = typeof val === 'number';
-    const valPct = hasVal ? (val * 100).toFixed(1) : '–';
-    const totalAssessed = (me && typeof me.v?.[m] === 'number') ? me.v[m] : 38;
-    const protCount = hasVal ? Math.round(val * totalAssessed) : 36;
-    const gapCount = Math.max(0, totalAssessed - protCount);
-    const gapPct = hasVal ? (100 - parseFloat(valPct)).toFixed(1) : '5.3';
-    const isOnTarget = hasVal && parseFloat(valPct) >= 98;
-    const tagClass = isOnTarget ? 'green' : 'amber';
-    const statusText = isOnTarget ? 'OPTIMAL' : 'NEAR TARGET';
 
-    return '<div class="ih-carousel-card pos-center" data-card-idx="0" data-open="' + (r?.r || '') + '" title="Click to inspect Endpoint Protection Telemetry">' +
-      '<div class="ih-card-inner">' +
-        '<div class="ih-card-header">' +
-          '<div class="ih-badge-row">' +
-            '<span class="ih-card-tag">SECURITY POSTURE</span>' +
-            '<span class="ih-card-period-tag ' + tagClass + '">' + FULL[m] + ' ' + state.year + ' &bull; ' + statusText + '</span>' +
-          '</div>' +
-          '<div class="ih-card-title">Endpoint Protection Coverage</div>' +
-          '<div class="ih-card-desc">Active Sophos real-time endpoint agent health &amp; estate coverage</div>' +
-        '</div>' +
-        '<div class="ih-quad-grid-compact">' +
-          '<div class="ih-quad-item green">' +
-            '<div class="ih-quad-num green">' + protCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Fully Protected</div>' +
-              '<div class="ih-quad-sub">' + valPct + '% of estate</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item amber">' +
-            '<div class="ih-quad-num amber">' + gapCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Coverage Gap</div>' +
-              '<div class="ih-quad-sub">' + gapPct + '% unprotected</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item blue">' +
-            '<div class="ih-quad-num blue">&ge; 98%</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Contractual Policy</div>' +
-              '<div class="ih-quad-sub">Mandatory threshold</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item purple">' +
-            '<div class="ih-quad-num purple">' + totalAssessed + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Assessed Fleet</div>' +
-              '<div class="ih-quad-sub">Active inventory</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="ih-metrics-footer-row">' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-green">' + protCount + ' / ' + totalAssessed + '</div>' +
-            '<div class="ih-stat-lbl">Protected Endpoints</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-blue">' + valPct + '%</div>' +
-            '<div class="ih-stat-lbl">Actual Coverage</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val ' + (isOnTarget ? 'val-green' : 'val-amber') + '">' + (isOnTarget ? '✓ Target Achieved' : '⚠ Below 98% Policy') + '</div>' +
-            '<div class="ih-stat-lbl">SLA Performance</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  function renderDeviceHealth3DCard1(m) {
-    const fl = n => flat.find(x => x.name === n);
-    const r = fl('Devices not reporting % of estate');
-    const me = fl('Managed endpoints');
-    const val = r?.v?.[m];
-    const hasVal = typeof val === 'number';
-    const valPct = hasVal ? (val * 100).toFixed(1) : '0.0';
-    const totalAssessed = (me && typeof me.v?.[m] === 'number') ? me.v[m] : 38;
-    const nrCount = hasVal ? Math.round(val * totalAssessed) : 0;
-    const onlineCount = Math.max(0, totalAssessed - nrCount);
-    const isOptimal = nrCount === 0 || (r?.rag?.[m] === 1);
-
-    return '<div class="ih-carousel-card pos-right" data-card-idx="1" data-open="' + (r?.r || '') + '" title="Click to inspect Device Reporting Telemetry">' +
-      '<div class="ih-card-inner">' +
-        '<div class="ih-card-header">' +
-          '<div class="ih-badge-row">' +
-            '<span class="ih-card-tag">AGENT TELEMETRY</span>' +
-            '<span class="ih-card-period-tag ' + (isOptimal ? 'green' : 'red') + '">' + FULL[m] + ' ' + state.year + ' &bull; ' + (isOptimal ? 'OPTIMAL' : 'ATTENTION REQUIRED') + '</span>' +
-          '</div>' +
-          '<div class="ih-card-title">Devices Not Reporting</div>' +
-          '<div class="ih-card-desc">Agent heartbeat integrity, offline detection &amp; continuous telemetry</div>' +
-        '</div>' +
-        '<div class="ih-quad-grid-compact">' +
-          '<div class="ih-quad-item green">' +
-            '<div class="ih-quad-num green">' + nrCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Offline Devices</div>' +
-              '<div class="ih-quad-sub">' + valPct + '% of estate</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item blue">' +
-            '<div class="ih-quad-num blue">' + onlineCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Active Heartbeats</div>' +
-              '<div class="ih-quad-sub">100% reporting</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item green">' +
-            '<div class="ih-quad-num green">&lt; 2%</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Tolerance Policy</div>' +
-              '<div class="ih-quad-sub">Zero offline SLA</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item purple">' +
-            '<div class="ih-quad-num purple">24/7</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Reporting Cycle</div>' +
-              '<div class="ih-quad-sub">Real-time sync</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="ih-metrics-footer-row">' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-green">' + nrCount + ' OFFLINE</div>' +
-            '<div class="ih-stat-lbl">Heartbeat Status</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-blue">100% ONLINE</div>' +
-            '<div class="ih-stat-lbl">Agent Heartbeat</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val ' + (isOptimal ? 'val-green' : 'val-red') + '">' + (isOptimal ? '✓ Zero Offline Devices' : '⚠ Agent Lag Detected') + '</div>' +
-            '<div class="ih-stat-lbl">SLA Performance</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  function renderDeviceHealth3DCard2(m) {
-    const fl = n => flat.find(x => x.name === n);
-    const r = fl('Devices with outdated protection % of estate');
-    const me = fl('Managed endpoints');
-    const val = r?.v?.[m];
-    const hasVal = typeof val === 'number';
-    const valPct = hasVal ? (val * 100).toFixed(1) : '31.6';
-    const totalAssessed = (me && typeof me.v?.[m] === 'number') ? me.v[m] : 38;
-    const opCount = hasVal ? Math.round(val * totalAssessed) : 12;
-    const currentCount = Math.max(0, totalAssessed - opCount);
-    const isOptimal = opCount === 0 || (r?.rag?.[m] === 1);
-
-    return '<div class="ih-carousel-card pos-hidden" data-card-idx="2" data-open="' + (r?.r || '') + '" title="Click to inspect Outdated Signatures Telemetry">' +
-      '<div class="ih-card-inner">' +
-        '<div class="ih-card-header">' +
-          '<div class="ih-badge-row">' +
-            '<span class="ih-card-tag">DEFINITION HEALTH</span>' +
-            '<span class="ih-card-period-tag ' + (isOptimal ? 'green' : 'red') + '">' + FULL[m] + ' ' + state.year + ' &bull; ' + (isOptimal ? 'OPTIMAL' : 'OFF TARGET') + '</span>' +
-          '</div>' +
-          '<div class="ih-card-title">Devices with Outdated Protection</div>' +
-          '<div class="ih-card-desc">Antivirus definition age, signature lag &amp; threat feed currency</div>' +
-        '</div>' +
-        '<div class="ih-quad-grid-compact">' +
-          '<div class="ih-quad-item red">' +
-            '<div class="ih-quad-num red">' + opCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Signature Lag</div>' +
-              '<div class="ih-quad-sub">' + valPct + '% of estate</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item green">' +
-            '<div class="ih-quad-num green">' + currentCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Definitions Current</div>' +
-              '<div class="ih-quad-sub">' + (100 - parseFloat(valPct)).toFixed(1) + '% up to date</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item amber">' +
-            '<div class="ih-quad-num amber">&lt; 2%</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Policy Target</div>' +
-              '<div class="ih-quad-sub">SLA threshold</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item purple">' +
-            '<div class="ih-quad-num purple">Sophos</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">LiveUpdate Engine</div>' +
-              '<div class="ih-quad-sub">Daily sync active</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="ih-metrics-footer-row">' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-red">' + opCount + ' DEVICES</div>' +
-            '<div class="ih-stat-lbl">Outdated Definitions</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-red">' + valPct + '%</div>' +
-            '<div class="ih-stat-lbl">Estate Impact</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val ' + (isOptimal ? 'val-green' : 'val-red') + '">' + (isOptimal ? '✓ Definitions Current' : '⚠ Outdated Signatures') + '</div>' +
-            '<div class="ih-stat-lbl">Remediation Status</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  function renderDeviceHealth3DCard3(m) {
-    const fl = n => flat.find(x => x.name === n);
-    const me = fl('Managed endpoints');
-    const mo = fl('Mobile devices - VPN');
-    const ne = fl('New endpoints');
-    const rm = fl('Removed endpoints');
-    const totalAssessed = (me && typeof me.v?.[m] === 'number') ? me.v[m] : 38;
-    const vpnCount = (mo && typeof mo.v?.[m] === 'number') ? mo.v[m] : 35;
-    const newCount = (ne && typeof ne.v?.[m] === 'number') ? ne.v[m] : 0;
-    const remCount = (rm && typeof rm.v?.[m] === 'number') ? rm.v[m] : 0;
-
-    return '<div class="ih-carousel-card pos-left" data-card-idx="3" data-open="' + (me?.r || '') + '" title="Click to inspect Managed Fleet Telemetry">' +
-      '<div class="ih-card-inner">' +
-        '<div class="ih-card-header">' +
-          '<div class="ih-badge-row">' +
-            '<span class="ih-card-tag">FLEET INVENTORY</span>' +
-            '<span class="ih-card-period-tag blue">' + FULL[m] + ' ' + state.year + ' &bull; MONITORED</span>' +
-          '</div>' +
-          '<div class="ih-card-title">Managed Fleet &amp; Remote Infrastructure</div>' +
-          '<div class="ih-card-desc">Active endpoints in inventory, mobile VPN roamers &amp; fleet lifecycle</div>' +
-        '</div>' +
-        '<div class="ih-quad-grid-compact">' +
-          '<div class="ih-quad-item blue">' +
-            '<div class="ih-quad-num blue">' + totalAssessed + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Managed Endpoints</div>' +
-              '<div class="ih-quad-sub">Active estate</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item purple">' +
-            '<div class="ih-quad-num purple">' + vpnCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Remote &amp; Mobile VPN</div>' +
-              '<div class="ih-quad-sub">Roaming clients</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item green">' +
-            '<div class="ih-quad-num green">+' + newCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">New Endpoints</div>' +
-              '<div class="ih-quad-sub">Onboarded</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="ih-quad-item amber">' +
-            '<div class="ih-quad-num amber">-' + remCount + '</div>' +
-            '<div class="ih-quad-meta">' +
-              '<div class="ih-quad-lbl">Decommissioned</div>' +
-              '<div class="ih-quad-sub">Retired devices</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="ih-metrics-footer-row">' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-blue">' + totalAssessed + ' UNITS</div>' +
-            '<div class="ih-stat-lbl">Active Inventory</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-blue">' + vpnCount + ' ROAMING</div>' +
-            '<div class="ih-stat-lbl">Mobile VPN Access</div>' +
-          '</div>' +
-          '<div class="ih-stat-col">' +
-            '<div class="ih-stat-val val-green">● Monitored Fleet</div>' +
-            '<div class="ih-stat-lbl">Telemetry Status</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
 
   function endpointMonthCard(r, m, opts = {}) {
     if (!r) return '';
@@ -11832,14 +12327,14 @@ button.sla-radial-card:hover {
               '</div>' +
             '</div>' +
             '<div class="donut-legend-grid">' +
-              '<div class="donut-leg-item">' +
+              '<button type="button" class="donut-leg-item" onclick="openClientPatchCompDetail(0)" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Compliant Endpoints">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name">Compliant Endpoints</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasPcData && compEndpoints !== null ? compEndpoints : '–') + '</span><span class="donut-leg-pct">' + (hasPcData ? pcPctVal + '%' : '–') + '</span></div>' +
-              '</div>' +
-              '<div class="donut-leg-item">' +
+              '</button>' +
+              '<button type="button" class="donut-leg-item" onclick="openClientPatchCompDetail(1)" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Non-Compliant Endpoints">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name">Non-Compliant</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasPcData && nonCompEndpoints !== null ? nonCompEndpoints : '–') + '</span><span class="donut-leg-pct">' + (hasPcData ? (100 - parseFloat(pcPctVal)).toFixed(1) + '%' : '–') + '</span></div>' +
-              '</div>' +
+              '</button>' +
               '<div class="donut-leg-item">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name">Total Assessed</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasMe ? totalAssessed : '–') + '</span><span class="donut-leg-pct">' + (hasMe ? '100% estate' : '–') + '</span></div>' +
@@ -11906,6 +12401,7 @@ button.sla-radial-card:hover {
             '</div>' +
           '</section>' +
         '</div>' +
+        '<div id="patch-comp-detail-slot" style="display:none; width:100%; margin-top:20px;"></div>' +
 
         // Selected Month Compliance & Patching Status (Single Month View)
         (function() {
@@ -12019,10 +12515,26 @@ button.sla-radial-card:hover {
               '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
             '</button>' +
             '<div class="ih-carousel-track" id="dhCarouselTrack">' +
-              renderDeviceHealth3DCard0(m) +
-              renderDeviceHealth3DCard1(m) +
-              renderDeviceHealth3DCard2(m) +
-              renderDeviceHealth3DCard3(m) +
+              endpointMonthCard(fl('Endpoint protection coverage %'), m, {
+                sub: (hasEpcData && protCount !== null ? protCount + ' of ' + totalAssessed + ' devices fully protected' : (FULL[m] + ' ' + state.year + ' fleet coverage')),
+                badge: (epcIsOnTarget ? '✓ Target ≥ 98% Achieved' : '⚠ Below 98% Policy')
+              }) +
+              endpointMonthCard(fl('Devices not reporting % of estate'), m, {
+                sub: (hasDnr && nrCount !== null ? (nrCount === 0 ? '0 devices offline · Agent heartbeat active' : nrCount + ' device' + (nrCount === 1 ? '' : 's') + ' currently offline') : 'Agent reporting telemetry'),
+                badge: ((nrCount === 0 || fl('Devices not reporting % of estate')?.rag[m] === 1) ? '✓ Zero Offline Devices' : '⚠ Devices Not Reporting')
+              }) +
+              endpointMonthCard(fl('Devices with outdated protection % of estate'), m, {
+                sub: (hasDop && opCount !== null ? (opCount === 0 ? '0 devices with signature lag · 100% current' : opCount + ' device' + (opCount === 1 ? '' : 's') + ' require updates') : 'Signature definitions status'),
+                badge: ((opCount === 0 || fl('Devices with outdated protection % of estate')?.rag[m] === 1) ? '✓ Definitions 100% Current' : '⚠ Outdated Signatures')
+              }) +
+              endpointMonthCard(me, m, {
+                sub: (hasMe ? totalAssessed + ' total managed endpoints in active inventory' : 'Active endpoint inventory'),
+                badge: '● Monitored Fleet'
+              }) +
+              endpointMonthCard(mo, m, {
+                sub: (mo && typeof mo.v[m] === 'number' ? mo.v[m] + ' remote & mobile devices roaming via VPN' : 'Mobile VPN telemetry'),
+                badge: '● Remote Clients'
+              }) +
             '</div>' +
             '<button type="button" class="ih-nav-btn right" id="dhNavNext" aria-label="Next Health Metric">' +
               '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7.5 15l5-5-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
@@ -12032,7 +12544,8 @@ button.sla-radial-card:hover {
             '<div class="ih-dot active" data-dot-idx="0" title="Endpoint Protection Coverage"></div>' +
             '<div class="ih-dot" data-dot-idx="1" title="Devices Not Reporting"></div>' +
             '<div class="ih-dot" data-dot-idx="2" title="Devices with Outdated Protection"></div>' +
-            '<div class="ih-dot" data-dot-idx="3" title="Managed Estate &amp; Remote VPN"></div>' +
+            '<div class="ih-dot" data-dot-idx="3" title="Managed Endpoints"></div>' +
+            '<div class="ih-dot" data-dot-idx="4" title="Mobile Devices (VPN)"></div>' +
           '</div>' +
           '<div class="ih-bottom-action-wrap">' +
             '<div class="ih-pill-action">' +
@@ -12064,7 +12577,7 @@ button.sla-radial-card:hover {
               '</div>' +
             '</div>' +
             '<div class="patches-pie-legend-grid">' +
-              '<button type="button" class="patches-leg-card" data-open="' + (critRow?.r || 15) + '" title="Inspect Critical Patches">' +
+              '<button type="button" class="patches-leg-card" onclick="openClientPatchesSegmentDetail(0)" title="Inspect Critical Patches">' +
                 '<div class="patches-leg-top">' +
                   '<span class="patches-leg-dot red"></span>' +
                   '<span class="patches-leg-name">Critical Patches</span>' +
@@ -12075,7 +12588,7 @@ button.sla-radial-card:hover {
                   '<span class="patches-leg-pct">' + critPct + '</span>' +
                 '</div>' +
               '</button>' +
-              '<button type="button" class="patches-leg-card" data-open="' + (highRow?.r || 16) + '" title="Inspect High Patches">' +
+              '<button type="button" class="patches-leg-card" onclick="openClientPatchesSegmentDetail(1)" title="Inspect High Patches">' +
                 '<div class="patches-leg-top">' +
                   '<span class="patches-leg-dot amber"></span>' +
                   '<span class="patches-leg-name">High-Priority Patches</span>' +
@@ -12101,6 +12614,7 @@ button.sla-radial-card:hover {
             renderCriticalTurnaroundCard(m) +
           '</div>' +
         '</div>' +
+        '<div id="patches-pie-detail-slot" style="display:none; width:100%; margin-top:20px;"></div>' +
       '</div>' +
     '</div>';
   }
@@ -12111,7 +12625,7 @@ button.sla-radial-card:hover {
     const prevBtn = stage.querySelector('#dhNavPrev');
     const nextBtn = stage.querySelector('#dhNavNext');
     const dots = stage.querySelectorAll('.ih-dot');
-    const cards = Array.from(stage.querySelectorAll('.ih-carousel-card'));
+    const cards = Array.from(stage.querySelectorAll('.endpoint-month-card'));
     const N = cards.length;
     if (N === 0) return;
 
@@ -12277,6 +12791,10 @@ button.sla-radial-card:hover {
             maintainAspectRatio: false,
             cutout: '72%',
             rotation: -90,
+            onClick: (evt, elements) => {
+              if (!elements || !elements.length) return;
+              openClientPatchCompDetail(elements[0].index);
+            },
             animation: {
               animateRotate: true,
               animateScale: true,
@@ -12447,6 +12965,10 @@ button.sla-radial-card:hover {
           maintainAspectRatio: false,
           cutout: '72%',
           rotation: 0,
+          onClick: (evt, elements) => {
+            if (!elements || !elements.length) return;
+            openClientPatchesSegmentDetail(elements[0].index);
+          },
           animation: {
             animateRotate: true,
             animateScale: true,
@@ -12746,18 +13268,18 @@ button.sla-radial-card:hover {
               '</div>' +
             '</div>' +
             '<div class="donut-legend-grid">' +
-              '<div class="donut-leg-item">' +
+              '<button type="button" class="donut-leg-item" onclick="openClientVulnDonutDetail(0)" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Critical Vulnerabilities">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name">Critical Open</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? critVal : '–') + '</span><span class="donut-leg-pct">' + critPct + '% (Target: 0)</span></div>' +
-              '</div>' +
-              '<div class="donut-leg-item">' +
+              '</button>' +
+              '<button type="button" class="donut-leg-item" onclick="openClientVulnDonutDetail(1)" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect High-Priority Vulnerabilities">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name">High-Priority</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? hiVal : '–') + '</span><span class="donut-leg-pct">' + hiPct + '% (Target: ≤ 10)</span></div>' +
-              '</div>' +
-              '<div class="donut-leg-item">' +
+              '</button>' +
+              '<button type="button" class="donut-leg-item" onclick="openClientVulnDonutDetail(2)" style="cursor:pointer;background:none;border:none;text-align:left;width:100%;font:inherit;color:inherit;padding:0;" title="Inspect Medium Vulnerabilities">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name">Medium Severity</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? medVal : '–') + '</span><span class="donut-leg-pct">' + medPct + '%</span></div>' +
-              '</div>' +
+              '</button>' +
               '<div class="donut-leg-item">' +
                 '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name">Critical SLA</span></div>' +
                 '<div class="donut-leg-stats"><span class="donut-leg-val">' + (hasData ? (critVal === 0 ? 'Clear' : critVal + ' Breach') : '–') + '</span><span class="donut-leg-pct">Zero tolerance</span></div>' +
@@ -12785,6 +13307,7 @@ button.sla-radial-card:hover {
             '</div>' +
           '</section>' +
         '</div>' +
+        '<div id="vuln-donut-detail-slot" style="display:none; width:100%; margin-top:20px;"></div>' +
 
         // Monthly Historical Open vs Fixed with Luminous Mountain Ridge
         (function() {
@@ -12917,6 +13440,10 @@ button.sla-radial-card:hover {
           maintainAspectRatio: false,
           cutout: '72%',
           rotation: -90,
+          onClick: (evt, elements) => {
+            if (!elements || !elements.length) return;
+            openClientVulnDonutDetail(elements[0].index);
+          },
           animation: {
             animateRotate: true,
             animateScale: true,
@@ -14740,10 +15267,18 @@ button.sla-radial-card:hover {
       drawCharts();
     } else if (tab.id === 'endpoints') {
       drawEndpointCharts();
+      if (activeClientDetail && activeClientDetail.type === 'patches') {
+        openClientPatchesSegmentDetail(activeClientDetail.idx);
+      } else if (activeClientDetail && activeClientDetail.type === 'patch_comp') {
+        openClientPatchCompDetail(activeClientDetail.idx);
+      }
     } else if (tab.id === 'threats') {
       drawThreatCharts();
     } else if (tab.id === 'vuln') {
       drawVulnCharts();
+      if (activeClientDetail && activeClientDetail.type === 'vuln') {
+        openClientVulnDonutDetail(activeClientDetail.idx);
+      }
     } else if (tab.id === 'identity') {
       drawIdentityCharts();
     } else if (tab.id === 'service') {
@@ -14915,6 +15450,7 @@ button.sla-radial-card:hover {
       return;
     }
     if (t.dataset.tab) {
+      activeClientDetail = null;
       state.tab = t.dataset.tab;
       closeDrawer();
       render();
