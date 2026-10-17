@@ -13069,16 +13069,32 @@ button.vuln-chip:hover {
       '</div>' +
 
       // Fixing Speed
-      '<div class="blk">' + bt('Fixing speed', 'Average days from finding a critical weakness to fixing it') +
-        '<div class="fx"><section class="card chart-card"><div class="card-head"><h2 class="card-title">Remediation turnaround (Critical)</h2><p class="card-sub">Mean turnaround in days from vulnerability disclosure to remediation completion</p></div>' +
+      (function() {
+        const isMtOnTarget = typeof mtVal === 'number' && mtVal <= (mt?.target || 14);
+        const mtStatusBadge = (typeof mtVal === 'number')
+          ? (isMtOnTarget
+              ? '<span class="score-badge-status optimal">● Within Target (≤ 14 d)</span>'
+              : '<span class="score-badge-status warning">● Off Target (' + mtVal + ' d vs ≤ 14 d)</span>')
+          : '<span class="score-badge-status neutral">● Data Unavailable</span>';
+        const mtExplanation = typeof mtVal === 'number'
+          ? (isMtOnTarget
+              ? ('Critical vulnerabilities required an average turnaround of <strong>' + fmt(mt, mtVal) + '</strong> in ' + FULL[m] + ' ' + state.year + ', achieving the ≤ ' + fmt(mt, mt.target) + ' contractual SLA standard.')
+              : ('Critical vulnerabilities required an average turnaround of <strong>' + fmt(mt, mtVal) + '</strong> in ' + FULL[m] + ' ' + state.year + ', exceeding the ≤ ' + fmt(mt, mt.target) + ' target SLA threshold.'))
+          : 'Turnaround telemetry is pending for ' + FULL[m] + ' ' + state.year + '.';
+
+        return '<div class="blk">' + bt('Fixing speed', 'Average days from finding a critical weakness to fixing it') +
+          '<section class="card chart-card"><div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start">' +
+            '<div><h2 class="card-title">Remediation turnaround (Critical)</h2><p class="card-sub">Mean turnaround in days from vulnerability disclosure to remediation completion</p></div>' +
+            mtStatusBadge +
+          '</div>' +
           '<div class="lg"><span><i style="background:var(--s1)"></i>Days to fix critical</span><span><i class="dash"></i>Target ' + fmt(mt, mt.target) + '</span></div>' +
           '<div class="chart" style="height:220px !important; min-height:220px !important;"><canvas id="v2" role="img" aria-label="Line of mean days to remediate critical vulnerabilities by month with a 14 day target line">Days to remediate critical by month.</canvas></div>' +
           '<div class="client-explanation-box">' +
             '<i class="ce-icon">ℹ</i>' +
-            '<div class="ce-text">Critical vulnerabilities required an average turnaround of <strong>' + fmt(mt, mtVal) + '</strong> in ' + FULL[m] + ' ' + state.year + ', meeting the ≤ ' + fmt(mt, mt.target) + ' contractual SLA standard.</div>' +
+            '<div class="ce-text">' + mtExplanation + '</div>' +
           '</div>' +
-        '</section>' +
-        mcard(mt, m) + '</div></div>' +
+        '</section></div>';
+      })() +
     '</div>';
   }
 
