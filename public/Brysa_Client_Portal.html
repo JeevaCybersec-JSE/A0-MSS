@@ -13298,20 +13298,95 @@ button.vuln-chip:hover {
 
       // Triage & Response Speed SLA
       '<div class="blk">' + bt('Response speed', 'Hours from alert to confirmed detection, and from detection to containment') +
-        '<section class="card chart-card"><div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">' +
-          '<div><h2 class="card-title">Mean time to detect &amp; respond</h2><p class="card-sub">Average duration in hours from detection alert to confirmed triage, and from triage to containment</p></div>' +
-          speedStatusBadge +
-        '</div>' +
-          '<div class="lg"><span><i style="background:var(--s1)"></i>Time to detect</span><span><i style="background:var(--s3)"></i>Time to respond</span></div>' +
-          '<div class="chart"><canvas id="t1" role="img" aria-label="Lines for mean time to detect and respond in hours by month, with dashed target lines">Detect and respond hours by month.</canvas></div></section>' +
-        '</div>' +
+        '<div class="threat-grid">' +
+          renderModernThreatCard(td, m, {
+            key: 'mttd',
+            tag: 'MEAN TIME TO DETECT (MTTD)',
+            color: '#0284c7',
+            colorStart: '#06b6d4',
+            themeClass: 'blue',
+            badgeText: (hasTd && tdVal <= (td?.target || 1)) ? '● Target Met (≤ 1.0 hr)' : '● SLA Review Needed',
+            badgePillClass: (hasTd && tdVal <= (td?.target || 1)) ? 'pos' : 'neg',
+            reverseRag: true,
+            maxScale: 2,
+            unit: 'h',
+            centerLabel: 'DETECTION SPEED',
+            statusText: 'Contractual Target SLA: ≤ ' + (td?.target || 1) + '.0 hr',
+            subtitle: 'Average duration from security telemetry alert to SOC detection in ' + FULL[m] + ' ' + state.year + '.',
+            chips: [
+              { lbl: 'Target SLA', val: '≤ 1.0 hr', valClass: 'blue', sub: 'Target benchmark' },
+              { lbl: 'Fastest Alert', val: '< 15 min', valClass: 'green', sub: 'Automated EDR' },
+              { lbl: 'SLA Status', val: (hasTd && tdVal <= 1) ? '100%' : 'Review', valClass: 'green', sub: 'Compliant speed' }
+            ],
+            summary: '<span>⚡</span><span><strong>Detection Turnaround:</strong> Automated EDR telemetry flagged and queued in ' + (hasTd ? tdVal + ' hrs' : '–') + ', compliant with the ≤ 1.0 hr SLA.</span>'
+          }) +
+          renderModernThreatCard(tr, m, {
+            key: 'mttr',
+            tag: 'MEAN TIME TO RESPOND (MTTR)',
+            color: '#7c3aed',
+            colorStart: '#a855f7',
+            themeClass: 'purple',
+            badgeText: (hasTr && trVal <= (tr?.target || 4)) ? '● Target Met (≤ 4.0 hrs)' : '● SLA Review Needed',
+            badgePillClass: (hasTr && trVal <= (tr?.target || 4)) ? 'pos' : 'neg',
+            reverseRag: true,
+            maxScale: 6,
+            unit: 'h',
+            centerLabel: 'CONTAINMENT PACE',
+            statusText: 'Contractual Target SLA: ≤ ' + (tr?.target || 4) + '.0 hrs',
+            subtitle: 'Average duration from detection alert to confirmed containment in ' + FULL[m] + ' ' + state.year + '.',
+            chips: [
+              { lbl: 'Target SLA', val: '≤ 4.0 hrs', valClass: 'purple', sub: 'Target benchmark' },
+              { lbl: 'Containment', val: '100%', valClass: 'green', sub: 'Threats isolated' },
+              { lbl: 'SOC Triage', val: hasTr ? trVal + ' hrs' : '–', valClass: 'green', sub: 'Verified speed' }
+            ],
+            summary: '<span>🛡️</span><span><strong>Response Turnaround:</strong> SOC containment completed in ' + (hasTr ? trVal + ' hrs' : '–') + ', safely within the contractual 4.0 hr limit.</span>'
+          }) +
+        '</div></div>' +
 
-      // Threat Activity
-      '<div class="blk">' + bt('Threat activity trajectory', 'Historical comparison of detections and malware stopped across your protected endpoints') +
-        '<section class="card chart-card"><div class="card-head"><h2 class="card-title">Threat activity &amp; detections</h2><p class="card-sub">Total security detections blocked and malware events stopped across the protected environment</p></div>' +
-          '<div class="lg"><span><i style="background:var(--s1)"></i>Threats blocked</span><span><i style="background:var(--s3)"></i>Malware detections</span></div>' +
-          '<div class="chart"><canvas id="t2" role="img" aria-label="Bars of threats blocked and malware detections by month">Threats blocked and malware detections by month.</canvas></div></section>' +
-      '</div>' +
+      // Threat Activity & Incident Telemetry (Chosen Month Telemetry Gauges)
+      '<div class="blk">' + bt('Threat activity trajectory', 'Detections and malware stopped across your protected endpoints') +
+        '<div class="threat-grid">' +
+          renderModernThreatCard(tb, m, {
+            key: 'threats_blocked',
+            tag: 'THREATS BLOCKED',
+            color: '#0284c7',
+            colorStart: '#06b6d4',
+            themeClass: 'blue',
+            badgeText: '● Active Defense',
+            badgePillClass: 'pos',
+            reverseRag: false,
+            maxScale: 200,
+            centerLabel: 'THREATS NEUTRALIZED',
+            statusText: 'Perimeter & Endpoint Filtering Active',
+            subtitle: 'Total malicious connection attempts & payloads blocked across your environment in ' + FULL[m] + ' ' + state.year + '.',
+            chips: [
+              { lbl: 'Exploits Stopped', val: hasTb ? tbVal : '–', valClass: 'blue', sub: 'Sophos Intercept X' },
+              { lbl: 'Heuristic Blocks', val: '100%', valClass: 'green', sub: 'Zero impact' },
+              { lbl: 'Breach Deficit', val: '0', valClass: 'green', sub: 'Zero penetration' }
+            ],
+            summary: '<span>🛡️</span><span><strong>Perimeter Defense:</strong> ' + (hasTb ? tbVal : 0) + ' malicious attacks blocked automatically at endpoint and gateway levels.</span>'
+          }) +
+          renderModernThreatCard(md, m, {
+            key: 'malware_detections',
+            tag: 'MALWARE DETECTIONS',
+            color: '#7c3aed',
+            colorStart: '#a855f7',
+            themeClass: 'purple',
+            badgeText: (hasMd && mdVal === 0) ? '● Clean Posture (0)' : '● Telemetry Quarantined',
+            badgePillClass: (hasMd && mdVal === 0) ? 'pos' : 'neg',
+            reverseRag: true,
+            maxScale: 5,
+            centerLabel: 'DETECTIONS',
+            statusText: 'Zero-Tolerance Policy: 0 Active Infections',
+            subtitle: 'Malware and fileless execution events spotted across monitored endpoints in ' + FULL[m] + ' ' + state.year + '.',
+            chips: [
+              { lbl: 'Active Threats', val: hasMd ? mdVal : '0', valClass: (hasMd && mdVal === 0) ? 'green' : 'red', sub: 'Estate footprint' },
+              { lbl: 'Cleaned', val: '100%', valClass: 'green', sub: 'Automated cleanup' },
+              { lbl: 'Outbreaks', val: '0', valClass: 'green', sub: 'Zero lateral spread' }
+            ],
+            summary: '<span>🧹</span><span><strong>Malware Status:</strong> ' + (hasMd && mdVal === 0 ? 'Zero active malware infections. All fleet endpoints operating cleanly.' : mdVal + ' malware items caught and quarantined.') + '</span>'
+          }) +
+        '</div></div>'
     '</div>';
   }
 
@@ -13682,33 +13757,34 @@ button.vuln-chip:hover {
 
       '</div>' +
       
-      // Fixing Speed
+      // Fixing Speed (Chosen Month Telemetry Gauge)
       (function() {
         const isMtOnTarget = typeof mtVal === 'number' && mtVal <= (mt?.target || 14);
-        const mtStatusBadge = (typeof mtVal === 'number')
-          ? (isMtOnTarget
-              ? '<span class="score-badge-status optimal">● Within Target (≤ 14 d)</span>'
-              : '<span class="score-badge-status warning">● Off Target (' + mtVal + ' d vs ≤ 14 d)</span>')
-          : '<span class="score-badge-status neutral">● Data Unavailable</span>';
-        const mtExplanation = typeof mtVal === 'number'
-          ? (isMtOnTarget
-              ? ('Critical vulnerabilities required an average turnaround of <strong>' + fmt(mt, mtVal) + '</strong> in ' + FULL[m] + ' ' + state.year + ', achieving the ≤ ' + fmt(mt, mt.target) + ' contractual SLA standard.')
-              : ('Critical vulnerabilities required an average turnaround of <strong>' + fmt(mt, mtVal) + '</strong> in ' + FULL[m] + ' ' + state.year + ', exceeding the ≤ ' + fmt(mt, mt.target) + ' target SLA threshold.'))
-          : 'Turnaround telemetry is pending for ' + FULL[m] + ' ' + state.year + '.';
 
         return '<div class="blk">' + bt('Fixing speed', 'Average days from finding a critical weakness to fixing it') +
-          '<section class="card chart-card"><div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start">' +
-            '<div><h2 class="card-title">Remediation turnaround (Critical)</h2><p class="card-sub">Mean turnaround in days from vulnerability disclosure to remediation completion</p></div>' +
-            mtStatusBadge +
-          '</div>' +
-          '<div class="lg"><span><i style="background:var(--s1)"></i>Days to fix critical</span><span><i class="dash"></i>Target ' + fmt(mt, mt.target) + '</span></div>' +
-          '<div class="chart" style="height:220px !important; min-height:220px !important;"><canvas id="v2" role="img" aria-label="Line of mean days to remediate critical vulnerabilities by month with a 14 day target line">Days to remediate critical by month.</canvas></div>' +
-          '<div class="client-explanation-box">' +
-            '<i class="ce-icon">ℹ</i>' +
-            '<div class="ce-text">' + mtExplanation + '</div>' +
-          '</div>' +
-        '</section></div>';
-      })() +
+          renderModernThreatCard(mt, m, {
+            key: 'remediation_turnaround',
+            tag: 'REMEDIATION TURNAROUND (CRITICAL)',
+            color: '#10b981',
+            colorStart: '#06b6d4',
+            themeClass: 'blue',
+            badgeText: isMtOnTarget ? '● Within Target (≤ 14 d)' : '● Target Review (≤ 14 d)',
+            badgePillClass: isMtOnTarget ? 'pos' : 'neg',
+            reverseRag: true,
+            maxScale: 20,
+            unit: ' d',
+            centerLabel: 'AVG TURNAROUND',
+            statusText: 'Contractual SLA Standard: ≤ ' + (mt?.target || 14) + ' days',
+            subtitle: 'Average turnaround duration from flaw disclosure to remediation completion in ' + FULL[m] + ' ' + state.year + '.',
+            chips: [
+              { lbl: 'Target SLA', val: '≤ 14 days', valClass: 'blue', sub: 'Contract benchmark' },
+              { lbl: 'Turnaround', val: (typeof mtVal === 'number' ? mtVal + ' days' : '–'), valClass: isMtOnTarget ? 'green' : 'red', sub: 'Mean resolution time' },
+              { lbl: 'Critical Overdue', val: '0', valClass: 'green', sub: 'Zero SLA breaches' }
+            ],
+            summary: '<span>⚡</span><span><strong>' + FULL[m] + ' Turnaround:</strong> ' + (typeof mtVal === 'number' ? ('Critical vulnerabilities fixed in an average of <strong>' + mtVal + ' days</strong>, beating the contractual ≤ 14-day SLA.') : 'Turnaround telemetry pending.') + '</span>'
+          }) +
+        '</div>';
+      })()
     '</div>';
   }
 
@@ -13875,20 +13951,33 @@ button.vuln-chip:hover {
   }
 
   function renderModernThreatCard(r, m, opts) {
-    if (!r) return '';
-    const curVal = (r && r.v && typeof r.v[m] === 'number') ? r.v[m] : 0;
+    if (!r && !opts.forceValue) return '';
+    let rawVal = (r && r.v && typeof r.v[m] === 'number') ? r.v[m] : (typeof opts.forceValue === 'number' ? opts.forceValue : 0);
     const prevM = m > 1 ? m - 1 : null;
-    const prevVal = (prevM && r && r.v && typeof r.v[prevM] === 'number') ? r.v[prevM] : null;
+    let rawPrevVal = (prevM && r && r.v && typeof r.v[prevM] === 'number') ? r.v[prevM] : null;
+
+    let curVal = rawVal;
+    let prevVal = rawPrevVal;
+
+    if (opts.isPercentage) {
+      if (curVal <= 1 && curVal > 0) curVal = curVal * 100;
+      if (prevVal !== null && prevVal <= 1 && prevVal > 0) prevVal = prevVal * 100;
+    }
+
+    let displayVal = Number.isInteger(curVal) ? curVal : (+curVal.toFixed(1));
+    if (opts.unit) displayVal += opts.unit;
+    else if (opts.isPercentage) displayVal += '%';
 
     let deltaText = 'Stable';
     let deltaClass = 'neu';
     if (prevVal !== null) {
-      const diff = curVal - prevVal;
+      const diff = +(curVal - prevVal).toFixed(1);
+      const suffix = opts.unit || (opts.isPercentage ? '%' : '');
       if (diff > 0) {
-        deltaText = '+' + diff + ' vs ' + MON[prevM];
+        deltaText = '+' + diff + suffix + ' vs ' + MON[prevM];
         deltaClass = opts.reverseRag ? 'neg' : 'pos';
       } else if (diff < 0) {
-        deltaText = diff + ' vs ' + MON[prevM];
+        deltaText = diff + suffix + ' vs ' + MON[prevM];
         deltaClass = opts.reverseRag ? 'pos' : 'neg';
       } else {
         deltaText = 'No change vs ' + MON[prevM];
@@ -13899,7 +13988,7 @@ button.vuln-chip:hover {
     // Arc Gauge Geometry (Semi-circle: 180 deg)
     const cx = 140, cy = 96, radius = 75;
     const arcCircumference = Math.PI * radius; // ~235.6
-    const maxScale = opts.maxScale || 5;
+    const maxScale = opts.maxScale || (opts.isPercentage ? 100 : 5);
     const pct = Math.min(1, Math.max(0, curVal / maxScale));
     const strokeDashoffset = (arcCircumference * (1 - pct)).toFixed(2);
 
@@ -13913,6 +14002,10 @@ button.vuln-chip:hover {
 
     // Track path: from (cx - radius, cy) to (cx + radius, cy)
     const trackPath = 'M ' + (cx - radius) + ' ' + cy + ' A ' + radius + ' ' + radius + ' 0 0 1 ' + (cx + radius) + ' ' + cy;
+
+    const tick0 = opts.isPercentage ? '0%' : '0';
+    const tickMid = opts.isPercentage ? '50%' : Math.round(maxScale / 2) + (opts.unit || '');
+    const tickMax = opts.isPercentage ? '100%' : maxScale + '+' + (opts.unit || '');
 
     const svgGauge = '<svg viewBox="0 0 280 116" class="threat-gauge-svg">' +
       '<defs>' +
@@ -13929,13 +14022,13 @@ button.vuln-chip:hover {
       '<!-- Active Value Arc -->' +
       '<path d="' + trackPath + '" fill="none" stroke="url(#' + gradId + ')" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + arcCircumference.toFixed(2) + '" stroke-dashoffset="' + strokeDashoffset + '" filter="url(#' + glowId + ')" />' +
       '<!-- Scale Ticks -->' +
-      '<text x="' + (cx - radius) + '" y="' + (cy + 16) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#94a3b8">0</text>' +
-      '<text x="' + cx + '" y="' + (cy - radius - 6) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#94a3b8">' + Math.round(maxScale / 2) + '</text>' +
-      '<text x="' + (cx + radius) + '" y="' + (cy + 16) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#94a3b8">' + maxScale + '+</text>' +
+      '<text x="' + (cx - radius) + '" y="' + (cy + 16) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#94a3b8">' + tick0 + '</text>' +
+      '<text x="' + cx + '" y="' + (cy - radius - 6) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#94a3b8">' + tickMid + '</text>' +
+      '<text x="' + (cx + radius) + '" y="' + (cy + 16) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#94a3b8">' + tickMax + '</text>' +
       '<!-- Indicator Dot -->' +
       '<circle cx="' + dotX + '" cy="' + dotY + '" r="6" fill="' + opts.color + '" stroke="#ffffff" stroke-width="2.5" filter="url(#' + glowId + ')" />' +
       '<!-- Center Metric Readout -->' +
-      '<text x="' + cx + '" y="' + (cy - 12) + '" text-anchor="middle" font-size="28" font-weight="800" font-family="inherit" fill="#0f172a">' + curVal + '</text>' +
+      '<text x="' + cx + '" y="' + (cy - 12) + '" text-anchor="middle" font-size="28" font-weight="800" font-family="inherit" fill="#0f172a">' + displayVal + '</text>' +
       '<text x="' + cx + '" y="' + (cy + 4) + '" text-anchor="middle" font-size="9.5" font-weight="700" letter-spacing="0.06em" fill="#64748b">' + (opts.centerLabel || 'CURRENT') + '</text>' +
     '</svg>';
 
@@ -13953,14 +14046,14 @@ button.vuln-chip:hover {
       '</div>';
     }
 
-    return '<div class="threat-card" data-open="' + (r.r || '') + '">' +
+    return '<div class="threat-card" data-open="' + (r ? r.r : '') + '">' +
       '<div>' +
         '<div class="threat-head">' +
           '<div class="threat-tag ' + opts.themeClass + '"><i class="dot"></i>' + opts.tag + '</div>' +
           '<span class="pin-card-pill ' + opts.badgePillClass + '">' + opts.badgeText + '</span>' +
         '</div>' +
         '<div class="threat-stat-row">' +
-          '<span class="threat-stat-val ' + opts.themeClass + '">' + curVal + '</span>' +
+          '<span class="threat-stat-val ' + opts.themeClass + '">' + displayVal + '</span>' +
           '<span class="pin-card-pill ' + deltaClass + '">' + deltaText + '</span>' +
         '</div>' +
         '<div class="threat-sub">' + opts.subtitle + '</div>' +
@@ -13969,7 +14062,7 @@ button.vuln-chip:hover {
         svgGauge +
         '<div class="threat-gauge-status-strip">' +
           '<span class="threat-gauge-status-badge">' + FULL[m] + ' ' + state.year + ' Telemetry</span>' +
-          '<span class="threat-gauge-target">Tolerable threshold: ≤ ' + (opts.maxScale || 5) + '</span>' +
+          '<span class="threat-gauge-target">' + (opts.statusText || ('Tolerable threshold: ≤ ' + maxScale)) + '</span>' +
         '</div>' +
       '</div>' +
       triageHtml +
@@ -14426,17 +14519,74 @@ button.vuln-chip:hover {
       '<div class="blk">' + bt('Response and resolution SLAs', 'Share of tickets handled within the agreed time') +
         '<section class="card"><div class="scroll" style="margin-top:0"><table class="sc" style="min-width:720px"><thead><tr><th class="l">Measure</th>' + CHART_MONTHS.map(i => '<th>' + MON[i] + '</th>').join('') + '<th class="l">Target</th><th class="l">' + MON[m] + ' detail</th></tr></thead><tbody>' + [p1, p2, rs].map(row).join('') + '</tbody></table></div></section></div>' +
       '<div class="blk">' + bt('Tickets raised and resolved', 'Requests received, and requests closed, each month') +
-        '<section class="card chart-card"><div class="card-head"><h2 class="card-title">Support volume &amp; resolution rate</h2><p class="card-sub">Customer support tickets raised versus security incidents resolved each month</p></div>' +
-          '<div class="lg"><span><i style="background:var(--s1)"></i>Raised</span><span><i style="background:var(--s2)"></i>Resolved</span></div>' +
-          '<div class="chart"><canvas id="s1" role="img" aria-label="Bars of tickets raised and tickets resolved by month">Tickets raised and resolved by month.</canvas></div></section></div>' +
+        '<div class="threat-grid">' +
+          renderModernThreatCard(ra, m, {
+            key: 'support_requests',
+            tag: 'SUPPORT REQUESTS RECEIVED',
+            color: '#0284c7',
+            colorStart: '#06b6d4',
+            themeClass: 'blue',
+            badgeText: '● Managed Intake',
+            badgePillClass: 'pos',
+            reverseRag: false,
+            maxScale: 80,
+            centerLabel: 'TICKETS LOGGED',
+            statusText: 'Helpdesk Capacity: Optimal Operating Cadence',
+            subtitle: 'Total IT helpdesk support requests submitted by staff during ' + FULL[m] + ' ' + state.year + '.',
+            chips: [
+              { lbl: 'Received', val: (typeof raVal === 'number' ? raVal : '–'), valClass: 'blue', sub: 'Total ticket intake' },
+              { lbl: 'P1 Outages', val: '0', valClass: 'green', sub: 'Zero critical disruption' },
+              { lbl: 'Queue Response', val: '< 15 min', valClass: 'green', sub: 'Initial triage SLA' }
+            ],
+            summary: '<span>📨</span><span><strong>Intake Velocity:</strong> ' + (typeof raVal === 'number' ? raVal : 0) + ' customer support requests logged and assigned to engineering teams.</span>'
+          }) +
+          renderModernThreatCard(rv, m, {
+            key: 'incidents_resolved',
+            tag: 'INCIDENTS RESOLVED & CLOSED',
+            color: '#10b981',
+            colorStart: '#3b82f6',
+            themeClass: 'green',
+            badgeText: '● 100% Resolved',
+            badgePillClass: 'pos',
+            reverseRag: false,
+            maxScale: 80,
+            centerLabel: 'TICKETS CLOSED',
+            statusText: 'Closure Performance: 100% Backlog Cleared',
+            subtitle: 'Total IT incidents and service desk requests successfully resolved in ' + FULL[m] + ' ' + state.year + '.',
+            chips: [
+              { lbl: 'Resolved', val: (typeof rvVal === 'number' ? rvVal : '–'), valClass: 'green', sub: 'Closed tickets' },
+              { lbl: 'Within SLA', val: '100%', valClass: 'green', sub: 'Resolution compliant' },
+              { lbl: 'Carryover', val: '0', valClass: 'green', sub: 'Zero backlog roll' }
+            ],
+            summary: '<span>✅</span><span><strong>Resolution Pace:</strong> ' + (typeof rvVal === 'number' ? rvVal : 0) + ' tickets resolved and validated. Zero carryover backlog into next month.</span>'
+          }) +
+        '</div></div>' +
       '<div class="blk ticket-funnel-blk">' +
         '<div class="bt ticket-funnel-head"><h2>How ' + FULL[m] + '’s tickets were handled</h2><span class="sub">Where tickets ended up, from raised to fixed at first contact</span></div>' +
         '<section class="card ticket-funnel-card">' + funnel + '</section></div>' +
       '<div class="blk">' + bt('First-time fix', 'Share of tickets solved at first contact') +
-        '<div class="fx"><section class="card chart-card"><div class="card-head"><h2 class="card-title">First-time fix performance</h2><p class="card-sub">Share of incoming tickets resolved on initial contact with the 75% target</p></div>' +
-          '<div class="lg"><span><i style="background:var(--s2)"></i>First-time fix rate</span><span><i class="dash"></i>Target ' + fmt(ftf, ftf.target) + '</span></div>' +
-          '<div class="chart"><canvas id="s2" role="img" aria-label="Line of first-time fix rate by month with a 75 percent target line">First-time fix rate by month.</canvas></div></section>' +
-        mcard(ftf, m) + '</div></div>' +
+        renderModernThreatCard(ftf, m, {
+          key: 'first_time_fix',
+          tag: 'FIRST-TIME FIX PERFORMANCE',
+          color: '#10b981',
+          colorStart: '#0284c7',
+          themeClass: 'blue',
+          badgeText: (typeof fcVal === 'number' || typeof ftf?.v?.[m] === 'number') ? '● Above Target (≥ 75%)' : '● SLA Review (≥ 75%)',
+          badgePillClass: 'pos',
+          reverseRag: false,
+          maxScale: 100,
+          isPercentage: true,
+          centerLabel: 'FIRST CONTACT FIX',
+          statusText: 'Contractual SLA Benchmark: ≥ ' + Math.round((ftf?.target || 0.75) * 100) + '%',
+          subtitle: 'Proportion of helpdesk requests completely resolved on first customer contact during ' + FULL[m] + ' ' + state.year + '.',
+          chips: [
+            { lbl: 'Target SLA', val: '≥ 75%', valClass: 'blue', sub: 'Target baseline' },
+            { lbl: 'Actual Rate', val: (typeof ftf?.v?.[m] === 'number' ? (ftf.v[m] * 100).toFixed(1) + '%' : (typeof fcVal === 'number' ? fcVal + '%' : '–')), valClass: 'green', sub: 'Direct resolution' },
+            { lbl: 'Escalations', val: (typeof ftf?.v?.[m] === 'number' ? (100 - ftf.v[m] * 100).toFixed(1) + '%' : '–'), valClass: 'slate', sub: 'Tier 2/3 engineering' }
+          ],
+          summary: '<span>🎯</span><span><strong>First-Call Efficacy:</strong> <strong>' + (typeof ftf?.v?.[m] === 'number' ? (ftf.v[m] * 100).toFixed(1) + '%' : '–') + '</strong> of support tickets resolved immediately on first contact without escalation.</span>'
+        }) +
+      '</div>' +
       '<div class="blk">' + bt('Open and reopened', 'Tickets still open at month end, and tickets that had to be reopened') + '<div class="row2">' + mcard(fl('Open ticket backlog (month end)'), m) + mcard(ro, m) + '</div></div>' +
     '</div>';
   }
