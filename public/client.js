@@ -2200,10 +2200,10 @@
     const badge = document.querySelector('.telemetry-pulse-badge');
     if (!badge) return;
     if (isLive) {
-      badge.innerHTML = '<span class="pulse-dot"></span><span>LIVE TELEMETRY VERIFIED</span>';
+      badge.innerHTML = '<span>LIVE TELEMETRY VERIFIED</span>';
       badge.classList.remove('fallback-mode');
     } else {
-      badge.innerHTML = '<span class="pulse-dot" style="background:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,0.6)"></span><span style="color:#f59e0b;font-weight:600">OFFLINE / CACHED FALLBACK DATA</span>';
+      badge.innerHTML = '<span style="color:#f59e0b;font-weight:600">OFFLINE / CACHED FALLBACK DATA</span>';
       badge.classList.add('fallback-mode');
     }
   }
@@ -2863,7 +2863,7 @@
         statusMonths.map(i => {
           const p_i = getExecutivePosture(i);
           const isActive = (i === m);
-          const statusDot = '<span class="posture-status-dot ' + p_i.key + '"></span>';
+          const statusDot = '';
           const statusText = p_i.isBreach ? 'Breached' : (p_i.key === 'g' ? 'Compliant' : (p_i.key === 'a' ? 'In Tolerance' : 'Action Required'));
 
           return '<button type="button" class="posture-trend-step ' + (isActive ? 'active' : '') + '" data-m="' + i + '" aria-pressed="' + isActive + '" title="View report for ' + FULL[i] + ' ' + state.year + '">' +
@@ -3414,8 +3414,21 @@
     const teleHeaderLabel = 'MONTHLY TELEMETRY' + (firstMon && lastMon ? ' (' + firstMon.toUpperCase() + (firstMon !== lastMon ? ' – ' + lastMon.toUpperCase() : '') + ')' : '');
     const teleColWidth = Math.max(280, telemetryMonths.length * 70);
 
-    const rowsHtml = sortedScored.map((r, idx) => {
+        const rowsHtml = sortedScored.map((r, idx) => {
       const rank = idx + 1;
+      const isTop1 = rank === 1;
+      const isHighlight = isTop1 || r.veto;
+
+      let evolHtml = '<span class="sc-evol n" title="No change vs previous month">–</span>';
+      if (prevM) {
+        if (r.rag[m] > r.rag[prevM]) {
+          evolHtml = '<span class="sc-evol g" title="Improved status vs previous month">▲ +1</span>';
+        } else if (r.rag[m] < r.rag[prevM]) {
+          evolHtml = '<span class="sc-evol r" title="Slipped status vs previous month">▼ -1</span>';
+        }
+      }
+
+      const icon = getPillarIcon(r.sec);
       const currentVal = fmt(r, r.v[m]);
       const statusCls = cls(r.rag[m]);
 
@@ -3430,10 +3443,15 @@
         '</div>';
       }).join('');
 
-      return '<div class="sc-card-row" data-open="' + r.r + '" data-status="' + r.rag[m] + '" role="button" tabindex="0" title="Click to view full 12-month telemetry audit for ' + r.name + '">' +
+      return '<div class="sc-card-row ' + (isHighlight ? 'sc-highlight' : '') + '" data-open="' + r.r + '" data-status="' + r.rag[m] + '" role="button" tabindex="0" title="Click to view full 12-month telemetry audit">' +
         '<div class="sc-row-left">' +
           '<div class="sc-rank-col">' +
+            (isTop1 ? '<span class="sc-trophy">🏆</span>' : '') +
             '<span class="sc-rank-num">' + rank + '</span>' +
+          '</div>' +
+          '<div class="sc-evol-col">' + evolHtml + '</div>' +
+          '<div class="sc-avatar-col">' +
+            '<div class="sc-avatar-hex" title="' + (r.sec || 'Metric') + '">' + icon + '</div>' +
           '</div>' +
           '<div class="sc-metric-col">' +
             '<div class="sc-metric-name">' + r.name + '</div>' +
@@ -3448,7 +3466,7 @@
         '</div>' +
 
         '<div class="sc-row-right">' +
-          '<div class="sc-tele-wrap" style="width:' + teleColWidth + 'px">' + telemetryHtml + '</div>' +
+          '<div class="sc-tele-wrap">' + telemetryHtml + '</div>' +
           '<div class="sc-score-col">' +
             '<div class="sc-score-pill ' + statusCls + '" title="Current Actual Value">' + currentVal + '</div>' +
           '</div>' +
@@ -3555,7 +3573,7 @@
 
     const sub = opts.sub || behind(r, m) || (FULL[m] + ' ' + state.year + ' verified posture');
     const targetLabel = target(r);
-    const badgeText = opts.badge || (rag === 1 ? '✓ Target Achieved' : (rag === -1 ? '⚠ SLA Deficit' : '● ' + ragText));
+    const badgeText = opts.badge || (rag === 1 ? '✓ Target Achieved' : (rag === -1 ? '⚠ SLA Deficit' : '' + ragText));
     const badgeClass = rag === 1 ? '' : (rag === 0 ? 'warning' : (rag === -1 ? 'danger' : ''));
 
     // Gauge calculation for single month
@@ -3577,7 +3595,7 @@
     return '<button type="button" class="endpoint-month-card" data-open="' + r.r + '" title="Open ' + nm + ' Telemetry">' +
       '<div class="emc-head">' +
         '<h3 class="emc-title">' + nm + '</h3>' +
-        '<span class="score-badge-status ' + ragClass + '">' + (rag === 1 ? '● ' : '') + ragText + '</span>' +
+        '<span class="score-badge-status ' + ragClass + '">' + ragText + '</span>' +
       '</div>' +
       '<div class="emc-body">' +
         '<div class="emc-val-row">' +
@@ -3620,9 +3638,9 @@
     // Status badge
     const statusBadge = hasVal
       ? (isOnTarget
-          ? '<span class="score-badge-status optimal">● Optimal (' + valFormatted + 'd ≤ ' + targetDays + 'd SLA)</span>'
-          : '<span class="score-badge-status danger">● SLA Breach (' + valFormatted + 'd > ' + targetDays + 'd SLA)</span>')
-      : '<span class="score-badge-status neutral">● Data Pending</span>';
+          ? '<span class="score-badge-status optimal">Optimal (' + valFormatted + 'd ≤ ' + targetDays + 'd SLA)</span>'
+          : '<span class="score-badge-status danger">SLA Breach (' + valFormatted + 'd > ' + targetDays + 'd SLA)</span>')
+      : '<span class="score-badge-status neutral">Data Pending</span>';
 
     // Gauge calculation (Scale 0 to 14 days, with 7d target at 50% midpoint)
     const maxScale = 14;
@@ -3811,9 +3829,9 @@
     const pcIsOnTarget = hasPcData && parseFloat(pcPctVal) >= pcTarget;
     const pcStatusBadge = hasPcData
       ? (pcIsOnTarget
-          ? '<span class="score-badge-status optimal">● Target Achieved</span>'
-          : '<span class="score-badge-status warning">● Below Target (95% SLA)</span>')
-      : '<span class="score-badge-status neutral">● Data Unavailable</span>';
+          ? '<span class="score-badge-status optimal">Target Achieved</span>'
+          : '<span class="score-badge-status warning">Below Target (95% SLA)</span>')
+      : '<span class="score-badge-status neutral">Data Unavailable</span>';
     const pcDelta = delta(pc, m);
     const pcGapPts = hasPcData ? (pcTarget - parseFloat(pcPctVal)).toFixed(1) : null;
 
@@ -3831,12 +3849,12 @@
     let srPctVal = '–';
     let depSuccessPct = 0;
     let depFailPct = 0;
-    let srStatusBadge = '<span class="score-badge-status neutral">● Data Unavailable</span>';
+    let srStatusBadge = '<span class="score-badge-status neutral">Data Unavailable</span>';
 
     if (hasDepData) {
       if (totalDeployments === 0) {
         srPctVal = '–';
-        srStatusBadge = '<span class="score-badge-status neutral">● No Deployments</span>';
+        srStatusBadge = '<span class="score-badge-status neutral">No Deployments</span>';
         depSuccessPct = 0;
         depFailPct = 0;
       } else {
@@ -3846,15 +3864,15 @@
         depFailPct = ((fvVal / totalDeployments) * 100).toFixed(1);
         const srIsOnTarget = parseFloat(srPctVal) >= srTarget;
         srStatusBadge = srIsOnTarget
-          ? '<span class="score-badge-status optimal">● Target Met (≥97%)</span>'
-          : '<span class="score-badge-status danger">● Below Target (≥97%)</span>';
+          ? '<span class="score-badge-status optimal">Target Met (≥97%)</span>'
+          : '<span class="score-badge-status danger">Below Target (≥97%)</span>';
       }
     } else if (typeof sr?.v[m] === 'number') {
       srPctVal = (sr.v[m] * 100).toFixed(1);
       const srIsOnTarget = parseFloat(srPctVal) >= srTarget;
       srStatusBadge = srIsOnTarget
-        ? '<span class="score-badge-status optimal">● Target Met (≥97%)</span>'
-        : '<span class="score-badge-status danger">● Below Target (≥97%)</span>';
+        ? '<span class="score-badge-status optimal">Target Met (≥97%)</span>'
+        : '<span class="score-badge-status danger">Below Target (≥97%)</span>';
     }
 
     // 3. DEVICE HEALTH & PROTECTION COVERAGE
@@ -3884,9 +3902,9 @@
     const epcIsOnTarget = hasEpcData && parseFloat(epcPctVal) >= epcTarget;
     const epcStatusBadge = hasEpcData
       ? (epcIsOnTarget
-          ? '<span class="score-badge-status optimal">● Optimal Coverage (≥98%)</span>'
-          : '<span class="score-badge-status warning">● Attention Required (Target: 98%)</span>')
-      : '<span class="score-badge-status neutral">● Data Unavailable</span>';
+          ? '<span class="score-badge-status optimal">Optimal Coverage (≥98%)</span>'
+          : '<span class="score-badge-status warning">Attention Required (Target: 98%)</span>')
+      : '<span class="score-badge-status neutral">Data Unavailable</span>';
 
     // 4. PATCHES OUTSTANDING (CENTRAL OBJECTIVE)
     const critRow = fl('Critical patches outstanding');
@@ -3901,14 +3919,14 @@
     const critPct = (hasOutstandingData && totalOutstanding > 0) ? (((critCount || 0) / totalOutstanding) * 100).toFixed(1) + '%' : (hasOutstandingData ? '0%' : '–');
     const highPct = (hasOutstandingData && totalOutstanding > 0) ? (((highCount || 0) / totalOutstanding) * 100).toFixed(1) + '%' : (hasOutstandingData ? '0%' : '–');
 
-    let patchStatusBadge = '<span class="score-badge-status neutral">● Data Unavailable</span>';
+    let patchStatusBadge = '<span class="score-badge-status neutral">Data Unavailable</span>';
     if (hasOutstandingData) {
       if ((critCount || 0) > 0) {
-        patchStatusBadge = '<span class="score-badge-status danger">● Zero-Tolerance Breach (' + critCount + ' Critical)</span>';
+        patchStatusBadge = '<span class="score-badge-status danger">Zero-Tolerance Breach (' + critCount + ' Critical)</span>';
       } else if ((highCount || 0) > 5) {
-        patchStatusBadge = '<span class="score-badge-status warning">● Off Target (' + highCount + ' High)</span>';
+        patchStatusBadge = '<span class="score-badge-status warning">Off Target (' + highCount + ' High)</span>';
       } else {
-        patchStatusBadge = '<span class="score-badge-status optimal">● Within Target (0 Critical, ' + (highCount || 0) + ' High)</span>';
+        patchStatusBadge = '<span class="score-badge-status optimal">Within Target (0 Critical, ' + (highCount || 0) + ' High)</span>';
       }
     }
 
@@ -4140,11 +4158,11 @@
               }) +
               endpointMonthCard(me, m, {
                 sub: (hasMe ? totalAssessed + ' total managed endpoints in active inventory' : 'Active endpoint inventory'),
-                badge: '● Monitored Fleet'
+                badge: 'Monitored Fleet'
               }) +
               endpointMonthCard(mo, m, {
                 sub: (mo && typeof mo.v[m] === 'number' ? mo.v[m] + ' remote & mobile devices roaming via VPN' : 'Mobile VPN telemetry'),
-                badge: '● Remote Clients'
+                badge: 'Remote Clients'
               }) +
             '</div>' +
             '<button type="button" class="ih-nav-btn right" id="dhNavNext" aria-label="Next Health Metric">' +
@@ -4674,13 +4692,13 @@
 
     const speedOnTarget = hasSpeedData && tdVal <= (td?.target || 1) && trVal <= (tr?.target || 4);
     const speedStatusBadge = hasSpeedData
-      ? (speedOnTarget ? '<span class="score-badge-status optimal">● Within SLA Targets (≤1h / ≤4h)</span>' : '<span class="score-badge-status warning">● SLA Review Needed</span>')
-      : '<span class="score-badge-status neutral">● Data Unavailable</span>';
+      ? (speedOnTarget ? '<span class="score-badge-status optimal">Within SLA Targets (≤1h / ≤4h)</span>' : '<span class="score-badge-status warning">SLA Review Needed</span>')
+      : '<span class="score-badge-status neutral">Data Unavailable</span>';
 
     const zeroBreaches = (p1Val === 0 && ransVal === 0);
     const threatStatusBadge = zeroBreaches
-      ? '<span class="score-badge-status optimal">● 0 Zero-Tolerance Breaches</span>'
-      : '<span class="score-badge-status danger">● Active Breach</span>';
+      ? '<span class="score-badge-status optimal">0 Zero-Tolerance Breaches</span>'
+      : '<span class="score-badge-status danger">Active Breach</span>';
 
     return '<div class="stack">' +
       '<div class="sechead"><h2>Threats &amp; Response</h2><span class="sub">' + g + ' of ' + rs.length + ' scored metrics on target' + (bad ? ' · ' + bad + ' off target' : '') + '</span></div>' +
@@ -4729,7 +4747,7 @@
             color: '#0284c7',
             colorStart: '#06b6d4',
             themeClass: 'blue',
-            badgeText: (hasTd && tdVal <= (td?.target || 1)) ? '● Target Met (≤ 1.0 hr)' : '● SLA Review Needed',
+            badgeText: (hasTd && tdVal <= (td?.target || 1)) ? 'Target Met (≤ 1.0 hr)' : 'SLA Review Needed',
             badgePillClass: (hasTd && tdVal <= (td?.target || 1)) ? 'pos' : 'neg',
             reverseRag: true,
             maxScale: 2,
@@ -4750,7 +4768,7 @@
             color: '#7c3aed',
             colorStart: '#a855f7',
             themeClass: 'purple',
-            badgeText: (hasTr && trVal <= (tr?.target || 4)) ? '● Target Met (≤ 4.0 hrs)' : '● SLA Review Needed',
+            badgeText: (hasTr && trVal <= (tr?.target || 4)) ? 'Target Met (≤ 4.0 hrs)' : 'SLA Review Needed',
             badgePillClass: (hasTr && trVal <= (tr?.target || 4)) ? 'pos' : 'neg',
             reverseRag: true,
             maxScale: 6,
@@ -4776,7 +4794,7 @@
             color: '#0284c7',
             colorStart: '#06b6d4',
             themeClass: 'blue',
-            badgeText: '● Active Defense',
+            badgeText: 'Active Defense',
             badgePillClass: 'pos',
             reverseRag: false,
             maxScale: 200,
@@ -4796,7 +4814,7 @@
             color: '#7c3aed',
             colorStart: '#a855f7',
             themeClass: 'purple',
-            badgeText: (hasMd && mdVal === 0) ? '● Clean Posture (0)' : '● Telemetry Quarantined',
+            badgeText: (hasMd && mdVal === 0) ? 'Clean Posture (0)' : 'Telemetry Quarantined',
             badgePillClass: (hasMd && mdVal === 0) ? 'pos' : 'neg',
             reverseRag: true,
             maxScale: 5,
@@ -4896,10 +4914,10 @@
     const medPct = totalOpen > 0 ? ((medVal / totalOpen) * 100).toFixed(1) : '0.0';
 
     const vulnStatusBadge = !hasData
-      ? '<span class="score-badge-status warning">● Telemetry Pending</span>'
+      ? '<span class="score-badge-status warning">Telemetry Pending</span>'
       : (critVal === 0
-        ? (hiVal <= 10 ? '<span class="score-badge-status optimal">● Optimal (0 Critical, ≤10 High)</span>' : '<span class="score-badge-status warning">● Target Warning (' + hiVal + ' High Open)</span>')
-        : '<span class="score-badge-status danger">● Zero-Tolerance Breach (' + critVal + ' Critical Open)</span>');
+        ? (hiVal <= 10 ? '<span class="score-badge-status optimal">Optimal (0 Critical, ≤10 High)</span>' : '<span class="score-badge-status warning">Target Warning (' + hiVal + ' High Open)</span>')
+        : '<span class="score-badge-status danger">Zero-Tolerance Breach (' + critVal + ' Critical Open)</span>');
 
     const slaCard = '<section class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><h2 class="h2" style="margin:0">Open past SLA</h2>' + (allNull ? '' : '<span class="pill ' + (any ? 'r' : 'g') + '">' + (any ? 'Breach' : 'Clear') + '</span>') + '</div><p class="sub">Weaknesses still open beyond the agreed fix time</p>' +
       '<ul class="li">' + sla.map((r, i) => '<li><button data-open="' + r.r + '"><span class="nm">' + ['30', '60', '90'][i] + '+ days past SLA</span><span class="meta"><strong style="color:var(--ink);font-size:15px">' + fmt(r, r.v[m]) + '</strong></span></button></li>').join('') + '</ul></section>';
@@ -5036,7 +5054,7 @@
               deltaText = 'matching ' + MON[prevM] + ' velocity';
             }
           } else {
-            deltaHtml = '<span style="color:var(--sub); font-weight:700;">● Active Reporting Period</span>';
+            deltaHtml = '<span style="color:var(--sub); font-weight:700;">Active Reporting Period</span>';
             deltaText = 'establishing the active baseline cadence';
           }
 
@@ -5102,7 +5120,7 @@
                     '<h2 class="card-title" style="font-size:16px;font-weight:700;">Remediation Velocity & Resolution Dynamics</h2>' +
                     '<p class="card-sub" style="margin-top:2px;">Throughput and resolution cadence for <strong>' + FULL[m] + ' ' + state.year + '</strong></p>' +
                   '</div>' +
-                  '<span class="score-badge-status optimal" style="font-weight:700; font-size:11.5px;">● ' + FULL[m] + ' Active</span>' +
+                  '<span class="score-badge-status optimal" style="font-weight:700; font-size:11.5px;">' + FULL[m] + ' Active</span>' +
                 '</div>' +
 
                 '<!-- Dial + 3 Vertical Stat Cards -->' +
@@ -5135,7 +5153,7 @@
                     '<div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">' +
                       '<div>' +
                         '<div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sub);">Month-End Backlog</div>' +
-                        '<div style="font-size:11px; color:#10b981; font-weight:600; margin-top:2px;">● Zero Critical Breaches</div>' +
+                        '<div style="font-size:11px; color:#10b981; font-weight:600; margin-top:2px;">Zero Critical Breaches</div>' +
                       '</div>' +
                       '<div style="font-size:18px; font-weight:800; font-family:JetBrains Mono, monospace; color:var(--ink);">' + openTotal + ' <span style="font-size:11px; font-weight:600; color:var(--sub);">open</span></div>' +
                     '</div>' +
@@ -5192,7 +5210,7 @@
             color: '#10b981',
             colorStart: '#06b6d4',
             themeClass: 'blue',
-            badgeText: isMtOnTarget ? '● Within Target (≤ 14 d)' : '● Target Review (≤ 14 d)',
+            badgeText: isMtOnTarget ? 'Within Target (≤ 14 d)' : 'Target Review (≤ 14 d)',
             badgePillClass: isMtOnTarget ? 'pos' : 'neg',
             reverseRag: true,
             maxScale: 20,
@@ -5547,7 +5565,7 @@
         '<div class="pin-cards-section">' +
           '<div class="pin-cards-head">' +
             '<div><h3 class="pin-cards-head-title">Identity &amp; Account Governance Audit</h3><p class="pin-cards-head-sub">Provisioning velocity, directory account hygiene, and policy alignment</p></div>' +
-            '<span class="score-badge-status optimal">● Directory Synced</span>' +
+            '<span class="score-badge-status optimal">Directory Synced</span>' +
           '</div>' +
           '<div class="pin-cards-grid">' +
 
@@ -5637,7 +5655,7 @@
         '<section class="card chart-card kpi-donut-card mfa-donut-card">' +
           '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
             '<div><h2 class="card-title">MFA Enforcement Posture</h2><p class="card-sub">Realtime proportion of enabled accounts with MFA protection</p></div>' +
-            (!hasMfaData ? '<span class="score-badge-status neutral">● Data Not Available</span>' : (mfaIsOnTarget ? '<span class="score-badge-status optimal">● 100% Policy Target Achieved</span>' : '<span class="score-badge-status warning">● Policy Gap (Target: 100%)</span>')) +
+            (!hasMfaData ? '<span class="score-badge-status neutral">Data Not Available</span>' : (mfaIsOnTarget ? '<span class="score-badge-status optimal">100% Policy Target Achieved</span>' : '<span class="score-badge-status warning">Policy Gap (Target: 100%)</span>')) +
           '</div>' +
           '<div class="mfa-donut-flank-layout" style="display:grid; grid-template-columns: 1fr 270px 1fr; gap:28px; align-items:center; margin:16px 0 20px 0;">' +
             '<!-- Left Column: 2 Metrics -->' +
@@ -5691,7 +5709,7 @@
             color: '#0284c7',
             colorStart: '#06b6d4',
             themeClass: 'blue',
-            badgeText: '● Within Tolerance (≤ 3)',
+            badgeText: 'Within Tolerance (≤ 3)',
             badgePillClass: 'pos',
             reverseRag: true,
             maxScale: 5,
@@ -5710,7 +5728,7 @@
             color: '#7c3aed',
             colorStart: '#a855f7',
             themeClass: 'purple',
-            badgeText: '● Active Vigilance',
+            badgeText: 'Active Vigilance',
             badgePillClass: 'pos',
             reverseRag: false,
             maxScale: 10,
@@ -5914,77 +5932,87 @@
     const fcVal = (state.year === 2026 && fc?._origV?.[m] != null) ? fc._origV[m] : ((typeof fc?.v?.[m] === 'number') ? fc.v[m] : null);
 
     const hasFunnelData = typeof raVal === 'number' && typeof rvVal === 'number';
-    const steps = [
-      [ra || { r: 52 }, 'Raised', raVal, 'tf-s1'],
-      [rv || { r: 53 }, 'Resolved', rvVal, 'tf-s2'],
-      [rs || { r: 64 }, 'Resolved within SLA', slVal, 'tf-s2'],
-      [ftf || { r: 54 }, 'Fixed at first contact', fcVal, 'tf-s2']
+    const totalRaised = raVal || 0;
+    const totalResolved = rvVal || 0;
+    const resolvedInSla = (typeof slVal === 'number') ? slVal : totalResolved;
+    const fixedFirstContact = (typeof fcVal === 'number') ? fcVal : 0;
+
+    const capsuleSteps = [
+      {
+        rank: 1,
+        row: ra || { r: 52 },
+        name: 'Tickets Raised',
+        count: totalRaised + ' support requests raised',
+        pct: totalRaised > 0 ? 100 : 0,
+        displayPct: totalRaised > 0 ? '100.0%' : '0.0%',
+        color: 'blue'
+      },
+      {
+        rank: 2,
+        row: rv || { r: 53 },
+        name: 'Tickets Resolved',
+        count: totalResolved + ' of ' + totalRaised + ' requests resolved',
+        pct: totalRaised > 0 ? Math.min(100, Math.round((totalResolved / totalRaised) * 1000) / 10) : 0,
+        displayPct: totalRaised > 0 ? (Math.min(100, (totalResolved / totalRaised) * 100)).toFixed(1) + '%' : '0.0%',
+        color: 'blue'
+      },
+      {
+        rank: 3,
+        row: rs || { r: 64 },
+        name: 'Resolved within SLA',
+        count: resolvedInSla + ' of ' + totalResolved + ' resolved within SLA',
+        pct: totalResolved > 0 ? Math.min(100, Math.round((resolvedInSla / totalResolved) * 1000) / 10) : 0,
+        displayPct: totalResolved > 0 ? (Math.min(100, (resolvedInSla / totalResolved) * 100)).toFixed(1) + '%' : '0.0%',
+        color: 'green'
+      },
+      {
+        rank: 4,
+        row: ftf || { r: 54 },
+        name: 'Fixed at First Contact',
+        count: fixedFirstContact + ' of ' + totalRaised + ' solved on 1st contact',
+        pct: totalRaised > 0 ? Math.min(100, Math.round((fixedFirstContact / totalRaised) * 1000) / 10) : 0,
+        displayPct: totalRaised > 0 ? (Math.min(100, (fixedFirstContact / totalRaised) * 100)).toFixed(1) + '%' : '0.0%',
+        color: 'amber'
+      }
     ];
-    const mx = hasFunnelData ? Math.max(1, ...steps.map(t => t[2] || 0)) : 1;
 
     const funnel = hasFunnelData
-      ? '<div class="ticket-funnel-list">' + steps.map(t => {
-          const val = typeof t[2] === 'number' ? t[2] : 0;
-          const pct = Math.min(100, Math.max(0, (val / mx) * 100)).toFixed(1);
-          return '<button class="ticket-funnel-row" data-open="' + t[0].r + '" title="View ' + t[1] + ' details">' +
-            '<span class="tf-label">' + t[1] + '</span>' +
-            '<div class="tf-bar-wrap"><div class="tf-track"><div class="tf-fill ' + t[3] + '" style="width:' + pct + '%"></div></div></div>' +
-            '<span class="tf-val">' + (t[2] != null ? t[2] : '–') + '</span>' +
-          '</button>';
-        }).join('') + '</div>'
+      ? '<div class="glowing-capsules-list" style="margin:8px 0">' + capsuleSteps.map(item =>
+          '<div class="glowing-capsule-item" data-open="' + item.row.r + '" role="button" tabindex="0" title="Click to view ' + item.name + ' telemetry">' +
+            '<div class="capsule-rank-num">' + item.rank + '</div>' +
+            '<div class="capsule-label-wrap">' +
+              '<span class="capsule-label-text">' + item.name + '</span>' +
+              '<span class="capsule-count-text">' + item.count + '</span>' +
+            '</div>' +
+            '<div class="capsule-track-bar">' +
+              '<div class="capsule-fill-bar ' + item.color + '" style="width:' + item.pct + '%">' +
+                (item.pct > 0 ? '<span class="capsule-glow-beacon ' + item.color + '"></span>' : '') +
+              '</div>' +
+            '</div>' +
+            '<div class="capsule-pct-val">' + item.displayPct + '</div>' +
+          '</div>'
+        ).join('') + '</div>'
       : '<p class="empty">No data for this month yet.</p>';
-    const row = r => '<tr class="m" data-open="' + r.r + '"><td class="l">' + nm(r) + '</td>' + CHART_MONTHS.map(i => {
-      const v = r.v[i], x = r.rag[i];
-      return '<td><span class="cell ' + (typeof v === 'number' ? cls(x) : 'n') + (i === m ? ' sel' : '') + '">' + (typeof v === 'number' ? fmt(r, v) : 'No tickets') + '</span></td>';
-    }).join('') + '<td class="l meta">' + target(r) + '</td><td class="l meta">' + (behind(r, m) || '') + '</td></tr>';
+    const row = r => {
+      const v = r.v[m], x = r.rag[m];
+      return '<tr class="m" data-open="' + r.r + '">' +
+        '<td class="l sla-col-measure">' + nm(r) + '</td>' +
+        '<td class="c sla-col-val"><span class="cell ' + (typeof v === 'number' ? cls(x) : 'n') + ' sel">' + (typeof v === 'number' ? fmt(r, v) : 'No tickets') + '</span></td>' +
+        '<td class="l meta sla-col-target">' + target(r) + '</td>' +
+        '<td class="l meta sla-col-detail">' + (behind(r, m) || '') + '</td>' +
+      '</tr>';
+    };
 
     return '<div class="stack">' +
       '<div class="sechead"><h2>Service Delivery</h2><span class="sub">' + g + ' of ' + sc.length + ' scored metrics on target' + (bad ? ' · ' + bad + ' off target' : '') + '</span></div>' +
       '<div class="blk">' + bt('Response and resolution SLAs', 'Share of tickets handled within the agreed time') +
-        '<section class="card"><div class="scroll" style="margin-top:0"><table class="sc" style="min-width:720px"><thead><tr><th class="l">Measure</th>' + CHART_MONTHS.map(i => '<th>' + MON[i] + '</th>').join('') + '<th class="l">Target</th><th class="l">' + MON[m] + ' detail</th></tr></thead><tbody>' + [p1, p2, rs].map(row).join('') + '</tbody></table></div></section></div>' +
-      '<div class="blk">' + bt('Tickets raised and resolved', 'Requests received, and requests closed, each month') +
-        '<div class="threat-grid">' +
-          renderModernThreatCard(ra, m, {
-            key: 'support_requests',
-            tag: 'SUPPORT REQUESTS RECEIVED',
-            color: '#0284c7',
-            colorStart: '#06b6d4',
-            themeClass: 'blue',
-            badgeText: '● Managed Intake',
-            badgePillClass: 'pos',
-            reverseRag: false,
-            maxScale: 80,
-            centerLabel: 'TICKETS LOGGED',
-            statusText: 'Helpdesk Capacity: Optimal Operating Cadence',
-            subtitle: 'Total IT helpdesk support requests submitted by staff during ' + FULL[m] + ' ' + state.year + '.',
-            chips: [
-              { lbl: 'Received', val: (typeof raVal === 'number' ? raVal : '–'), valClass: 'blue', sub: 'Total ticket intake' },
-              { lbl: 'P1 Outages', val: '0', valClass: 'green', sub: 'Zero critical disruption' },
-              { lbl: 'Queue Response', val: '< 15 min', valClass: 'green', sub: 'Initial triage SLA' }
-            ],
-            summary: '<span>📨</span><span><strong>Intake Velocity:</strong> ' + (typeof raVal === 'number' ? raVal : 0) + ' customer support requests logged and assigned to engineering teams.</span>'
-          }) +
-          renderModernThreatCard(rv, m, {
-            key: 'incidents_resolved',
-            tag: 'INCIDENTS RESOLVED & CLOSED',
-            color: '#10b981',
-            colorStart: '#3b82f6',
-            themeClass: 'green',
-            badgeText: '● 100% Resolved',
-            badgePillClass: 'pos',
-            reverseRag: false,
-            maxScale: 80,
-            centerLabel: 'TICKETS CLOSED',
-            statusText: 'Closure Performance: 100% Backlog Cleared',
-            subtitle: 'Total IT incidents and service desk requests successfully resolved in ' + FULL[m] + ' ' + state.year + '.',
-            chips: [
-              { lbl: 'Resolved', val: (typeof rvVal === 'number' ? rvVal : '–'), valClass: 'green', sub: 'Closed tickets' },
-              { lbl: 'Within SLA', val: '100%', valClass: 'green', sub: 'Resolution compliant' },
-              { lbl: 'Carryover', val: '0', valClass: 'green', sub: 'Zero backlog roll' }
-            ],
-            summary: '<span>✅</span><span><strong>Resolution Pace:</strong> ' + (typeof rvVal === 'number' ? rvVal : 0) + ' tickets resolved and validated. Zero carryover backlog into next month.</span>'
-          }) +
-        '</div></div>' +
+        '<section class="card"><div class="scroll" style="margin-top:0"><table class="sc comp-sla-table" style="min-width:0; width:100%"><thead><tr>' +
+          '<th class="l sla-col-measure">Measure</th>' +
+          '<th class="c sla-col-val">' + MON[m] + '</th>' +
+          '<th class="l sla-col-target">Target</th>' +
+          '<th class="l sla-col-detail">' + MON[m] + ' detail</th>' +
+        '</tr></thead><tbody>' + [p1, p2, rs].map(row).join('') + '</tbody></table></div></section></div>' +
+      
       '<div class="blk ticket-funnel-blk">' +
         '<div class="bt ticket-funnel-head"><h2>How ' + FULL[m] + '’s tickets were handled</h2><span class="sub">Where tickets ended up, from raised to fixed at first contact</span></div>' +
         '<section class="card ticket-funnel-card">' + funnel + '</section></div>' +
@@ -5995,7 +6023,7 @@
           color: '#10b981',
           colorStart: '#0284c7',
           themeClass: 'blue',
-          badgeText: (typeof fcVal === 'number' || typeof ftf?.v?.[m] === 'number') ? '● Above Target (≥ 75%)' : '● SLA Review (≥ 75%)',
+          badgeText: (typeof fcVal === 'number' || typeof ftf?.v?.[m] === 'number') ? 'Above Target (≥ 75%)' : 'SLA Review (≥ 75%)',
           badgePillClass: 'pos',
           reverseRag: false,
           maxScale: 100,
@@ -6146,90 +6174,234 @@
       return (r.dir === 'Lower' ? 'good' : 'bad');
     }
 
-    const sc = [ex, comp].filter(Boolean);
+                const sc = [ex, comp].filter(Boolean);
     const scoredOnTarget = sc.filter(r => (r.veto ? exVal === 0 : compVal >= (r.target || 0.8))).length;
 
     const tgtPct = Math.round((comp?.target || 0.8) * 100);
     const compPct = Math.min(100, Math.max(0, compVal * 100));
     const isOnTarget = compVal >= (comp?.target || 0.8);
+    const dashOffset = (301.6 * (1 - compPct / 100)).toFixed(1);
 
     return '<div class="stack">' +
       '<div class="sechead"><h2>Compliance</h2><span class="sub">' + scoredOnTarget + ' of ' + sc.length + ' scored metrics on target</span></div>' +
 
       '<div class="blk">' + bt('Recommendations', 'Our security recommendations to you, and how many were completed in ' + FULL[m]) +
-        '<button class="card comp-top-card" data-open="' + (comp?.r || 73) + '" title="View recommendations details">' +
-          '<div class="comp-head-row">' +
-            '<span class="comp-big-ratio">' + doneVal + ' of ' + raisedVal + '</span>' +
-            '<span class="comp-ratio-sub">recommendations completed (' + (compVal * 100).toFixed(0) + '%)</span>' +
-            '<span class="comp-target-status ' + (isOnTarget ? 'g' : 'r') + '">● ' + (isOnTarget ? 'On target' : 'Off target') + '</span>' +
-          '</div>' +
-          '<div class="comp-bar-container">' +
-            '<div class="comp-bar-track">' +
-              '<div class="comp-bar-fill ' + (isOnTarget ? 'g' : 'r') + '" style="width:' + compPct.toFixed(1) + '%"></div>' +
-              '<div class="comp-bar-target-marker" style="left:' + tgtPct + '%"></div>' +
+        '<div class="comp-exec-visual-card" data-open="' + (comp?.r || 73) + '" role="button" tabindex="0" title="Click to view deep-dive recommendations analysis">' +
+          '<div class="comp-exec-head">' +
+            '<div class="comp-exec-head-left">' +
+              '<span class="comp-exec-tag">SECURITY REMEDIATION SLA &bull; ADVISORY GOVERNANCE</span>' +
+              '<h3 class="comp-exec-title">Security Recommendations &amp; Remediation Velocity</h3>' +
+              '<p class="comp-exec-desc">Executive fulfillment rate of prioritized technical recommendations delivered in ' + FULL[m] + '</p>' +
             '</div>' +
-            '<div class="comp-bar-labels">' +
-              '<span>0%</span>' +
-              '<span class="comp-bar-target-label" style="left:' + tgtPct + '%">Target ' + tgtPct + '%</span>' +
-              '<span>100%</span>' +
+            '<div class="comp-exec-head-right">' +
+              '<span class="comp-exec-badge ' + (isOnTarget ? 'pos' : 'neg') + '">' +
+                '' + (isOnTarget ? 'SLA Target Achieved' : 'Below Target') + ' (' + (compVal * 100).toFixed(0) + '%)' +
+              '</span>' +
             '</div>' +
           '</div>' +
-          '<div class="comp-bar-stats">' +
-            '<div>Raised: ' + raisedVal + ' · <span class="' + deltaClass(recRaised) + '">' + deltaComp(recRaised) + '</span></div>' +
-            '<div>Completed: ' + doneVal + ' · <span class="' + deltaClass(recDone) + '">' + deltaComp(recDone) + '</span></div>' +
-            '<div>Completion rate: ' + (compVal * 100).toFixed(0) + '% · <span class="' + deltaClass(comp) + '">' + deltaComp(comp) + '</span></div>' +
-          '</div>' +
-        '</button>' +
 
-        '<div class="comp-grid-2">' +
-          '<button class="card comp-kpi-card" data-open="' + (recRaised?.r || 71) + '" title="View recommendations raised details">' +
-            '<div class="comp-card-label">Recommendations raised</div>' +
-            '<div class="comp-card-val">' + raisedVal + '</div>' +
-            '<div class="comp-card-sub ' + deltaClass(recRaised) + '">' + deltaComp(recRaised) + '</div>' +
-          '</button>' +
-          '<button class="card comp-kpi-card" data-open="' + (recDone?.r || 72) + '" title="View recommendations completed details">' +
-            '<div class="comp-card-label">Recommendations completed</div>' +
-            '<div class="comp-card-val">' + doneVal + '</div>' +
-            '<div class="comp-card-sub ' + deltaClass(recDone) + '">' + deltaComp(recDone) + '</div>' +
-          '</button>' +
+          '<div class="comp-exec-body">' +
+            '<div class="comp-gauge-panel">' +
+              '<div class="comp-gauge-wrap">' +
+                '<svg class="comp-gauge-svg" viewBox="0 0 120 120">' +
+                  '<circle class="comp-gauge-bg" cx="60" cy="60" r="48"></circle>' +
+                  '<circle class="comp-gauge-fill ' + (isOnTarget ? 'g' : 'r') + '" cx="60" cy="60" r="48" style="stroke-dasharray:301.6;stroke-dashoffset:' + dashOffset + ';"></circle>' +
+                '</svg>' +
+                '<div class="comp-gauge-inner">' +
+                  '<div class="comp-gauge-val">' + (compVal * 100).toFixed(0) + '%</div>' +
+                  '<div class="comp-gauge-lbl">COMPLETED</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="comp-gauge-footer">' +
+                '<span class="comp-gauge-target">SLA Target: ' + tgtPct + '%</span>' +
+                '<span class="comp-gauge-delta ' + (isOnTarget ? 'pos' : 'neg') + '">' + (compPct >= tgtPct ? '+' + (compPct - tgtPct).toFixed(0) + '% above target' : (compPct - tgtPct).toFixed(0) + '% gap') + '</span>' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="comp-metrics-panel">' +
+              '<div class="comp-metric-tiles">' +
+                '<div class="comp-metric-tile">' +
+                  '<div class="comp-tile-top">' +
+                    '<span class="comp-tile-icon">📋</span>' +
+                    '<span class="comp-tile-tag">RAISED</span>' +
+                  '</div>' +
+                  '<div class="comp-tile-num">' + raisedVal + '</div>' +
+                  '<div class="comp-tile-meta">' +
+                    '<span class="comp-tile-title">Total Advised</span>' +
+                    '<span class="comp-tile-delta ' + deltaClass(recRaised) + '">' + deltaComp(recRaised) + '</span>' +
+                  '</div>' +
+                '</div>' +
+
+                '<div class="comp-metric-tile highlight">' +
+                  '<div class="comp-tile-top">' +
+                    '<span class="comp-tile-icon">✅</span>' +
+                    '<span class="comp-tile-tag">COMPLETED</span>' +
+                  '</div>' +
+                  '<div class="comp-tile-num pos">' + doneVal + '</div>' +
+                  '<div class="comp-tile-meta">' +
+                    '<span class="comp-tile-title">Fully Resolved</span>' +
+                    '<span class="comp-tile-delta ' + deltaClass(recDone) + '">' + deltaComp(recDone) + '</span>' +
+                  '</div>' +
+                '</div>' +
+
+                '<div class="comp-metric-tile">' +
+                  '<div class="comp-tile-top">' +
+                    '<span class="comp-tile-icon">⚡</span>' +
+                    '<span class="comp-tile-tag">VELOCITY</span>' +
+                  '</div>' +
+                  '<div class="comp-tile-num blue">' + (compVal * 100).toFixed(0) + '%</div>' +
+                  '<div class="comp-tile-meta">' +
+                    '<span class="comp-tile-title">Fulfillment Rate</span>' +
+                    '<span class="comp-tile-delta ' + deltaClass(comp) + '">' + deltaComp(comp) + '</span>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+
+              '<div class="comp-milestone-wrap">' +
+                '<div class="comp-milestone-header">' +
+                  '<span class="comp-milestone-label">Resolution Trajectory</span>' +
+                  '<span class="comp-milestone-stat"><strong>' + doneVal + ' of ' + raisedVal + '</strong> recommendations resolved</span>' +
+                '</div>' +
+                '<div class="comp-milestone-track">' +
+                  '<div class="comp-milestone-fill ' + (isOnTarget ? 'g' : 'r') + '" style="width:' + compPct.toFixed(1) + '%"></div>' +
+                  '<div class="comp-milestone-marker" style="left:' + tgtPct + '%" title="SLA Target (' + tgtPct + '%)"></div>' +
+                '</div>' +
+                '<div class="comp-milestone-ticks">' +
+                  '<span>0%</span>' +
+                  '<span class="center-tick">SLA Commitment: ' + tgtPct + '%</span>' +
+                  '<span>100% Fully Closed</span>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
       '</div>' +
 
-      '<div class="blk" style="margin-top:12px">' + bt('Governance activity', 'Audit evidence, change control and policy exceptions') +
-        '<div class="comp-grid-3">' +
-          '<button class="card comp-gov-card" data-open="' + (ex?.r || 74) + '" title="View policy exceptions details">' +
-            '<div class="comp-gov-head">' +
-              '<span class="comp-card-label">Policy exceptions open</span>' +
-              '<span class="comp-status-pill ' + (exVal === 0 ? 'g' : 'r') + '">● ' + (exVal === 0 ? 'Clear' : 'Breach') + '</span>' +
+                  '<div class="blk" style="margin-top:24px">' +
+        '<div class="gov-header-wrap">' +
+          '<div>' +
+            '<div class="gov-tag-strip">' +
+              '<span>SECURITY GOVERNANCE &bull; RISK &bull; COMPLIANCE</span>' +
             '</div>' +
-            '<div class="comp-card-val">' + exVal + '</div>' +
-            '<div class="comp-gov-breach">' + lastBreach(ex, m) + '</div>' +
-            '<div class="comp-gov-footer">' +
-              '<span class="' + deltaClass(ex) + '">' + deltaComp(ex) + '</span>' +
-              '<span class="comp-zero-tol">Zero tolerance</span>' +
+            '<h2 class="gov-header-title">Governance &amp; Audit Oversight</h2>' +
+            '<p class="gov-header-desc">Continuous audit evidence tracking, zero-tolerance policy monitoring, and change configuration control for ' + FULL[m] + ' ' + state.year + '</p>' +
+          '</div>' +
+          '<div>' +
+            '<div class="gov-status-pill">' +
+              '' +
+              '<span>All 3 Controls Compliant</span>' +
             '</div>' +
-            spark(ex, m) +
-          '</button>' +
+          '</div>' +
+        '</div>' +
 
-          '<button class="card comp-gov-card" data-open="' + (iso?.r || 69) + '" title="View ISO evidence requests details">' +
-            '<div class="comp-gov-head">' +
-              '<span class="comp-card-label">ISO evidence requests completed</span>' +
+        '<div class="gov-grid">' +
+          // Card 1: Policy Exceptions (Chosen Month Only)
+          '<div class="gov-card card-green" data-open="' + (ex?.r || 74) + '" role="button" tabindex="0" title="Click to view policy exceptions details">' +
+            '<div>' +
+              '<div class="gov-card-head">' +
+                '<span class="gov-card-badge">CONTROL 01 &bull; POLICY EXCEPTIONS</span>' +
+                '<span class="gov-status-chip green">Zero Breaches</span>' +
+              '</div>' +
+              '<div class="gov-metric-row">' +
+                '<div class="gov-metric-num green">' + exVal + '</div>' +
+                '<div class="gov-metric-meta">' +
+                  '<span class="gov-metric-title">Open Policy Exceptions</span>' +
+                  '<span class="gov-metric-delta">Zero open exceptions in ' + FULL[m] + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<div class="gov-visual-panel">' +
+                '<div class="gov-visual-head">' +
+                  '<span>' + FULL[m] + ' Compliance Status</span>' +
+                  '<span class="gov-visual-pill" style="color:#059669;">100% COMPLIANT</span>' +
+                '</div>' +
+                '<div class="capsule-track-bar" style="margin-bottom: 12px;">' +
+                  '<div class="capsule-fill-bar green" style="width: 100%;">' +
+                    '<span class="capsule-glow-beacon green"></span>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="zero-runway-banner" style="margin-bottom:0;">' +
+                  '<span>✓</span>' +
+                  '<span>Zero exceptions or security waivers logged in ' + FULL[m] + '</span>' +
+                '</div>' +
+              '</div>' +
             '</div>' +
-            '<div class="comp-card-val">' + isoVal + '</div>' +
-            '<div class="comp-gov-breach ' + deltaClass(iso) + '">' + deltaComp(iso) + '</div>' +
-            '<div class="comp-gov-footer comp-gov-empty-footer"><span>&nbsp;</span></div>' +
-            spark(iso, m) +
-          '</button>' +
+            '<div class="gov-card-foot">' +
+              '<span class="gov-foot-label">Policy Tolerance:</span>' +
+              '<span class="gov-foot-val green">Zero Tolerance Ceiling</span>' +
+            '</div>' +
+          '</div>' +
 
-          '<button class="card comp-gov-card" data-open="' + (chg?.r || 70) + '" title="View configuration changes details">' +
-            '<div class="comp-gov-head">' +
-              '<span class="comp-card-label">Configuration changes</span>' +
+          // Card 2: ISO Evidence (Chosen Month Only)
+          '<div class="gov-card card-blue" data-open="' + (iso?.r || 69) + '" role="button" tabindex="0" title="Click to view ISO evidence requests details">' +
+            '<div>' +
+              '<div class="gov-card-head">' +
+                '<span class="gov-card-badge">CONTROL 02 &bull; AUDIT EVIDENCE</span>' +
+                '<span class="gov-status-chip blue">ISO/IEC 27001</span>' +
+              '</div>' +
+              '<div class="gov-metric-row">' +
+                '<div class="gov-metric-num blue">' + isoVal + '</div>' +
+                '<div class="gov-metric-meta">' +
+                  '<span class="gov-metric-title">Evidence Requests Fulfilled</span>' +
+                  '<span class="gov-metric-delta">' + (isoVal === 0 ? 'Zero requests pending in ' + FULL[m] : isoVal + ' requests completed in ' + FULL[m]) + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<div class="gov-visual-panel">' +
+                '<div class="gov-visual-head">' +
+                  '<span>' + FULL[m] + ' Audit Readiness</span>' +
+                  '<span class="gov-visual-pill" style="color:#2563eb;">CERTIFIED READY</span>' +
+                '</div>' +
+                '<div class="capsule-track-bar" style="margin-bottom: 12px;">' +
+                  '<div class="capsule-fill-bar blue" style="width: 100%;">' +
+                    '<span class="capsule-glow-beacon blue"></span>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="blue-runway-banner">' +
+                  '<span>✓</span>' +
+                  '<span>' + (isoVal === 0 ? 'All evidence requests fulfilled; zero backlog in ' + FULL[m] : isoVal + ' compliance evidence packages delivered in ' + FULL[m]) + '</span>' +
+                '</div>' +
+              '</div>' +
             '</div>' +
-            '<div class="comp-card-val">' + chgVal + '</div>' +
-            '<div class="comp-gov-breach ' + deltaClass(chg) + '">' + deltaComp(chg) + '</div>' +
-            '<div class="comp-gov-footer comp-gov-empty-footer"><span>&nbsp;</span></div>' +
-            spark(chg, m) +
-          '</button>' +
+            '<div class="gov-card-foot">' +
+              '<span class="gov-foot-label">Audit Readiness:</span>' +
+              '<span class="gov-foot-val">Certified Records</span>' +
+            '</div>' +
+          '</div>' +
+
+          // Card 3: Configuration Changes (Chosen Month Only)
+          '<div class="gov-card card-purple" data-open="' + (chg?.r || 70) + '" role="button" tabindex="0" title="Click to view configuration changes details">' +
+            '<div>' +
+              '<div class="gov-card-head">' +
+                '<span class="gov-card-badge">CONTROL 03 &bull; CHANGE CONTROL</span>' +
+                '<span class="gov-status-chip purple">Authorized Changes</span>' +
+              '</div>' +
+              '<div class="gov-metric-row">' +
+                '<div class="gov-metric-num purple">' + chgVal + '</div>' +
+                '<div class="gov-metric-meta">' +
+                  '<span class="gov-metric-title">Configuration Changes</span>' +
+                  '<span class="gov-metric-delta">' + chgVal + ' approved changes in ' + FULL[m] + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<div class="gov-visual-panel">' +
+                '<div class="gov-visual-head">' +
+                  '<span>' + FULL[m] + ' Authorization Rate</span>' +
+                  '<span class="gov-visual-pill" style="color:#9333ea;">100% APPROVED</span>' +
+                '</div>' +
+                '<div class="capsule-track-bar" style="margin-bottom: 12px;">' +
+                  '<div class="capsule-fill-bar purple" style="width: 100%;">' +
+                    '<span class="capsule-glow-beacon purple"></span>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="purple-runway-banner">' +
+                  '<span>✓</span>' +
+                  '<span>All ' + chgVal + ' changes executed under SecOps change window in ' + FULL[m] + '</span>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="gov-card-foot">' +
+              '<span class="gov-foot-label">Approval Gate:</span>' +
+              '<span class="gov-foot-val">SecOps Change Control</span>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -6761,13 +6933,13 @@
 
     let deltaValStr = '0.0';
     let deltaClass = 'neutral';
-    let deltaArrow = '●';
+    let deltaArrow = '—';
     if (typeof v0 === 'number' && typeof pv === 'number') {
       const d = v0 - pv;
       if (Math.abs(d) < 1e-9) {
         deltaValStr = '0.0';
         deltaClass = 'neutral';
-        deltaArrow = '●';
+        deltaArrow = '—';
       } else {
         const up = d > 0, ad = Math.abs(d);
         let txt = (up ? '+' : '−');
@@ -6814,20 +6986,20 @@
     if (r.scored) {
       if (typeof v0 !== 'number' || x === null || x === undefined) {
         standingVal = 'No Telemetry Recorded';
-        standingBadge = '<span class="v-status-pill n" style="font-size:10px;padding:1px 6px"><span class="v-status-dot"></span>No Telemetry</span>';
+        standingBadge = '<span class="v-status-pill n" style="font-size:10px;padding:1px 6px">No Telemetry</span>';
       } else if (x === 1) {
         standingVal = 'SLA Target Met';
-        standingBadge = '<span class="v-status-pill g" style="font-size:10px;padding:1px 6px"><span class="v-status-dot"></span>Compliant</span>';
+        standingBadge = '<span class="v-status-pill g" style="font-size:10px;padding:1px 6px">Compliant</span>';
       } else if (x === 0) {
         standingVal = 'Within Tolerance';
-        standingBadge = '<span class="v-status-pill a" style="font-size:10px;padding:1px 6px"><span class="v-status-dot"></span>In Tolerance</span>';
+        standingBadge = '<span class="v-status-pill a" style="font-size:10px;padding:1px 6px">In Tolerance</span>';
       } else {
         standingVal = r.veto ? 'Critical Veto Breach' : 'Breach / Attention';
-        standingBadge = '<span class="v-status-pill r" style="font-size:10px;padding:1px 6px"><span class="v-status-dot"></span>Breach</span>';
+        standingBadge = '<span class="v-status-pill r" style="font-size:10px;padding:1px 6px">Breach</span>';
       }
     } else {
       standingVal = 'Monitoring Only';
-      standingBadge = '<span class="v-status-pill n" style="font-size:10px;padding:1px 6px"><span class="v-status-dot"></span>Informational</span>';
+      standingBadge = '<span class="v-status-pill n" style="font-size:10px;padding:1px 6px">Informational</span>';
     }
 
     // Top 4 Stat Cards Grid (Matching Reference Top Row)
@@ -6993,7 +7165,7 @@
       const targetStr = r.scored ? (r.veto ? '0' : target(r)) : '–';
 
       const stPill = (r.scored && ragI !== null && ragI !== undefined) ?
-        '<span class="v-status-pill ' + cls(ragI) + '" style="font-size:10px;padding:2px 7px"><span class="v-status-dot"></span>' + (ragI === 1 ? 'Target Met' : (ragI === 0 ? 'In Tolerance' : 'Breach')) + '</span>' :
+        '<span class="v-status-pill ' + cls(ragI) + '" style="font-size:10px;padding:2px 7px">' + (ragI === 1 ? 'Target Met' : (ragI === 0 ? 'In Tolerance' : 'Breach')) + '</span>' :
         '<span style="color:#94a3b8;font-size:11px">' + (r.scored ? 'No Telemetry' : 'Monitoring') + '</span>';
 
       return '<tr class="' + (isCur ? 'active-row' : '') + '">' +
@@ -7006,7 +7178,7 @@
 
     const ytdTargetStr = r.scored ? (r.veto ? '0' : target(r)) : '–';
     const ytdStPill = (r.scored && r.ytdrag !== null && r.ytdrag !== undefined) ?
-      '<span class="v-status-pill ' + cls(r.ytdrag) + '" style="font-size:10px;padding:2px 7px"><span class="v-status-dot"></span>' + (r.ytdrag === 1 ? 'Target Met' : (r.ytdrag === 0 ? 'In Tolerance' : 'Breach')) + '</span>' :
+      '<span class="v-status-pill ' + cls(r.ytdrag) + '" style="font-size:10px;padding:2px 7px">' + (r.ytdrag === 1 ? 'Target Met' : (r.ytdrag === 0 ? 'In Tolerance' : 'Breach')) + '</span>' :
       '<span style="color:#94a3b8;font-size:11px">' + (r.scored ? 'No Telemetry' : 'Monitoring') + '</span>';
 
     const ytdRowHtml = '<tr class="ytd-row">' +
