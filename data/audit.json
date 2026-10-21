@@ -1,28 +1,6 @@
 {
   "events": [
     {
-      "id": "aud_1790856878807_0hymp",
-      "timestamp": "2026-10-01T12:14:38.807Z",
-      "actor": "Jeeva",
-      "action": "ROLE_CHANGED",
-      "target": "Jeeva",
-      "result": "FAILED",
-      "details": {
-        "reason": "Cannot change role of last active Super Admin"
-      }
-    },
-    {
-      "id": "aud_1790856879063_bohu6",
-      "timestamp": "2026-10-01T12:14:39.063Z",
-      "actor": "Jeeva",
-      "action": "LOGIN_SUCCESS",
-      "target": "Jeeva",
-      "result": "SUCCESS",
-      "details": {
-        "ip": "::1"
-      }
-    },
-    {
       "id": "aud_1790856879079_e2qhq",
       "timestamp": "2026-10-01T12:14:39.079Z",
       "actor": "admin",
@@ -10847,6 +10825,31 @@
       "result": "SUCCESS",
       "details": {
         "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1792587982752_4ufrp",
+      "timestamp": "2026-10-21T13:06:22.752Z",
+      "actor": "Jeeva",
+      "action": "LOGIN_SUCCESS",
+      "target": "Jeeva",
+      "result": "SUCCESS",
+      "details": {
+        "ip": "::1"
+      }
+    },
+    {
+      "id": "aud_1792588097565_cauq8",
+      "timestamp": "2026-10-21T13:08:17.565Z",
+      "actor": "Jeeva",
+      "action": "SHARE_CREATED",
+      "target": "share:shr_2bbacaa8336f83bd7b92",
+      "result": "SUCCESS",
+      "details": {
+        "month": "2026-05",
+        "expiresInDays": 7,
+        "clientName": "A0 MSS Dashboard",
+        "shareId": "shr_2bbacaa8336f83bd7b92"
       }
     }
   ]

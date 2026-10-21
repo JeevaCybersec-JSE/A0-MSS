@@ -11,6 +11,18 @@
       "createdBy": "Jeeva",
       "status": "active",
       "revokedAt": null
+    },
+    {
+      "id": "shr_2bbacaa8336f83bd7b92",
+      "tokenHash": "1870d0f56a122616e4fe078a029e02b13ce96b27a0cc21a8958ad5f2f8365505",
+      "clientName": "A0 MSS Dashboard",
+      "scope": "month",
+      "month": "2026-05",
+      "createdAt": "2026-10-21T13:08:17.554Z",
+      "expiresAt": "2026-10-28T13:08:17.554Z",
+      "createdBy": "Jeeva",
+      "status": "active",
+      "revokedAt": null
     }
   ]
 }
