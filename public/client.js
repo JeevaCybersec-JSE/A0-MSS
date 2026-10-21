@@ -6291,9 +6291,6 @@
         });
       }
 
-      // Target threshold indicator at bottom of donut ring (like Image 2)
-      texts.push('<text x="110" y="196" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff" pointer-events="none">' + tgtPct + '%</text>');
-
       return '<svg class="estate-donut-svg" viewBox="0 0 220 220" width="180" height="180" style="display:block;margin:0 auto;overflow:visible;">' +
         '<g class="donut-segments">' + paths.join('') + '</g>' +
         '<g class="donut-labels">' + texts.join('') + '</g>' +
