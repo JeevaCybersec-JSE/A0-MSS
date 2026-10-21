@@ -6184,21 +6184,15 @@
 
   function complianceView() {
     const m = state.m;
-    const fl = n => {
-      const row = flat.find(x => x.name === n);
-      if (!row) return row;
-      if (state.year === 2026 && row._origV) {
-        return { ...row, v: row._origV };
-      }
-      return row;
-    };
+    const fl = n => flat.find(x => x.name === n);
     const comp = fl('Recommendations completion %'), recRaised = fl('Security recommendations raised'), recDone = fl('Recommendations completed');
     const iso = fl('ISO evidence requests completed'), chg = fl('Configuration changes'), ex = fl('Policy exceptions open');
     const bt = (h, s) => '<div class="bt"><h2>' + h + '</h2><span class="sub">' + s + '</span></div>';
 
     const raisedVal = (typeof recRaised?.v?.[m] === 'number') ? recRaised.v[m] : 0;
     const doneVal = (typeof recDone?.v?.[m] === 'number') ? recDone.v[m] : 0;
-    let compVal = (typeof comp?.v?.[m] === 'number') ? comp.v[m] : (raisedVal > 0 ? doneVal / raisedVal : 1);
+    const hasCompData = (typeof comp?.v?.[m] === 'number') || (raisedVal > 0);
+    let compVal = (typeof comp?.v?.[m] === 'number') ? comp.v[m] : (raisedVal > 0 ? doneVal / raisedVal : 0);
 
     const isoVal = (typeof iso?.v?.[m] === 'number') ? iso.v[m] : 0;
     const chgVal = (typeof chg?.v?.[m] === 'number') ? chg.v[m] : 0;
@@ -6209,8 +6203,8 @@
 
     function deltaComp(r) {
       if (!prevM) return 'No change';
-      const curV = (typeof r?.v?.[m] === 'number') ? r.v[m] : (state.year === 2026 && r?._origV?.[m] != null ? r._origV[m] : null);
-      const prevV = (typeof r?.v?.[prevM] === 'number') ? r.v[prevM] : (state.year === 2026 && r?._origV?.[prevM] != null ? r._origV[prevM] : null);
+      const curV = (typeof r?.v?.[m] === 'number') ? r.v[m] : null;
+      const prevV = (typeof r?.v?.[prevM] === 'number') ? r.v[prevM] : null;
       if (typeof curV !== 'number' || typeof prevV !== 'number') return 'No change';
       const diff = curV - prevV;
       if (Math.abs(diff) < 1e-6) return 'No change';
@@ -6225,8 +6219,8 @@
 
     function deltaClass(r) {
       if (!prevM) return 'muted';
-      const curV = (typeof r?.v?.[m] === 'number') ? r.v[m] : (state.year === 2026 && r?._origV?.[m] != null ? r._origV[m] : null);
-      const prevV = (typeof r?.v?.[prevM] === 'number') ? r.v[prevM] : (state.year === 2026 && r?._origV?.[prevM] != null ? r._origV[prevM] : null);
+      const curV = (typeof r?.v?.[m] === 'number') ? r.v[m] : null;
+      const prevV = (typeof r?.v?.[prevM] === 'number') ? r.v[prevM] : null;
       if (typeof curV !== 'number' || typeof prevV !== 'number') return 'muted';
       const diff = curV - prevV;
       if (Math.abs(diff) < 1e-6) return 'muted';
@@ -6418,26 +6412,26 @@
             '<div>' +
               '<div class="gov-card-head">' +
                 '<span class="gov-card-badge">CONTROL 01 &bull; POLICY EXCEPTIONS</span>' +
-                '<span class="gov-status-chip pos">Zero Breaches</span>' +
+                '<span class="gov-status-chip ' + (exVal === 0 ? 'pos">Zero Breaches' : 'neg">' + exVal + ' Breached') + '</span>' +
               '</div>' +
               '<div class="gov-metric-row">' +
                 '<div class="gov-metric-num navy">' + exVal + '</div>' +
                 '<div class="gov-metric-meta">' +
                   '<span class="gov-metric-title">Open Policy Exceptions</span>' +
-                  '<span class="gov-metric-delta">Zero open exceptions in ' + FULL[m] + '</span>' +
+                  '<span class="gov-metric-delta">' + (exVal === 0 ? 'Zero open exceptions in ' + FULL[m] : exVal + ' policy exception' + (exVal > 1 ? 's' : '') + ' in ' + FULL[m]) + '</span>' +
                 '</div>' +
               '</div>' +
               '<div class="gov-visual-panel">' +
                 '<div class="gov-visual-head">' +
                   '<span>' + FULL[m] + ' Compliance Status</span>' +
-                  '<span class="gov-visual-pill">100% COMPLIANT</span>' +
+                  '<span class="gov-visual-pill ' + (exVal === 0 ? 'pos">100% COMPLIANT' : 'neg">NON-COMPLIANT') + '</span>' +
                 '</div>' +
                 '<div class="capsule-track-bar" style="margin-bottom: 12px;">' +
-                  '<div class="capsule-fill-bar uniform" style="width: 100%;"></div>' +
+                  '<div class="capsule-fill-bar ' + (exVal === 0 ? 'uniform' : 'warn') + '" style="width: ' + (exVal === 0 ? '100%' : '15%') + ';"></div>' +
                 '</div>' +
                 '<div class="gov-runway-banner">' +
-                  '<span class="gov-check-icon">✓</span>' +
-                  '<span>Zero exceptions or security waivers logged in ' + FULL[m] + '</span>' +
+                  '<span class="gov-check-icon">' + (exVal === 0 ? '✓' : '⚠️') + '</span>' +
+                  '<span>' + (exVal === 0 ? 'Zero exceptions or security waivers logged in ' + FULL[m] : exVal + ' active policy exception' + (exVal > 1 ? 's' : '') + ' in ' + FULL[m]) + '</span>' +
                 '</div>' +
               '</div>' +
             '</div>' +
