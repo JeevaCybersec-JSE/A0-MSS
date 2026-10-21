@@ -3148,7 +3148,7 @@
 
         // Donut SVG generator for Endpoint Protection Coverage (Covered vs Remaining)
         const donutSvg = (function () {
-          const cx = 110, cy = 110, R = 90, r = 54, rMid = 72;
+          const cx = 110, cy = 110, R = 88, r = 62, rMid = 75;
           let curAngle = -Math.PI / 2;
           const paths = [];
           const texts = [];
@@ -3213,8 +3213,8 @@
             '<g class="donut-segments">' + paths.join('') + '</g>' +
             '<g class="donut-labels">' + texts.join('') + '</g>' +
             '<g class="donut-center" pointer-events="none">' +
-              '<text x="110" y="104" text-anchor="middle" font-size="28" font-weight="800" fill="var(--ink)" letter-spacing="-0.5">' + coveredPct.toFixed(1) + '%</text>' +
-              '<text x="110" y="122" text-anchor="middle" font-size="9" font-weight="700" fill="var(--muted)" letter-spacing="0.8">COVERED</text>' +
+              '<text x="110" y="105" text-anchor="middle" font-size="24" font-weight="800" fill="var(--ink)" letter-spacing="-0.5">' + (coveredPct >= 99.95 || coveredPct % 1 === 0 ? coveredPct.toFixed(0) : coveredPct.toFixed(1)) + '%</text>' +
+              '<text x="110" y="125" text-anchor="middle" font-size="9" font-weight="700" fill="var(--muted)" letter-spacing="0.8">COVERED</text>' +
             '</g>' +
           '</svg>';
         })();
@@ -6247,7 +6247,7 @@
 
     // Donut SVG Generator matching Device Protection Composition (Image 2 style)
     const compDonutSvg = (function () {
-      const cx = 110, cy = 110, R = 90, r = 54, rMid = 72;
+      const cx = 110, cy = 110, R = 88, r = 62, rMid = 75;
       let curAngle = -Math.PI / 2;
       const paths = [];
       const texts = [];
@@ -6295,8 +6295,8 @@
         '<g class="donut-segments">' + paths.join('') + '</g>' +
         '<g class="donut-labels">' + texts.join('') + '</g>' +
         '<g class="donut-center" pointer-events="none">' +
-          '<text x="110" y="104" text-anchor="middle" font-size="28" font-weight="800" fill="var(--ink)" letter-spacing="-0.5">' + compPct.toFixed(1) + '%</text>' +
-          '<text x="110" y="122" text-anchor="middle" font-size="9" font-weight="700" fill="var(--muted)" letter-spacing="0.8">COMPLETED</text>' +
+          '<text x="110" y="105" text-anchor="middle" font-size="24" font-weight="800" fill="var(--ink)" letter-spacing="-0.5">' + (compPct >= 99.95 || compPct % 1 === 0 ? compPct.toFixed(0) : compPct.toFixed(1)) + '%</text>' +
+          '<text x="110" y="125" text-anchor="middle" font-size="9" font-weight="700" fill="var(--muted)" letter-spacing="0.8">COMPLETED</text>' +
         '</g>' +
       '</svg>';
     })();
