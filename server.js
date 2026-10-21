@@ -274,6 +274,7 @@ function loadDB() {
   }
 }
 function saveDB(db, targetMonth = null) {
+  db.lastUpdated = new Date().toISOString();
   fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
   notifyDataChanged(targetMonth);
 }
@@ -1459,8 +1460,11 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/active-month' && req.method === 'POST') {
       const body = await readBody(req);
       if (body && body.month && isValidMonth(body.month)) {
-        currentActiveMonth = body.month;
-        notifyDataChanged(body.month);
+        const db = loadDB();
+        if (db.months && db.months[body.month]) {
+          currentActiveMonth = body.month;
+          notifyDataChanged(body.month);
+        }
       }
       return sendJSON(res, 200, { success: true, activeMonth: currentActiveMonth, version: dataChangeVersion });
     }
@@ -1505,8 +1509,8 @@ const server = http.createServer(async (req, res) => {
       } else if (!month || !isValidMonth(month)) {
         month = allMonthKeys.slice().reverse().find(m => {
           const raw = db.months[m]?.metrics || {};
-          return Object.values(raw).some(e => e && (e.computed !== null || e.inputs));
-        }) || allMonthKeys[allMonthKeys.length - 1] || '2026-03';
+          return Object.values(raw).some(e => e && e.computed !== null && e.computed !== undefined);
+        }) || currentActiveMonth || '2026-05';
       }
 
       const year = month.split('-')[0];
@@ -1663,6 +1667,7 @@ const server = http.createServer(async (req, res) => {
         },
         activeMonth: currentActiveMonth,
         dataVersion: dataChangeVersion,
+        lastUpdated: db.lastUpdated || (fs.existsSync(DB_PATH) ? fs.statSync(DB_PATH).mtime.toISOString() : new Date().toISOString()),
         allMonthsData: allMonthsSummary,
       });
     }

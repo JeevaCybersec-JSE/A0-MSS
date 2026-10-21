@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <base href="/">
-  <title>Brysa Security · Executive Performance Report</title>
+  <title>Brysa · Managed Security Services Performance Dashboard</title>
   
   <!-- Premium Modern Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,11 +25,70 @@
         </div>
       </div>
       <div class="top-actions">
-        <!-- Year Selector -->
-        <div class="period-control-group" title="Select Reporting Year">
-          <button type="button" class="year-btn" id="year-prev-btn" title="Previous Year" aria-label="Previous Year">&lt;</button>
-          <span class="year-val" id="year-display">2026</span>
-          <button type="button" class="year-btn" id="year-next-btn" title="Next Year" aria-label="Next Year">&gt;</button>
+        <!-- Month & Year Calendar Selector (Matching Main Page Reference UI) -->
+        <div class="month-selector-group" id="month-selector-container">
+          <button id="prev-month-btn" class="btn-icon-nav" title="Previous Month" type="button" aria-label="Previous Month">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button type="button" class="month-picker" id="month-picker-trigger" title="Select Reporting Month">
+            <svg class="month-picker-cal-icon" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="4" width="14" height="13" rx="1.5"/>
+              <path d="M3 8h14M7 2.3v3M13 2.3v3" stroke-linecap="round"/>
+            </svg>
+            <span id="month-display-text" class="month-display-text">May 2026</span>
+            <svg class="month-picker-caret" viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 8l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <input id="month-input" type="hidden">
+          </button>
+          <button id="next-month-btn" class="btn-icon-nav" title="Next Month" type="button" aria-label="Next Month">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7.5 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <!-- Custom Ultra-Modern Dark Glow Calendar Widget (Matching Reference UI) -->
+          <div id="custom-calendar-popup" class="cal-card-popup" style="display: none;" role="dialog" aria-label="Calendar month picker">
+            <!-- Top Violet Glowing Notch Bar & Arch Cutout -->
+            <div class="cal-top-notch-wrap">
+              <div class="cal-top-notch-bar"></div>
+              <div class="cal-top-notch-arch"></div>
+            </div>
+
+            <!-- Ambient Glow Spotlight -->
+            <div class="cal-ambient-glow"></div>
+
+            <!-- Header: Chevron Left, Month Year, Chevron Right -->
+            <div class="cal-header">
+              <button type="button" id="cal-nav-prev" class="cal-nav-btn" title="Previous Month" aria-label="Previous Month">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 18l-6-6 6-6"/>
+                </svg>
+              </button>
+              <div id="cal-month-title" class="cal-month-title">May 2026</div>
+              <button type="button" id="cal-nav-next" class="cal-nav-btn" title="Next Month" aria-label="Next Month">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Year Scroll & Selector Ribbon (Scroll wheel / chevrons) -->
+            <div class="cal-year-scroll-wrapper" id="cal-year-scroll-container" title="Scroll mouse wheel to change year">
+              <button type="button" id="cal-year-scroll-prev" class="cal-year-nav-btn" title="Previous Year" aria-label="Previous Year">
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13L5 8L10 3"/></svg>
+              </button>
+              <div class="cal-year-track" id="cal-year-track"></div>
+              <button type="button" id="cal-year-scroll-next" class="cal-year-nav-btn" title="Next Year" aria-label="Next Year">
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3L11 8L6 13"/></svg>
+              </button>
+            </div>
+
+            <!-- 12-Month Selection Grid (JAN to DEC) -->
+            <div id="cal-months-grid" class="cal-months-grid"></div>
+          </div>
         </div>
 
         <!-- Frosted Glass Liquid Theme Toggle -->
@@ -64,7 +123,13 @@
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-brand-block">
-        <h1 class="hero-title">Security Performance Report<br><span id="hero-title-period">May 2026 Executive Audit</span></h1>
+        <h1 class="hero-title">Managed Security Services Performance Dashboard</h1>
+        <div class="hero-meta-badge-row">
+          <span class="hero-last-updated-badge" id="hero-last-updated" title="Date of last data modification or final data entry">
+            <svg class="hero-update-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Last updated: <strong id="last-updated-date">20 Oct 2026</strong>
+          </span>
+        </div>
         <p class="hero-subtitle">Comprehensive monthly SLA intelligence, threat hunting metrics, incident response posture, and remediations.</p>
       </div>
     </div>

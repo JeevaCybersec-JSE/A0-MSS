@@ -1824,10 +1824,10 @@
         }
       },
       "narrative": {
-        "topRisks": "How is it ?\n",
+        "topRisks": "Automated Verification Check 1792585148986",
         "improvements": "Good or Nice ",
         "plannedActions": "Any changes u want ?\n",
-        "updatedAt": "2026-10-12T13:37:01.467Z",
+        "updatedAt": "2026-10-21T12:19:08.996Z",
         "updatedBy": "Jeeva"
       }
     },
@@ -2910,41 +2910,19 @@
     "2026-10": {
       "metrics": {
         "managed_endpoints": {
-          "inputs": {
-            "value": 15
-          },
-          "computed": 15,
-          "rag": null,
-          "history": [
-            {
-              "timestamp": "2026-10-12T08:20:32.322Z",
-              "action": "clear",
-              "user": "Jeeva",
-              "previousInputs": {
-                "value": 5
-              },
-              "previousComputed": 5,
-              "previousRAG": null
-            }
-          ]
+          "inputs": {},
+          "computed": null,
+          "rag": null
         },
         "mobile_devices": {
-          "inputs": {
-            "a": null,
-            "b": null,
-            "choice": "vpn_only"
-          },
+          "inputs": {},
           "computed": null,
-          "rag": null,
-          "history": []
+          "rag": null
         },
         "new_endpoints": {
-          "inputs": {
-            "value": null
-          },
+          "inputs": {},
           "computed": null,
-          "rag": null,
-          "history": []
+          "rag": null
         },
         "removed_endpoints": {
           "inputs": {},
@@ -2952,12 +2930,9 @@
           "rag": null
         },
         "devices_not_reporting": {
-          "inputs": {
-            "value": 4
-          },
-          "computed": 4,
-          "rag": null,
-          "history": []
+          "inputs": {},
+          "computed": null,
+          "rag": null
         },
         "endpoint_protection_coverage_pct": {
           "inputs": {},
@@ -3176,13 +3151,13 @@
         },
         "devices_not_reporting_pct": {
           "inputs": {
-            "num": 4,
-            "den": 15,
-            "devices_not_reporting": 4,
-            "managed_endpoints": 15
+            "num": null,
+            "den": null,
+            "devices_not_reporting": null,
+            "managed_endpoints": null
           },
-          "computed": 26.67,
-          "rag": "red"
+          "computed": null,
+          "rag": null
         },
         "patch_deployment_success_rate_pct": {
           "inputs": {},
@@ -3739,5 +3714,6 @@
         "actions": ""
       }
     }
-  }
+  },
+  "lastUpdated": "2026-10-21T12:19:08.996Z"
 }

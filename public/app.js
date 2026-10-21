@@ -546,6 +546,12 @@ async function initApp() {
 
   buildSectionNav();
   await loadMonthsHistory();
+  if (state.monthsHistory && state.monthsHistory.length > 0) {
+    const latestWithData = state.monthsHistory.slice().reverse().find(m => m.total > 0);
+    if (latestWithData) {
+      state.month = latestWithData.month;
+    }
+  }
   const monthInput = document.getElementById('month-input');
   if (monthInput && state.month) {
     monthInput.value = state.month;

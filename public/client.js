@@ -2232,10 +2232,6 @@
       if (json.clientName && json.clientName !== 'Brysa') {
         const topClientEl = document.getElementById('top-client-name');
         if (topClientEl) topClientEl.textContent = ' · Client: ' + json.clientName;
-        const heroTitlePeriod = document.getElementById('hero-title-period');
-        if (heroTitlePeriod) {
-          heroTitlePeriod.innerHTML = MON[state.m] + ' ' + state.year + ' Executive Audit &middot; <span style="color:#38bdf8">' + json.clientName + '</span>';
-        }
       }
 
       applyServerData(json);
@@ -2335,11 +2331,25 @@
       return '<div class="luminous-spark-empty"><span class="luminous-empty-badge">No data recorded</span></div>';
     }
 
-    const months = CHART_MONTHS;
-    const pts = months.map(i => ({ x: i, v: typeof r.v[i] === 'number' ? r.v[i] : null }));
-    const validVals = pts.filter(p => p.v !== null).map(p => p.v);
+    // ViewBox: 240 wide, 62 tall. Plot area: X from 12 to 228, baseY = 46, plotH = 34
+    const plotW = 216;
+    const plotH = 34;
+    const startX = 12;
+    const baseY = 46;
 
-    if (validVals.length === 0) {
+    // Full 12-month coordinate system across entire card width (Jan = 12, Dec = 228)
+    const getX = mon => startX + ((mon - 1) / 11) * plotW;
+
+    // Dynamically detect the latest month for which actual numeric data is provided
+    let latestMonthWithData = 0;
+    for (let i = 12; i >= 1; i--) {
+      if (typeof r.v[i] === 'number' && !isNaN(r.v[i])) {
+        latestMonthWithData = i;
+        break;
+      }
+    }
+
+    if (latestMonthWithData === 0) {
       return '<div class="luminous-spark-empty">' +
         '<div class="luminous-empty-badge">' +
           '<span class="luminous-empty-dot"></span>' +
@@ -2348,39 +2358,52 @@
       '</div>';
     }
 
+    // Collect all valid values up to latestMonthWithData to establish true min/max bounds
+    const validVals = [];
+    for (let i = 1; i <= latestMonthWithData; i++) {
+      if (typeof r.v[i] === 'number' && !isNaN(r.v[i])) {
+        validVals.push(r.v[i]);
+      }
+    }
+
     const minV = Math.min(...validVals, 0);
     const maxV = Math.max(...validVals, 1);
     const range = (maxV - minV) || 1;
 
-    // ViewBox: 240 wide, 62 tall. Plot area: X from 12 to 228, baseY = 46, plotH = 36
-    const plotW = 216;
-    const plotH = 34;
-    const startX = 12;
-    const baseY = 46;
-
-    const getX = mon => startX + ((mon - 1) / 11) * plotW;
     const getY = v => {
-      if (v === null) return baseY;
+      if (typeof v !== 'number' || isNaN(v)) return baseY;
       const norm = (v - minV) / range;
       return baseY - norm * plotH;
     };
 
-    const coords = pts.map(p => ({
-      x: getX(p.x),
-      y: p.v !== null ? getY(p.v) : baseY,
-      hasVal: p.v !== null,
-      m: p.x,
-      val: p.v
-    }));
-
-    // Multi-layered secondary background mountain ridge for rich depth
-    const bgCoords = coords.map(c => ({
-      x: c.x,
-      y: baseY - ((baseY - c.y) * 0.72)
-    }));
+    // Partition available data into contiguous segments so missing months are never bridged or treated as zero
+    const segments = [];
+    let currentSegment = [];
+    for (let i = 1; i <= latestMonthWithData; i++) {
+      if (typeof r.v[i] === 'number' && !isNaN(r.v[i])) {
+        currentSegment.push({
+          m: i,
+          val: r.v[i],
+          x: getX(i),
+          y: getY(r.v[i])
+        });
+      } else {
+        if (currentSegment.length > 0) {
+          segments.push(currentSegment);
+          currentSegment = [];
+        }
+      }
+    }
+    if (currentSegment.length > 0) {
+      segments.push(currentSegment);
+    }
 
     function splinePath(points) {
       if (points.length < 2) return '';
+      if (points.length === 2) {
+        return 'M ' + points[0].x.toFixed(1) + ' ' + points[0].y.toFixed(1) +
+               ' L ' + points[1].x.toFixed(1) + ' ' + points[1].y.toFixed(1);
+      }
       let d = 'M ' + points[0].x.toFixed(1) + ' ' + points[0].y.toFixed(1);
       for (let i = 0; i < points.length - 1; i++) {
         const p0 = points[i === 0 ? 0 : i - 1];
@@ -2396,19 +2419,14 @@
       return d;
     }
 
-    const fgLineD = splinePath(coords);
-    const fgAreaD = fgLineD + ' L ' + coords[coords.length - 1].x.toFixed(1) + ' ' + baseY + ' L ' + coords[0].x.toFixed(1) + ' ' + baseY + ' Z';
-
-    const bgLineD = splinePath(bgCoords);
-    const bgAreaD = bgLineD + ' L ' + bgCoords[bgCoords.length - 1].x.toFixed(1) + ' ' + baseY + ' L ' + bgCoords[0].x.toFixed(1) + ' ' + baseY + ' Z';
-
-    // Color theme mapping matching user reference image (Amber/Orange flame glow by default)
+    // Color theme mapping matching design rules (Amber flame by default, Green/Red/Blue by RAG/category)
     let colorKey = 'amber';
+    const ragMonth = (r.rag && r.rag[m] !== null && r.rag[m] !== undefined) ? m : latestMonthWithData;
     if (r.scored && r.rag) {
-      if (r.rag[m] === 1) colorKey = 'green';
-      else if (r.rag[m] === -1) colorKey = 'red';
-      else if (r.rag[m] === 0) colorKey = 'amber';
-    } else if (r.name.toLowerCase().includes('patch') || r.name.toLowerCase().includes('device')) {
+      if (r.rag[ragMonth] === 1) colorKey = 'green';
+      else if (r.rag[ragMonth] === -1) colorKey = 'red';
+      else if (r.rag[ragMonth] === 0) colorKey = 'amber';
+    } else if (r.name && (r.name.toLowerCase().includes('patch') || r.name.toLowerCase().includes('device'))) {
       colorKey = 'blue';
     }
 
@@ -2449,15 +2467,67 @@
 
     const c = colorPalettes[colorKey] || colorPalettes.amber;
     const uid = 'r' + Math.abs(r.name.split('').reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0) % 99999);
-    const curPt = coords[m - 1] || coords[0];
 
-    // Minimalist month ticks & numbers matching reference image (01 02 03 ... 12)
-    const ticks = coords.map((pt, idx) => {
-      const isAct = (idx + 1 === m);
-      const num = String(idx + 1).padStart(2, '0');
-      return '<line x1="' + pt.x.toFixed(1) + '" y1="' + baseY + '" x2="' + pt.x.toFixed(1) + '" y2="' + (baseY + 3) + '" stroke="' + (isAct ? c.stroke : 'rgba(148, 163, 184, 0.22)') + '" stroke-width="' + (isAct ? '1.5' : '1') + '" />' +
-        '<text x="' + pt.x.toFixed(1) + '" y="' + (baseY + 11) + '" text-anchor="middle" class="luminous-tick-txt' + (isAct ? ' active' : '') + '">' + num + '</text>';
+    // Build SVG paths strictly for valid contiguous segments up to latestMonthWithData
+    let segmentsSvg = '';
+    segments.forEach(seg => {
+      if (seg.length === 1) {
+        segmentsSvg += '<circle cx="' + seg[0].x.toFixed(1) + '" cy="' + seg[0].y.toFixed(1) + '" r="2.8" fill="' + c.stroke + '" />';
+      } else if (seg.length >= 2) {
+        const bgPoints = seg.map(pt => ({
+          x: pt.x,
+          y: baseY - ((baseY - pt.y) * 0.72)
+        }));
+        const startXSeg = seg[0].x.toFixed(1);
+        const endXSeg = seg[seg.length - 1].x.toFixed(1);
+
+        const fgLineD = splinePath(seg);
+        const fgAreaD = fgLineD + ' L ' + endXSeg + ' ' + baseY + ' L ' + startXSeg + ' ' + baseY + ' Z';
+
+        const bgLineD = splinePath(bgPoints);
+        const bgAreaD = bgLineD + ' L ' + endXSeg + ' ' + baseY + ' L ' + startXSeg + ' ' + baseY + ' Z';
+
+        segmentsSvg += '<!-- Secondary Background Ridge Wave -->' +
+          '<path d="' + bgAreaD + '" fill="url(#bg-' + uid + ')" />' +
+          '<path d="' + bgLineD + '" fill="none" stroke="' + c.neon + '" stroke-opacity="0.32" stroke-width="1" />' +
+          '<!-- Primary Foreground Ridge Wave -->' +
+          '<path d="' + fgAreaD + '" fill="url(#fg-' + uid + ')" />' +
+          '<!-- Glowing Neon Line Path -->' +
+          '<path d="' + fgLineD + '" fill="none" stroke="' + c.stroke + '" stroke-width="1.8" filter="url(#glow-' + uid + ')" vector-effect="non-scaling-stroke" />';
+      }
+    });
+
+    // All 12 months visible on the X-axis timeline (January to December)
+    const allMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    const ticks = allMonths.map(mon => {
+      const x = getX(mon);
+      const isAct = (mon === m);
+      const isFuture = (mon > latestMonthWithData);
+      const hasData = (typeof r.v[mon] === 'number' && !isNaN(r.v[mon]));
+      const num = String(mon).padStart(2, '0');
+      const strokeCol = isAct ? c.stroke : (hasData ? 'rgba(148, 163, 184, 0.28)' : 'rgba(148, 163, 184, 0.16)');
+      const strokeW = isAct ? '1.5' : '1';
+      const txtCls = 'luminous-tick-txt' + (isAct ? ' active' : '') + (isFuture ? ' future-tick' : '');
+
+      return '<line x1="' + x.toFixed(1) + '" y1="' + baseY + '" x2="' + x.toFixed(1) + '" y2="' + (baseY + 3) + '" stroke="' + strokeCol + '" stroke-width="' + strokeW + '" />' +
+        '<text x="' + x.toFixed(1) + '" y="' + (baseY + 11) + '" text-anchor="middle" class="' + txtCls + '">' + num + '</text>';
     }).join('');
+
+    // Glowing Luminous Beacon Node on Active Month (rendered ONLY if active month has real data)
+    let beaconSvg = '';
+    if (typeof r.v[m] === 'number' && !isNaN(r.v[m])) {
+      const curPt = { x: getX(m), y: getY(r.v[m]) };
+      beaconSvg = '<!-- Glowing Luminous Beacon Node on Active Month -->' +
+        '<g class="luminous-beacon-group" transform="translate(' + curPt.x.toFixed(1) + ', ' + curPt.y.toFixed(1) + ')">' +
+          '<line x1="0" y1="0" x2="0" y2="' + (baseY - curPt.y).toFixed(1) + '" stroke="' + c.stroke + '" stroke-opacity="0.4" stroke-dasharray="2,2" stroke-width="1" />' +
+          '<circle cx="0" cy="0" r="5" fill="' + c.neon + '" opacity="0.45">' +
+            '<animate attributeName="r" values="3.5;7.5;3.5" dur="2.4s" repeatCount="indefinite" />' +
+            '<animate attributeName="opacity" values="0.55;0.12;0.55" dur="2.4s" repeatCount="indefinite" />' +
+          '</circle>' +
+          '<circle cx="0" cy="0" r="3.6" fill="' + c.stroke + '" opacity="0.9" />' +
+          '<circle cx="0" cy="0" r="1.8" fill="#ffffff" />' +
+        '</g>';
+    }
 
     return '<div class="luminous-ridge-wrap">' +
       '<svg viewBox="0 0 240 62" preserveAspectRatio="none" class="luminous-ridge-svg" aria-hidden="true">' +
@@ -2481,25 +2551,10 @@
         '</defs>' +
         '<!-- Baseline Grid -->' +
         '<line x1="12" y1="' + baseY + '" x2="228" y2="' + baseY + '" stroke="rgba(148, 163, 184, 0.16)" stroke-width="1" />' +
-        '<!-- Secondary Background Ridge Wave -->' +
-        '<path d="' + bgAreaD + '" fill="url(#bg-' + uid + ')" />' +
-        '<path d="' + bgLineD + '" fill="none" stroke="' + c.neon + '" stroke-opacity="0.32" stroke-width="1" />' +
-        '<!-- Primary Foreground Ridge Wave -->' +
-        '<path d="' + fgAreaD + '" fill="url(#fg-' + uid + ')" />' +
-        '<!-- Glowing Neon Line Path -->' +
-        '<path d="' + fgLineD + '" fill="none" stroke="' + c.stroke + '" stroke-width="1.8" filter="url(#glow-' + uid + ')" vector-effect="non-scaling-stroke" />' +
+        segmentsSvg +
         '<!-- Timeline Ticks -->' +
         ticks +
-        '<!-- Glowing Luminous Beacon Node on Active Month -->' +
-        '<g class="luminous-beacon-group" transform="translate(' + curPt.x.toFixed(1) + ', ' + curPt.y.toFixed(1) + ')">' +
-          '<line x1="0" y1="0" x2="0" y2="' + (baseY - curPt.y).toFixed(1) + '" stroke="' + c.stroke + '" stroke-opacity="0.4" stroke-dasharray="2,2" stroke-width="1" />' +
-          '<circle cx="0" cy="0" r="5" fill="' + c.neon + '" opacity="0.45">' +
-            '<animate attributeName="r" values="3.5;7.5;3.5" dur="2.4s" repeatCount="indefinite" />' +
-            '<animate attributeName="opacity" values="0.55;0.12;0.55" dur="2.4s" repeatCount="indefinite" />' +
-          '</circle>' +
-          '<circle cx="0" cy="0" r="3.6" fill="' + c.stroke + '" opacity="0.9" />' +
-          '<circle cx="0" cy="0" r="1.8" fill="#ffffff" />' +
-        '</g>' +
+        beaconSvg +
       '</svg>' +
     '</div>';
   }
@@ -2763,15 +2818,39 @@
     };
   }
 
+  
+  function formatLastUpdatedDate(dateStr) {
+    if (!dateStr) return '20 Oct 2026';
+    try {
+      const d = new Date(dateStr);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+    } catch (e) {}
+    return String(dateStr);
+  }
+
   function renderHeader() {
+    calViewYear = state.year;
+    calViewMonth = state.m;
+
     const yearDisplay = document.getElementById('year-display');
     if (yearDisplay) yearDisplay.textContent = state.year;
+
+    const monthDisplayText = document.getElementById('month-display-text');
+    if (monthDisplayText) monthDisplayText.textContent = FULL[state.m] + ' ' + state.year;
+    if (typeof renderClientCustomCalendar === 'function') {
+      renderClientCustomCalendar();
+    }
 
     const topPeriod = document.getElementById('top-reporting-period');
     if (topPeriod) topPeriod.textContent = FULL[state.m] + ' ' + state.year;
 
-    const heroTitlePeriod = document.getElementById('hero-title-period');
-    if (heroTitlePeriod) heroTitlePeriod.textContent = FULL[state.m] + ' ' + state.year + ' Executive Audit';
+    const lastUpdatedEl = document.getElementById('last-updated-date');
+    if (lastUpdatedEl) {
+      const rawDate = (state.data && state.data.lastUpdated) || '2026-10-20T09:08:23.529Z';
+      lastUpdatedEl.textContent = formatLastUpdatedDate(rawDate);
+    }
 
     const c = counts(state.m);
 
@@ -2997,7 +3076,7 @@
               '<div class="perf-gauge-target" style="left:' + t.toFixed(1) + '%"></div>' +
             '</div>' +
             '<div class="perf-val">' + fmt(r, v) + '</div>' +
-            '<div class="perf-pill ' + pillCls + '"><i class="pdot"></i>' + pillLabel + '</div>' +
+            '<div class="perf-pill ' + pillCls + '">' + pillLabel + '</div>' +
           '</button>';
         };
 
@@ -3025,9 +3104,9 @@
               '<p class="sub" style="margin:0">Key operational and security indicators</p>' +
             '</div>' +
             '<div class="perf-summary-group">' +
-              '<span class="perf-badge g"><span class="dot"></span>' + onTarget + ' On target</span>' +
-              (nearTarget > 0 ? '<span class="perf-badge a"><span class="dot"></span>' + nearTarget + ' Near target</span>' : '') +
-              '<span class="perf-badge r"><span class="dot"></span>' + offTarget + ' Off target</span>' +
+              '<span class="perf-badge g">' + onTarget + ' On target</span>' +
+              (nearTarget > 0 ? '<span class="perf-badge a">' + nearTarget + ' Near target</span>' : '') +
+              '<span class="perf-badge r">' + offTarget + ' Off target</span>' +
             '</div>' +
           '</div>' +
           '<div class="perf-dist-bar" title="' + onTarget + ' On target, ' + nearTarget + ' Near, ' + offTarget + ' Off target">' +
@@ -3180,7 +3259,7 @@
             '<section class="card incident-sla-card" aria-label="Speed of detection, response & remediation">' +
               '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
                 '<div><h2 class="h2" style="margin-bottom:2px">Speed of detection, response &amp; remediation</h2><span class="sub" style="margin:0">Key operational performance indicators</span></div>' +
-                '<span class="perf-badge g" style="font-size:11px"><span class="dot"></span>Operations</span>' +
+                '<span class="perf-badge g" style="font-size:11px">Operations</span>' +
               '</div>' +
               '<div style="display:flex;flex-direction:column;gap:8px">' +
                 [
@@ -3243,7 +3322,7 @@
                       '<div class="perf-gauge-target" style="left:50%"></div>' +
                     '</div>' +
                     '<div class="perf-val" style="font-size:13px">' + dispVal + '</div>' +
-                    '<div class="perf-pill ' + pillCls + '" style="font-size:9.5px;padding:2px 5px">' + (pillCls !== 'n' ? '<i class="pdot"></i>' : '') + pillText + '</div>' +
+                    '<div class="perf-pill ' + pillCls + '" style="font-size:9.5px;padding:2px 5px">' + (pillCls !== 'n' ? '' : '') + pillText + '</div>' +
                   '</button>';
                 }).join('') +
               '</div>' +
@@ -3313,16 +3392,16 @@
 
                   '<button type="button" class="sla-radial-card" ' + (critVulnRow ? 'data-open="' + critVulnRow.r + '"' : '') + ' title="Critical vulnerabilities open: ' + critVulnVal + ' (Target: 0)">' +
                     '<div class="sla-radial-meter" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">' +
-                      '<span style="font-size:26px;font-weight:800;line-height:1;color:' + (critVulnVal === 0 ? 'var(--g, #059669)' : 'var(--r, #dc2626)') + '">' + critVulnVal + '</span>' +
-                      '<span style="font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;margin-top:3px">Target 0</span>' +
+                      '<span style="font-size:38px;font-weight:800;line-height:1;color:' + (critVulnVal === 0 ? 'var(--g, #059669)' : 'var(--r, #dc2626)') + '">' + critVulnVal + '</span>' +
+                      '<span style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.04em;margin-top:6px">Target 0</span>' +
                     '</div>' +
                     '<span class="sla-radial-lbl">Critical Vulns</span>' +
                   '</button>' +
 
                   '<button type="button" class="sla-radial-card" ' + (polExRow ? 'data-open="' + polExRow.r + '"' : '') + ' title="Policy exceptions open: ' + polExVal + ' (Target: 0)">' +
                     '<div class="sla-radial-meter" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">' +
-                      '<span style="font-size:26px;font-weight:800;line-height:1;color:' + (polExVal === 0 ? 'var(--g, #059669)' : 'var(--r, #dc2626)') + '">' + polExVal + '</span>' +
-                      '<span style="font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;margin-top:3px">Target 0</span>' +
+                      '<span style="font-size:38px;font-weight:800;line-height:1;color:' + (polExVal === 0 ? 'var(--g, #059669)' : 'var(--r, #dc2626)') + '">' + polExVal + '</span>' +
+                      '<span style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.04em;margin-top:6px">Target 0</span>' +
                     '</div>' +
                     '<span class="sla-radial-lbl">Policy Exceptions</span>' +
                   '</button>';
@@ -3383,159 +3462,28 @@
   // SCORECARD LEADERBOARD & PDF EXPORT ENGINE (CLIENT PAGE DESIGN SYSTEM)
   // ==========================================================================
 
-  window.printScorecardPDF = function () {
-    window.print();
-  };
-
   function scorecard() {
     const m = state.m;
+    const scMonths = CHART_MONTHS.filter(i => i <= m);
+    return '<section class="card"><h2 class="h2">Scorecard</h2><p class="sub">All ' + scored.length + ' scored metrics by month, grouped by weight. Select a row for its trend and definition.</p>' +
+      '<div class="legend2"><span><i style="background:var(--g-soft);border:1px solid var(--g)"></i>On target</span><span><i style="background:var(--a-soft);border:1px solid var(--a)"></i>Within 10% of target</span><span><i style="background:var(--r-soft);border:1px solid var(--r)"></i>Off target</span></div>' +
+      '<div class="scroll"><table class="sc"><thead><tr><th class="l">Metric</th><th>Target</th>' + scMonths.map(i => '<th>' + MON[i] + '</th>').join('') + '</tr></thead><tbody>' + scorecardRows(m, scMonths) + '</tbody></table></div></section>';
+  }
 
-    // Filter counts for summary pills
-    const totalCount = scored.length;
-    const onTargetCount = scored.filter(r => r.rag[m] === 1).length;
-    const nearTargetCount = scored.filter(r => r.rag[m] === 0).length;
-    const offTargetCount = scored.filter(r => r.rag[m] === -1).length;
-
-    // Ordered ranking: Zero tolerance first, then High, then Medium, then Low
-    const weightOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 };
-    const sortedScored = [...scored].sort((a, b) => {
-      const wa = weightOrder[a.weight] ?? 9;
-      const wb = weightOrder[b.weight] ?? 9;
-      if (wa !== wb) return wa - wb;
-      return (a.rag[m] ?? 0) - (b.rag[m] ?? 0);
+  function scorecardRows(m, scMonths) {
+    const months = scMonths || CHART_MONTHS.filter(i => i <= m);
+    const groups = [['Zero tolerance', 'Any breach turns the month Red'], ['High', 'Real security or response impact'], ['Medium', 'Standard operational measures'], ['Low', 'Process and admin measures, which count least']];
+    let out = '';
+    groups.forEach(([t, d]) => {
+      const rows = scored.filter(r => tier(r) === t);
+      if (!rows.length) return;
+      out += '<tr class="sec"><td colspan="' + (months.length + 2) + '">' + t + ' · ' + rows.length + ' measures <span class="meta" style="font-weight:400;letter-spacing:0">&nbsp;' + d + '</span></td></tr>';
+      rows.forEach(r => {
+        out += '<tr class="m" data-open="' + r.r + '"><td class="l">' + r.name + '</td><td class="meta">' + target(r) + '</td>' +
+          months.map(i => '<td><span class="cell ' + cls(r.rag[i]) + ' ' + (i === m ? 'sel' : '') + '">' + fmt(r, r.v[i]) + '</span></td>').join('') + '</tr>';
+      });
     });
-
-    // Dynamic telemetry months: all months available in data (CHART_MONTHS)
-    const telemetryMonths = (Array.isArray(CHART_MONTHS) && CHART_MONTHS.length > 0)
-      ? CHART_MONTHS
-      : [2, 3, 4, 5];
-    const firstMon = telemetryMonths.length > 0 ? (MON[telemetryMonths[0]] || '') : '';
-    const lastMon = telemetryMonths.length > 0 ? (MON[telemetryMonths[telemetryMonths.length - 1]] || '') : '';
-    const teleHeaderLabel = 'MONTHLY TELEMETRY' + (firstMon && lastMon ? ' (' + firstMon.toUpperCase() + (firstMon !== lastMon ? ' – ' + lastMon.toUpperCase() : '') + ')' : '');
-    const teleColWidth = Math.max(280, telemetryMonths.length * 70);
-
-        const rowsHtml = sortedScored.map((r, idx) => {
-      const rank = idx + 1;
-      const isTop1 = rank === 1;
-      const isHighlight = isTop1 || r.veto;
-
-      let evolHtml = '<span class="sc-evol n" title="No change vs previous month">–</span>';
-      if (prevM) {
-        if (r.rag[m] > r.rag[prevM]) {
-          evolHtml = '<span class="sc-evol g" title="Improved status vs previous month">▲ +1</span>';
-        } else if (r.rag[m] < r.rag[prevM]) {
-          evolHtml = '<span class="sc-evol r" title="Slipped status vs previous month">▼ -1</span>';
-        }
-      }
-
-      const icon = getPillarIcon(r.sec);
-      const currentVal = fmt(r, r.v[m]);
-      const statusCls = cls(r.rag[m]);
-
-      // Telemetry mini-metrics across all active reporting periods
-      const telemetryHtml = telemetryMonths.map(i => {
-        const val = typeof r.v[i] === 'number' ? fmt(r, r.v[i]) : '–';
-        const isCur = (i === m);
-        const cellCls = cls(r.rag[i]);
-        return '<div class="sc-tele-item ' + (isCur ? 'cur' : '') + '">' +
-          '<span class="sc-tele-lbl">' + MON[i] + '</span>' +
-          '<span class="sc-tele-val ' + cellCls + '">' + val + '</span>' +
-        '</div>';
-      }).join('');
-
-      return '<div class="sc-card-row ' + (isHighlight ? 'sc-highlight' : '') + '" data-open="' + r.r + '" data-status="' + r.rag[m] + '" role="button" tabindex="0" title="Click to view full 12-month telemetry audit">' +
-        '<div class="sc-row-left">' +
-          '<div class="sc-rank-col">' +
-            (isTop1 ? '<span class="sc-trophy">🏆</span>' : '') +
-            '<span class="sc-rank-num">' + rank + '</span>' +
-          '</div>' +
-          '<div class="sc-evol-col">' + evolHtml + '</div>' +
-          '<div class="sc-avatar-col">' +
-            '<div class="sc-avatar-hex" title="' + (r.sec || 'Metric') + '">' + icon + '</div>' +
-          '</div>' +
-          '<div class="sc-metric-col">' +
-            '<div class="sc-metric-name">' + r.name + '</div>' +
-            '<div class="sc-metric-sub">' +
-              '<span class="sc-weight-tag ' + (r.weight || 'std') + '">' + (r.veto ? 'ZERO TOLERANCE' : (r.weight || 'STANDARD').toUpperCase()) + '</span>' +
-              '<span class="sc-sep">·</span>' +
-              '<span>Target: <strong>' + target(r) + '</strong></span>' +
-              '<span class="sc-sep">·</span>' +
-              '<span>' + (r.sec || '') + '</span>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-
-        '<div class="sc-row-right">' +
-          '<div class="sc-tele-wrap">' + telemetryHtml + '</div>' +
-          '<div class="sc-score-col">' +
-            '<div class="sc-score-pill ' + statusCls + '" title="Current Actual Value">' + currentVal + '</div>' +
-          '</div>' +
-          '<div class="sc-action-col">' +
-            '<span class="sc-chevron">›</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-
-    return '<section class="scorecard-container" aria-label="Executive KPI Scorecard Leaderboard">' +
-      // Header Bar
-      '<div class="sc-header-bar">' +
-        '<div class="sc-title-block">' +
-          '<h2 class="h2" style="margin-bottom:4px">Executive KPI Scorecard</h2>' +
-          '<p class="sub" style="margin:0">Ranked performance across all ' + totalCount + ' scored operational & security indicators for ' + FULL[m] + ' ' + state.year + '</p>' +
-        '</div>' +
-        '<div class="sc-header-actions">' +
-          '<button type="button" class="sc-download-btn" id="sc-export-pdf" onclick="window.printScorecardPDF()" title="Download Scorecard as PDF">' +
-            'Download' +
-          '</button>' +
-        '</div>' +
-      '</div>' +
-
-      // Filter & Search Controls Bar
-      '<div class="sc-controls-bar">' +
-        '<div class="sc-search-wrap">' +
-          '<svg class="sc-search-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">' +
-            '<circle cx="11" cy="11" r="8"/>' +
-            '<line x1="21" y1="21" x2="16.65" y2="16.65"/>' +
-          '</svg>' +
-          '<input type="text" id="scorecard-search" placeholder="Search metric name, category, or pillar..." />' +
-        '</div>' +
-        '<div class="sc-filter-tabs">' +
-          '<button type="button" class="sc-filter-tab active" data-filter="all">All (' + totalCount + ')</button>' +
-          '<button type="button" class="sc-filter-tab" data-filter="on-target">On Target (' + onTargetCount + ')</button>' +
-          '<button type="button" class="sc-filter-tab" data-filter="off-target">Off Target (' + offTargetCount + ')</button>' +
-          (nearTargetCount > 0 ? '<button type="button" class="sc-filter-tab" data-filter="near-target">Near Target (' + nearTargetCount + ')</button>' : '') +
-        '</div>' +
-      '</div>' +
-
-      // Table Header Row
-      '<div class="sc-table-heading">' +
-        '<div class="sc-th-left">' +
-          '<span class="sc-th-rank">RANK</span>' +
-          '<span class="sc-th-metric">METRIC &amp; TARGET</span>' +
-        '</div>' +
-        '<div class="sc-th-right">' +
-          '<span class="sc-th-tele" style="width:' + teleColWidth + 'px">' + teleHeaderLabel + '</span>' +
-          '<span class="sc-th-score">SCORE</span>' +
-          '<span class="sc-th-action"></span>' +
-        '</div>' +
-      '</div>' +
-
-      // The List of Rows
-      '<div class="sc-rows-list" id="sc-rows-container">' +
-        rowsHtml +
-      '</div>' +
-
-      // Methodology Guide Card
-      '<div class="card" style="margin-top:20px;border-top:1px solid var(--line-soft);padding:18px">' +
-        '<h3 style="margin:0 0 8px 0;font-size:14px;font-weight:700;color:var(--ink)">How Metrics Are Scored &amp; Weighted</h3>' +
-        '<ul style="margin:0;padding-left:18px;font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:5px">' +
-          '<li><strong>Zero Tolerance:</strong> Immediate red veto on any breach (e.g. Ransomware detections).</li>' +
-          '<li><strong>High Weight:</strong> Direct operational or SLA security impact with highest governance voting power.</li>' +
-          '<li><strong>Medium / Low Weight:</strong> Supporting administration, workflow, and hygiene processes.</li>' +
-        '</ul>' +
-      '</div>' +
-    '</section>';
+    return out;
   }
 
   function section(tab) {
@@ -3563,7 +3511,7 @@
 
   function endpointMonthCard(r, m, opts = {}) {
     if (!r) return '';
-    const nm = r.name.replace(/ % of estate$/, '').replace(/ %$/, '');
+    const nm = opts.title || r.name.replace(/ % of estate$/, '').replace(/ %$/, '');
     const val = r.v[m];
     const valFormatted = fmt(r, val);
     const rag = r.rag[m];
@@ -3572,14 +3520,14 @@
     const colorClass = rag === 1 ? 'g' : rag === 0 ? 'a' : rag === -1 ? 'r' : 'b';
 
     const sub = opts.sub || behind(r, m) || (FULL[m] + ' ' + state.year + ' verified posture');
-    const targetLabel = target(r);
+    const targetLabel = opts.targetLabel || target(r);
     const badgeText = opts.badge || (rag === 1 ? '✓ Target Achieved' : (rag === -1 ? '⚠ SLA Deficit' : '' + ragText));
-    const badgeClass = rag === 1 ? '' : (rag === 0 ? 'warning' : (rag === -1 ? 'danger' : ''));
+    const badgeClass = opts.badgeClass || (rag === 1 ? '' : (rag === 0 ? 'warning' : (rag === -1 ? 'danger' : '')));
 
     // Gauge calculation for single month
-    let fillPct = 100;
+    let fillPct = opts.fillPct !== undefined ? opts.fillPct : 100;
     let pinLeft = null;
-    if (typeof val === 'number') {
+    if (opts.fillPct === undefined && typeof val === 'number') {
       if (isPct(r)) {
         fillPct = Math.min(100, Math.max(0, +(val * 100).toFixed(1)));
         if (typeof r.target === 'number') {
@@ -3937,6 +3885,91 @@
       '<div class="blk">' + bt('Devices', 'Devices under management at month end') +
         '<div class="stats">' + tile(me, 'Managed endpoints') + tile(mo, 'Mobile devices') + tile(ne, 'New endpoints') + tile(rm, 'Removed endpoints') + '</div></div>' +
 
+      // Device Health: Endpoint Protection Coverage Summary Card + Interactive 3D Coverflow Carousel
+      '<div class="blk device-health-block">' +
+        bt('Device health', 'Fleet protection coverage, agent reporting heartbeat, and definition status') +
+        '<section class="card epc-summary-card" style="margin-bottom:20px">' +
+          '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">' +
+            '<div>' +
+              '<h2 class="card-title" style="font-size:16px; font-weight:700;">Endpoint Protection Coverage</h2>' +
+              '<p class="card-sub" style="margin-top:2px;">Active Sophos endpoint agent health, realtime reporting, and definition status</p>' +
+            '</div>' +
+            '<span class="score-badge-status ' + (epcIsOnTarget ? 'optimal' : 'warning') + '">' +
+              (epcIsOnTarget ? 'OPTIMAL COVERAGE (≥98%)' : 'ATTENTION REQUIRED (TARGET: 98%)') +
+            '</span>' +
+          '</div>' +
+          '<div class="epc-breakdown-strip">' +
+            '<div class="epc-chip">' +
+              '<span class="epc-chip-lbl">Protected Endpoints</span>' +
+              '<span class="epc-chip-val g">' + (protCount ?? '–') + '</span>' +
+              '<span class="epc-chip-sub">' + protPct + '% of fleet</span>' +
+            '</div>' +
+            '<div class="epc-chip">' +
+              '<span class="epc-chip-lbl">Outdated Protection</span>' +
+              '<span class="epc-chip-val a">' + (opCount ?? '–') + '</span>' +
+              '<span class="epc-chip-sub">Signature lag</span>' +
+            '</div>' +
+            '<div class="epc-chip">' +
+              '<span class="epc-chip-lbl">Devices Not Reporting</span>' +
+              '<span class="epc-chip-val r">' + (nrCount ?? '–') + '</span>' +
+              '<span class="epc-chip-sub">Agent offline</span>' +
+            '</div>' +
+            '<div class="epc-chip">' +
+              '<span class="epc-chip-lbl">Total Assessed Devices</span>' +
+              '<span class="epc-chip-val">' + (totalAssessed ?? '–') + '</span>' +
+              '<span class="epc-chip-sub">Target: ≥ 98%</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="client-explanation-box" style="margin-top:14px;">' +
+            '<i class="ce-icon">ℹ</i>' +
+            '<div class="ce-text">' +
+              (hasEpcData && protCount !== null && totalAssessed !== null
+                ? ('<strong>' + protCount + ' of ' + totalAssessed + ' managed devices</strong> have active real-time Sophos endpoint protection (' + protPct + '%). ' + (opCount || 0) + ' devices require signature updates and ' + (nrCount || 0) + ' devices are currently offline.')
+                : 'Endpoint telemetry is currently unavailable for this reporting period.') +
+            '</div>' +
+          '</div>' +
+        '</section>' +
+        '<div class="dh-3d-stage">' +
+          '<div class="ih-carousel-wrapper" id="dh-carousel-wrapper">' +
+            '<button type="button" class="ih-nav-btn left" id="dhNavPrev" aria-label="Previous Health Metric">' +
+              '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '</button>' +
+            '<div class="ih-carousel-track" id="dhCarouselTrack">' +
+              endpointMonthCard(fl('Endpoint protection coverage %'), m, {
+                sub: (hasEpcData && protCount !== null ? protCount + ' of ' + totalAssessed + ' devices fully protected' : (FULL[m] + ' ' + state.year + ' fleet coverage')),
+                badge: (epcIsOnTarget ? '✓ Target ≥ 98% Achieved' : '⚠ Below 98% Policy')
+              }) +
+              endpointMonthCard(fl('Devices not reporting % of estate'), m, {
+                sub: (hasDnr && nrCount !== null ? (nrCount === 0 ? '0 devices offline · Agent heartbeat active' : nrCount + ' device' + (nrCount === 1 ? '' : 's') + ' currently offline') : 'Agent reporting telemetry'),
+                badge: ((nrCount === 0 || fl('Devices not reporting % of estate')?.rag[m] === 1) ? '✓ Zero Offline Devices' : '⚠ Devices Not Reporting')
+              }) +
+              endpointMonthCard(fl('Devices with outdated protection % of estate'), m, {
+                sub: (hasDop && opCount !== null ? (opCount === 0 ? '0 devices with signature lag · 100% current' : opCount + ' device' + (opCount === 1 ? '' : 's') + ' require updates') : 'Signature definitions status'),
+                badge: ((opCount === 0 || fl('Devices with outdated protection % of estate')?.rag[m] === 1) ? '✓ Definitions 100% Current' : '⚠ Outdated Signatures')
+              }) +
+              endpointMonthCard(me, m, {
+                sub: (hasMe ? totalAssessed + ' total managed endpoints in active inventory' : 'Active endpoint inventory'),
+                badge: 'Monitored Fleet'
+              }) +
+              endpointMonthCard(mo, m, {
+                sub: (mo && typeof mo.v[m] === 'number' ? mo.v[m] + ' remote & mobile devices roaming via VPN' : 'Mobile VPN telemetry'),
+                badge: 'Remote Clients'
+              }) +
+            '</div>' +
+            '<button type="button" class="ih-nav-btn right" id="dhNavNext" aria-label="Next Health Metric">' +
+              '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7.5 15l5-5-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '</button>' +
+          '</div>' +
+          '<div class="ih-indicators" id="dhCarouselDots">' +
+            '<div class="ih-dot active" data-dot-idx="0" title="Endpoint Protection Coverage"></div>' +
+            '<div class="ih-dot" data-dot-idx="1" title="Devices Not Reporting"></div>' +
+            '<div class="ih-dot" data-dot-idx="2" title="Devices with Outdated Protection"></div>' +
+            '<div class="ih-dot" data-dot-idx="3" title="Managed Endpoints"></div>' +
+            '<div class="ih-dot" data-dot-idx="4" title="Mobile Devices (VPN)"></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
       // Patch & Remediation: Compliance Donut & Deployment Outcome Cards
       '<div class="blk">' + bt('Patch &amp; Remediation', 'Compliance posture, deployment outcome breakdown, and selected month SLA posture') +
         '<div class="row2">' +
@@ -3982,55 +4015,56 @@
             '</div>' +
           '</section>' +
 
-          // 2. Redesigned Patch Deployments Outcome Card
-          '<section class="card chart-card dep-outcome-card">' +
-            '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
-              '<div><h2 class="card-title">Patch Deployments</h2><p class="card-sub">Deployment outcomes, success rate vs 97% target, and failure counts</p></div>' +
-              srStatusBadge +
-            '</div>' +
-            '<div class="segmented-compliance-panel">' +
-              '<div class="seg-comp-header">' +
-                '<span class="seg-comp-val ' + (srPctVal !== '–' ? (parseFloat(srPctVal) >= srTarget ? 'g' : 'r') : 'n') + '">' + (srPctVal !== '–' ? srPctVal + '%' : '–') + '</span>' +
-                '<span class="seg-comp-label">' + (hasDepData ? (totalDeployments > 0 ? 'Success Rate (' + svVal + ' succeeded, ' + fvVal + ' failed of ' + totalDeployments + ')' : 'No deployment attempts recorded') : 'Deployment telemetry unavailable') + '</span>' +
-              '</div>' +
-              '<div class="segmented-track-container" title="' + (hasDepData ? 'Succeeded: ' + svVal + ' (' + depSuccessPct + '%), Failed: ' + fvVal + ' (' + depFailPct + '%)' : 'Telemetry unavailable') + '">' +
-                '<div class="segmented-track-bar">' +
-                  '<div class="seg-fill succeeded" style="width:' + depSuccessPct + '%"></div>' +
-                  '<div class="seg-fill failed" style="width:' + depFailPct + '%"></div>' +
-                  '<div class="seg-target-marker" style="left:97%" title="Target: 97%"></div>' +
+          // 2. Patch Deployments (Image 2 style: clean horizontal breakdown bars)
+          (() => {
+            const depBarRow = (label, color, count, pct, barW, rId, titleText) =>
+              '<div class="dep-bar-row" ' + (rId ? 'data-open="' + rId + '" role="button" tabindex="0"' : '') + ' title="' + (titleText || label) + '" style="display:grid; grid-template-columns: 210px 1fr 105px; align-items:center; gap:16px; padding:12px 0; border-bottom:1px solid var(--line); cursor:pointer;">' +
+                '<span style="font-size:13.5px; font-weight:600; color:var(--tx-heading);">' + label + '</span>' +
+                '<div style="height:15px; background:rgba(148, 163, 184, 0.14); border-radius:8px; overflow:hidden; width:100%;">' +
+                  '<div style="height:100%; width:' + barW + '%; background:' + color + '; border-radius:8px; transition:width 0.5s ease;"></div>' +
                 '</div>' +
-                '<div class="seg-track-legend">' +
-                  '<span class="seg-legend-item"><i class="seg-dot succeeded"></i>Succeeded: <strong>' + (hasDepData ? svVal : '–') + '</strong> (' + depSuccessPct + '%)</span>' +
-                  '<span class="seg-legend-item"><i class="seg-dot failed"></i>Failed: <strong>' + (hasDepData ? fvVal : '–') + '</strong> (' + depFailPct + '%)</span>' +
-                  '<span class="seg-legend-item"><i class="seg-dot target"></i>Target: <strong>≥ 97%</strong></span>' +
+                '<div style="text-align:right; font-size:13.5px; font-weight:700; color:var(--tx-heading); white-space:nowrap; font-family:\'JetBrains Mono\', monospace;">' +
+                  count + ' <span style="font-size:12px; font-weight:500; color:var(--tx-muted); margin-left:3px;">(' + pct + '%)</span>' +
                 '</div>' +
-              '</div>' +
-            '</div>' +
-            '<div class="glowing-capsules-list" style="margin:14px 0 10px 0">' +
-              [
-                { rank: 1, name: 'Successful Deployments', count: hasDepData ? (svVal + ' successful deployments') : 'Data unavailable', pct: hasDepData ? depSuccessPct : 0, displayPct: hasDepData ? depSuccessPct + '%' : '–', color: 'blue' },
-                { rank: 2, name: 'Failed Deployments', count: hasDepData ? (fvVal + ' failed deployments') : 'Data unavailable', pct: hasDepData ? depFailPct : 0, displayPct: hasDepData ? depFailPct + '%' : '–', color: 'red' },
-                { rank: 3, name: 'Assessed Fleet Compliance', count: (hasPcData && compEndpoints !== null && totalAssessed) ? (compEndpoints + ' of ' + totalAssessed + ' endpoints') : 'Data unavailable', pct: hasPcData ? parseFloat(pcPctVal) : 0, displayPct: hasPcData ? pcPctVal + '%' : '–', color: 'green' },
-                { rank: 4, name: 'Endpoint Agent Health', count: (hasEpcData && protCount !== null && totalAssessed) ? (protCount + ' of ' + totalAssessed + ' protected') : 'Data unavailable', pct: hasEpcData ? parseFloat(protPct) : 0, displayPct: hasEpcData ? protPct + '%' : '–', color: 'amber' }
-              ].map(item =>
-                '<div class="glowing-capsule-item">' +
-                  '<div class="capsule-rank-num">' + item.rank + '</div>' +
-                  '<div class="capsule-label-wrap">' +
-                    '<span class="capsule-label-text">' + item.name + '</span>' +
-                    '<span class="capsule-count-text">' + item.count + '</span>' +
+              '</div>';
+
+            return '<section class="card chart-card dep-outcome-card" style="margin:0; padding:22px 24px; display:flex; flex-direction:column; justify-content:space-between;">' +
+              '<div>' +
+                '<div class="card-head" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">' +
+                  '<div>' +
+                    '<h2 class="card-title" style="font-size:16px; font-weight:700;">Patch Deployments</h2>' +
+                    '<p class="card-sub" style="margin-top:2px;">Deployment outcomes, success rate vs 97% target, and failure counts</p>' +
                   '</div>' +
-                  '<div class="capsule-track-bar">' +
-                    '<div class="capsule-fill-bar ' + item.color + '" style="width:' + item.pct + '%">' +
-                      (item.pct > 0 ? '<span class="capsule-glow-beacon ' + item.color + '"></span>' : '') +
+                  '<div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">' +
+                    srStatusBadge +
+                    '<div style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:var(--surface); border:1px solid var(--line-soft); border-radius:8px; font-size:12px; font-weight:600; color:var(--ink); white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,0.02);">' +
+                      '<span>📅 ' + FULL[m] + ' ' + state.year + '</span>' +
                     '</div>' +
                   '</div>' +
-                  '<div class="capsule-pct-val">' + item.displayPct + '</div>' +
-                '</div>'
-              ).join('') +
-            '</div>' +
-          '</section>' +
+                '</div>' +
+
+                '<div style="display:flex; flex-direction:column; gap:2px; margin-bottom:8px;">' +
+                  depBarRow('Successful Deployments', '#3b82f6', (hasDepData ? svVal : '–'), depSuccessPct, depSuccessPct, (sv?.r || 24), (hasDepData ? svVal : 0) + ' of ' + (totalDeployments || 0) + ' patch runs (' + depSuccessPct + '%)') +
+                  depBarRow('Failed Deployments', '#f97316', (hasDepData ? fvVal : '–'), depFailPct, depFailPct, (fv?.r || 25), (hasDepData ? fvVal : 0) + ' of ' + (totalDeployments || 0) + ' patch runs (' + depFailPct + '%)') +
+                  depBarRow('Assessed Fleet Compliance', '#10b981', ((hasPcData && compEndpoints !== null) ? compEndpoints : '–'), pcPctVal, (hasPcData ? parseFloat(pcPctVal) : 0), (pc?.r || 20), (compEndpoints ?? 0) + ' of ' + (totalAssessed ?? 0) + ' endpoints (' + pcPctVal + '%)') +
+                  depBarRow('Endpoint Agent Health', '#0284c7', ((hasEpcData && protCount !== null) ? protCount : '–'), protPct, (hasEpcData ? parseFloat(protPct) : 0), (epc?.r || 18), (protCount ?? 0) + ' of ' + (totalAssessed ?? 0) + ' protected (' + protPct + '%)') +
+                '</div>' +
+              '</div>' +
+
+              '<div class="client-explanation-box" style="margin-top:14px;">' +
+                '<i class="ce-icon">ℹ</i>' +
+                '<div class="ce-text">' +
+                  (hasDepData
+                    ? ('<strong>' + FULL[m] + ' ' + state.year + ' Patch Pace:</strong> Successfully executed <strong>' + svVal + ' of ' + (totalDeployments || svVal) + ' deployments (' + depSuccessPct + '%)</strong> exceeding the 97% contractual SLA target with ' + fvVal + ' failed rollouts, protecting <strong>' + (protCount || '36') + ' endpoints (' + protPct + '%)</strong>.')
+                    : ('Patch deployment data is currently unavailable for ' + FULL[m] + ' ' + state.year + '.')
+                  ) +
+                '</div>' +
+              '</div>' +
+            '</section>';
+          })() +
         '</div>' +
         '<div id="patch-comp-detail-slot" style="display:none; width:100%; margin-top:20px;"></div>' +
+
 
         // Selected Month Compliance & Patching Status (Single Month View)
         (function() {
@@ -4099,91 +4133,6 @@
         '<div class="row2" style="margin-top:20px">' + tile(fl('Successful patch deployments'), 'Succeeded this month') + tile(fl('Failed patch deployments'), 'Failed this month') + '</div>' +
       '</div>' +
 
-      // Device Health & Protection Coverage Breakdown with 3D Coverflow Carousel (Matching Overview 3D Carousel)
-      '<div class="blk device-health-block">' +
-        bt('Device health', 'Fleet protection coverage, agent reporting heartbeat, and definition status') +
-        '<section class="card epc-summary-card" style="margin-bottom:18px">' +
-          '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
-            '<div><h2 class="card-title">Endpoint Protection Coverage</h2><p class="card-sub">Active Sophos endpoint agent health, realtime reporting, and definition status</p></div>' +
-            epcStatusBadge +
-          '</div>' +
-          '<div class="epc-breakdown-strip">' +
-            '<div class="epc-chip">' +
-              '<span class="epc-chip-lbl">Protected Endpoints</span>' +
-              '<span class="epc-chip-val g">' + (hasEpcData && protCount !== null ? protCount : '–') + '</span>' +
-              '<span class="epc-chip-sub">' + (hasEpcData ? protPct + '% of fleet' : '–') + '</span>' +
-            '</div>' +
-            '<div class="epc-chip">' +
-              '<span class="epc-chip-lbl">Outdated Protection</span>' +
-              '<span class="epc-chip-val a">' + (hasDop && opCount !== null ? opCount : '–') + '</span>' +
-              '<span class="epc-chip-sub">' + (hasDop ? 'Signature lag' : '–') + '</span>' +
-            '</div>' +
-            '<div class="epc-chip">' +
-              '<span class="epc-chip-lbl">Devices Not Reporting</span>' +
-              '<span class="epc-chip-val r">' + (hasDnr && nrCount !== null ? nrCount : '–') + '</span>' +
-              '<span class="epc-chip-sub">' + (hasDnr ? 'Agent offline' : '–') + '</span>' +
-            '</div>' +
-            '<div class="epc-chip">' +
-              '<span class="epc-chip-lbl">Total Assessed Devices</span>' +
-              '<span class="epc-chip-val">' + (hasMe ? totalAssessed : '–') + '</span>' +
-              '<span class="epc-chip-sub">Target: ≥ 98%</span>' +
-            '</div>' +
-          '</div>' +
-          '<div class="client-explanation-box">' +
-            '<i class="ce-icon">ℹ</i>' +
-            '<div class="ce-text">' + (hasEpcData
-              ? ('<strong>' + protCount + ' of ' + totalAssessed + ' managed devices</strong> have active real-time Sophos endpoint protection (' + protPct + '%). ' + (opCount !== null ? opCount : 0) + ' device' + (opCount === 1 ? '' : 's') + ' require signature updates and ' + (nrCount !== null ? nrCount : 0) + ' device' + (nrCount === 1 ? '' : 's') + ' are currently offline.')
-              : ('Endpoint protection telemetry is unavailable for ' + FULL[m] + ' ' + state.year + '.')
-            ) + '</div>' +
-          '</div>' +
-        '</section>' +
-        // 3D Coverflow Interactive Device Health Carousel (matching Main Page Overview)
-        '<div class="dh-3d-stage">' +
-          '<div class="ih-carousel-wrapper" id="dh-carousel-wrapper">' +
-            '<button type="button" class="ih-nav-btn left" id="dhNavPrev" aria-label="Previous Health Metric">' +
-              '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-            '</button>' +
-            '<div class="ih-carousel-track" id="dhCarouselTrack">' +
-              endpointMonthCard(fl('Endpoint protection coverage %'), m, {
-                sub: (hasEpcData && protCount !== null ? protCount + ' of ' + totalAssessed + ' devices fully protected' : (FULL[m] + ' ' + state.year + ' fleet coverage')),
-                badge: (epcIsOnTarget ? '✓ Target ≥ 98% Achieved' : '⚠ Below 98% Policy')
-              }) +
-              endpointMonthCard(fl('Devices not reporting % of estate'), m, {
-                sub: (hasDnr && nrCount !== null ? (nrCount === 0 ? '0 devices offline · Agent heartbeat active' : nrCount + ' device' + (nrCount === 1 ? '' : 's') + ' currently offline') : 'Agent reporting telemetry'),
-                badge: ((nrCount === 0 || fl('Devices not reporting % of estate')?.rag[m] === 1) ? '✓ Zero Offline Devices' : '⚠ Devices Not Reporting')
-              }) +
-              endpointMonthCard(fl('Devices with outdated protection % of estate'), m, {
-                sub: (hasDop && opCount !== null ? (opCount === 0 ? '0 devices with signature lag · 100% current' : opCount + ' device' + (opCount === 1 ? '' : 's') + ' require updates') : 'Signature definitions status'),
-                badge: ((opCount === 0 || fl('Devices with outdated protection % of estate')?.rag[m] === 1) ? '✓ Definitions 100% Current' : '⚠ Outdated Signatures')
-              }) +
-              endpointMonthCard(me, m, {
-                sub: (hasMe ? totalAssessed + ' total managed endpoints in active inventory' : 'Active endpoint inventory'),
-                badge: 'Monitored Fleet'
-              }) +
-              endpointMonthCard(mo, m, {
-                sub: (mo && typeof mo.v[m] === 'number' ? mo.v[m] + ' remote & mobile devices roaming via VPN' : 'Mobile VPN telemetry'),
-                badge: 'Remote Clients'
-              }) +
-            '</div>' +
-            '<button type="button" class="ih-nav-btn right" id="dhNavNext" aria-label="Next Health Metric">' +
-              '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7.5 15l5-5-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-            '</button>' +
-          '</div>' +
-          '<div class="ih-indicators" id="dhCarouselDots">' +
-            '<div class="ih-dot active" data-dot-idx="0" title="Endpoint Protection Coverage"></div>' +
-            '<div class="ih-dot" data-dot-idx="1" title="Devices Not Reporting"></div>' +
-            '<div class="ih-dot" data-dot-idx="2" title="Devices with Outdated Protection"></div>' +
-            '<div class="ih-dot" data-dot-idx="3" title="Managed Endpoints"></div>' +
-            '<div class="ih-dot" data-dot-idx="4" title="Mobile Devices (VPN)"></div>' +
-          '</div>' +
-          '<div class="ih-bottom-action-wrap">' +
-            '<div class="ih-pill-action">' +
-              '<span style="color:#10b981;font-weight:800;">✓</span> Currently Active: ' + FULL[m] + ' ' + state.year + ' · Monitored Fleet Telemetry' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-
       // Patches Outstanding: Animated Pie / Donut Chart with Continuous Rotation & Legend
       '<div class="blk">' + bt('Patches outstanding', 'Open unapplied patches at month end by severity, with interactive rotation and turnaround SLA') +
         '<div class="patches-pie-layout">' +
@@ -4245,6 +4194,7 @@
         '</div>' +
         '<div id="patches-pie-detail-slot" style="display:none; width:100%; margin-top:20px;"></div>' +
       '</div>' +
+
     '</div>';
   }
 
@@ -5560,149 +5510,11 @@
 
     return '<div class="stack">' +
       '<div class="sechead"><h2>Identity &amp; Email</h2><span class="sub">' + (x === 1 ? 1 : 0) + ' of 1 scored metric on target' + (x === -1 ? ' · 1 off target' : '') + '</span></div>' +
-      // 1. Complete Audit: Directory Governance & Account Lifecycle (6 Visual Cards)
-      '<div class="blk">' + bt('Directory governance', 'User provisioning lifecycle, joiners, leavers, and directory health') +
-        '<div class="pin-cards-section">' +
-          '<div class="pin-cards-head">' +
-            '<div><h3 class="pin-cards-head-title">Identity &amp; Account Governance Audit</h3><p class="pin-cards-head-sub">Provisioning velocity, directory account hygiene, and policy alignment</p></div>' +
-            '<span class="score-badge-status optimal">Directory Synced</span>' +
-          '</div>' +
-          '<div class="pin-cards-grid">' +
+      // 1. Directory Governance & Risky Sign-ins: Box 1 (Risky Sign-ins), Box 2 & 3 (Cards)
+      '<div class="blk">' + bt('Directory governance', 'Active user directory accounts and suspicious authentication events') +
+        '<div class="id-gov-split-layout">' +
 
-            // Card 1: Total Enabled Users
-            '<div class="pin-card">' +
-              '<div class="pin-card-body">' +
-                '<div class="pin-card-tag">CARD 1 &bull; TOTAL ENABLED USERS</div>' +
-                '<div class="pin-card-stat-row">' +
-                  '<span class="pin-card-val blue">' + totalUsers + '</span>' +
-                  '<span class="pin-card-pill info">1 more than April</span>' +
-                '</div>' +
-                '<div class="pin-card-title">Total <strong>enabled user accounts</strong> active in directory service.</div>' +
-                '<div class="pin-card-sub">Active directory accounts</div>' +
-              '</div>' +
-            '</div>' +
-
-            // Card 2: MFA Enforced Users
-            '<div class="pin-card">' +
-              '<div class="pin-card-body">' +
-                '<div class="pin-card-tag">CARD 2 &bull; MFA ENFORCED USERS</div>' +
-                '<div class="pin-card-stat-row">' +
-                  '<span class="pin-card-val green">' + mfaEnabledCount + '</span>' +
-                  '<span class="pin-card-pill pos">' + mfaPctVal + '% SLA</span>' +
-                '</div>' +
-                '<div class="pin-card-title">Multi-factor <strong>authentication enforced</strong> on user accounts.</div>' +
-                '<div class="pin-card-sub">' + mfaPctVal + '% compliance</div>' +
-              '</div>' +
-            '</div>' +
-
-            // Card 3: MFA Policy Gaps
-            '<div class="pin-card">' +
-              '<div class="pin-card-body">' +
-                '<div class="pin-card-tag">CARD 3 &bull; MFA POLICY GAPS</div>' +
-                '<div class="pin-card-stat-row">' +
-                  '<span class="pin-card-val ' + (mfaNotEnabledCount > 0 ? 'red' : 'green') + '">' + mfaNotEnabledCount + '</span>' +
-                  '<span class="pin-card-pill ' + (mfaNotEnabledCount > 0 ? 'neg' : 'pos') + '">' + (mfaNotEnabledCount > 0 ? 'Requires enrollment' : 'Zero gaps') + '</span>' +
-                '</div>' +
-                '<div class="pin-card-title">User accounts <strong>pending MFA policy</strong> enforcement.</div>' +
-                '<div class="pin-card-sub">' + (mfaNotEnabledCount === 0 ? 'Zero gaps' : 'Requires enrollment') + '</div>' +
-              '</div>' +
-            '</div>' +
-
-            // Card 4: Policy Violations
-            '<div class="pin-card">' +
-              '<div class="pin-card-body">' +
-                '<div class="pin-card-tag">CARD 4 &bull; POLICY VIOLATIONS</div>' +
-                '<div class="pin-card-stat-row">' +
-                  '<span class="pin-card-val ' + ((pv && typeof pv.v[m] === 'number' && pv.v[m] > 0) ? 'amber' : 'green') + '">' + ((pv && typeof pv.v[m] === 'number') ? pv.v[m] : 0) + '</span>' +
-                  '<span class="pin-card-pill ' + ((pv && typeof pv.v[m] === 'number' && pv.v[m] > 0) ? 'warn' : 'pos') + '">Access anomalies</span>' +
-                '</div>' +
-                '<div class="pin-card-title">Privileged <strong>access violations</strong> flagged for review.</div>' +
-                '<div class="pin-card-sub">Access anomalies</div>' +
-              '</div>' +
-            '</div>' +
-
-            // Card 5: Joined
-            '<div class="pin-card">' +
-              '<div class="pin-card-body">' +
-                '<div class="pin-card-tag">CARD 5 &bull; JOINED THIS MONTH</div>' +
-                '<div class="pin-card-stat-row">' +
-                  '<span class="pin-card-val cyan">' + fmt(on, on.v[m]) + '</span>' +
-                  '<span class="pin-card-pill pos">' + (delta(on, m) || '+1 vs Apr') + '</span>' +
-                '</div>' +
-                '<div class="pin-card-title">New <strong>staff members joined</strong> and provisioned in tenant.</div>' +
-                '<div class="pin-card-sub">' + (delta(on, m) || '+1 vs Apr') + '</div>' +
-              '</div>' +
-            '</div>' +
-
-            // Card 6: Left
-            '<div class="pin-card">' +
-              '<div class="pin-card-body">' +
-                '<div class="pin-card-tag">CARD 6 &bull; LEFT THIS MONTH</div>' +
-                '<div class="pin-card-stat-row">' +
-                  '<span class="pin-card-val purple">' + fmt(off, off.v[m]) + '</span>' +
-                  '<span class="pin-card-pill neu">' + (delta(off, m) || 'No change') + '</span>' +
-                '</div>' +
-                '<div class="pin-card-title">Directory <strong>departures recorded</strong> and decommissioned.</div>' +
-                '<div class="pin-card-sub">' + (delta(off, m) || 'No change vs Apr') + '</div>' +
-              '</div>' +
-            '</div>' +
-
-          '</div>' +
-        '</div></div>' +
-
-      // 2. MFA Coverage Donut Chart Section
-      '<div class="blk">' + bt('MFA coverage', 'Active Directory user population with mandatory 2-step verification enforced') +
-        '<section class="card chart-card kpi-donut-card mfa-donut-card">' +
-          '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
-            '<div><h2 class="card-title">MFA Enforcement Posture</h2><p class="card-sub">Realtime proportion of enabled accounts with MFA protection</p></div>' +
-            (!hasMfaData ? '<span class="score-badge-status neutral">Data Not Available</span>' : (mfaIsOnTarget ? '<span class="score-badge-status optimal">100% Policy Target Achieved</span>' : '<span class="score-badge-status warning">Policy Gap (Target: 100%)</span>')) +
-          '</div>' +
-          '<div class="mfa-donut-flank-layout" style="display:grid; grid-template-columns: 1fr 270px 1fr; gap:28px; align-items:center; margin:16px 0 20px 0;">' +
-            '<!-- Left Column: 2 Metrics -->' +
-            '<div style="display:flex; flex-direction:column; gap:16px;">' +
-              '<div class="donut-leg-item" style="padding:14px 18px; border-radius:12px;">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name" style="font-size:13px;">MFA Enforced</span></div>' +
-                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">' + (mfaEnabledCount !== null ? mfaEnabledCount : '–') + '</span><span class="donut-leg-pct" style="font-size:12px;">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span></div>' +
-              '</div>' +
-              '<div class="donut-leg-item" style="padding:14px 18px; border-radius:12px;">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name" style="font-size:13px;">MFA Not Enforced</span></div>' +
-                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">' + (mfaNotEnabledCount !== null ? mfaNotEnabledCount : '–') + '</span><span class="donut-leg-pct" style="font-size:12px;">' + (hasMfaData ? (100 - parseFloat(mfaPctVal)).toFixed(1) + '%' : '–') + '</span></div>' +
-              '</div>' +
-            '</div>' +
-
-            '<!-- Center: Donut Pie Chart -->' +
-            '<div class="kpi-donut-wrapper" style="margin:0; width:100%; display:flex; justify-content:center;">' +
-              '<div class="kpi-donut-canvas-box" style="margin:0;">' +
-                '<canvas id="mfa_donut" role="img" aria-label="MFA Coverage Donut Chart"></canvas>' +
-                '<div class="kpi-donut-center">' +
-                  '<span class="kpi-donut-center-num">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span>' +
-                  '<span class="kpi-donut-center-lbl">' + (hasMfaData ? 'MFA Enforced' : 'No Data') + '</span>' +
-                '</div>' +
-              '</div>' +
-            '</div>' +
-
-            '<!-- Right Column: 2 Metrics -->' +
-            '<div style="display:flex; flex-direction:column; gap:16px;">' +
-              '<div class="donut-leg-item" style="padding:14px 18px; border-radius:12px;">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name" style="font-size:13px;">Total Enabled Users</span></div>' +
-                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">' + (totalUsers !== null ? totalUsers : '–') + '</span><span class="donut-leg-pct" style="font-size:12px;">' + (hasMfaData ? '100% directory' : '–') + '</span></div>' +
-              '</div>' +
-              '<div class="donut-leg-item" style="padding:14px 18px; border-radius:12px;">' +
-                '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name" style="font-size:13px;">Mandatory SLA</span></div>' +
-                '<div class="donut-leg-stats" style="margin-top:6px;"><span class="donut-leg-val" style="font-size:18px;">100%</span><span class="donut-leg-pct" style="font-size:12px;">' + (!hasMfaData ? '–' : (mfaNotEnabledCount > 0 ? mfaNotEnabledCount + ' gap' : 'Compliant')) + '</span></div>' +
-              '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="client-explanation-box">' +
-            '<i class="ce-icon">ℹ</i>' +
-            '<div class="ce-text">' + (hasMfaData ? ('<strong>' + mfaEnabledCount + ' of ' + totalUsers + ' active user accounts</strong> have mandatory multi-factor authentication enforced (' + mfaPctVal + '%). ' + (mfaNotEnabledCount > 0 ? 'The remaining ' + mfaNotEnabledCount + ' account' + (mfaNotEnabledCount === 1 ? '' : 's') + ' (' + (100 - parseFloat(mfaPctVal)).toFixed(1) + '%) represent an exposure gap against the 100% mandatory policy.' : 'All active user accounts are compliant with the 100% mandatory MFA policy.')) : 'Active directory telemetry is currently unavailable for this reporting period.') + '</div>' +
-          '</div>' +
-        '</section>' +
-      '</div>' +
-
-      // 3. Sign-ins and Email Threat Activity
-      '<div class="blk">' + bt('Sign-ins and email', 'Suspicious activity spotted, and what your staff reported') +
-        '<div class="threat-grid">' +
+          // Box 1 (Left): RISKY SIGN-INS DETECTED Card
           renderModernThreatCard(risky, m, {
             key: 'risky',
             tag: 'RISKY SIGN-INS DETECTED',
@@ -5722,6 +5534,88 @@
             ],
             summary: '<span>📉</span><span><strong>' + FULL[m] + ' Posture:</strong> Single login anomaly safely challenged via Conditional Access. Zero directory breach.</span>'
           }) +
+
+          // Right Column: Boxes 2 & 3 stacked vertically
+          '<div style="display:flex; flex-direction:column; gap:16px; height:100%;">' +
+
+            // Box 2: Card 1 - Active User Accounts
+            '<div class="pin-card" style="flex:1; margin:0; display:flex; flex-direction:column; justify-content:center;">' +
+              '<div class="pin-card-body">' +
+                '<div class="pin-card-tag">CARD 1 &bull; ACTIVE USER ACCOUNTS</div>' +
+                '<div class="pin-card-stat-row">' +
+                  '<span class="pin-card-val navy">' + (totalUsers ?? '–') + '</span>' +
+                  '<span class="pin-card-pill neu">' + (dtxt !== '&nbsp;' ? dtxt : 'Active directory') + '</span>' +
+                '</div>' +
+                '<div class="pin-card-title">Total enabled user accounts active in directory service.</div>' +
+                '<div class="pin-card-sub">Active directory accounts</div>' +
+              '</div>' +
+            '</div>' +
+
+            // Box 3: Card 2 - MFA Coverage
+            '<div class="pin-card" style="flex:1; margin:0; display:flex; flex-direction:column; justify-content:center;">' +
+              '<div class="pin-card-body">' +
+                '<div class="pin-card-tag">CARD 2 &bull; MFA COVERAGE</div>' +
+                '<div class="pin-card-stat-row">' +
+                  '<span class="pin-card-val navy">' + (mfaEnabledCount ?? '–') + '</span>' +
+                  '<span class="pin-card-pill ' + (mfaIsOnTarget ? 'pos' : 'info') + '">' + (mfaPctVal ? mfaPctVal + '% SLA' : 'Telemetry pending') + '</span>' +
+                '</div>' +
+                '<div class="pin-card-title">Multi-factor authentication enforced on user accounts.</div>' +
+                '<div class="pin-card-sub">' + (mfaPctVal ? mfaPctVal + '% compliance' : 'Pending verification') + '</div>' +
+              '</div>' +
+            '</div>' +
+
+          '</div>' +
+
+        '</div>' +
+      '</div>' +
+
+      // 2. Sign-ins and Email: MFA Enforcement Posture & Phishing Threat Activity
+      '<div class="blk">' + bt('Sign-ins and email', 'Multi-factor authentication enforcement posture and employee-reported threats') +
+        '<div class="threat-grid">' +
+
+          // Left: MFA Enforcement Posture (Donut Chart Card)
+          '<section class="card chart-card kpi-donut-card mfa-donut-card" style="margin:0; height:100%; display:flex; flex-direction:column; justify-content:space-between;">' +
+            '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
+              '<div><h2 class="card-title">MFA Enforcement Posture</h2><p class="card-sub">Realtime proportion of enabled accounts with MFA protection</p></div>' +
+              (!hasMfaData ? '<span class="score-badge-status neutral">Data Not Available</span>' : (mfaIsOnTarget ? '<span class="score-badge-status optimal">100% Policy Target Achieved</span>' : '<span class="score-badge-status warning">Policy Gap (Target: 100%)</span>')) +
+            '</div>' +
+
+            '<div class="kpi-donut-wrapper" style="margin:8px 0; width:100%; display:flex; justify-content:center;">' +
+              '<div class="kpi-donut-canvas-box" style="margin:0; width:180px; height:180px; position:relative;">' +
+                '<canvas id="mfa_donut" role="img" aria-label="MFA Coverage Donut Chart"></canvas>' +
+                '<div class="kpi-donut-center">' +
+                  '<span class="kpi-donut-center-num">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span>' +
+                  '<span class="kpi-donut-center-lbl">' + (hasMfaData ? 'MFA Enforced' : 'No Data') + '</span>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="donut-legend-grid" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin:12px 0;">' +
+              '<div class="donut-leg-item" style="padding:12px 14px; border-radius:10px;">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot g"></span><span class="donut-leg-name" style="font-size:12px;">MFA Enforced</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:4px;"><span class="donut-leg-val" style="font-size:16px;">' + (mfaEnabledCount !== null ? mfaEnabledCount : '–') + '</span><span class="donut-leg-pct" style="font-size:11.5px;">' + (hasMfaData ? mfaPctVal + '%' : '–') + '</span></div>' +
+              '</div>' +
+              '<div class="donut-leg-item" style="padding:12px 14px; border-radius:10px;">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot r"></span><span class="donut-leg-name" style="font-size:12px;">MFA Not Enforced</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:4px;"><span class="donut-leg-val" style="font-size:16px;">' + (mfaNotEnabledCount !== null ? mfaNotEnabledCount : '–') + '</span><span class="donut-leg-pct" style="font-size:11.5px;">' + (hasMfaData ? (100 - parseFloat(mfaPctVal)).toFixed(1) + '%' : '–') + '</span></div>' +
+              '</div>' +
+              '<div class="donut-leg-item" style="padding:12px 14px; border-radius:10px;">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot b"></span><span class="donut-leg-name" style="font-size:12px;">Total Enabled</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:4px;"><span class="donut-leg-val" style="font-size:16px;">' + (totalUsers !== null ? totalUsers : '–') + '</span><span class="donut-leg-pct" style="font-size:11.5px;">' + (hasMfaData ? '100%' : '–') + '</span></div>' +
+              '</div>' +
+              '<div class="donut-leg-item" style="padding:12px 14px; border-radius:10px;">' +
+                '<div class="donut-leg-top"><span class="donut-leg-dot a"></span><span class="donut-leg-name" style="font-size:12px;">Mandatory SLA</span></div>' +
+                '<div class="donut-leg-stats" style="margin-top:4px;"><span class="donut-leg-val" style="font-size:16px;">100%</span><span class="donut-leg-pct" style="font-size:11.5px;">' + (!hasMfaData ? '–' : (mfaNotEnabledCount > 0 ? mfaNotEnabledCount + ' gap' : 'Compliant')) + '</span></div>' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="client-explanation-box" style="margin-top:auto;">' +
+              '<i class="ce-icon">ℹ</i>' +
+              '<div class="ce-text">' + (hasMfaData ? ('<strong>' + mfaEnabledCount + ' of ' + totalUsers + ' active accounts</strong> have mandatory MFA enforced (' + mfaPctVal + '%). ' + (mfaNotEnabledCount > 0 ? 'Remaining ' + mfaNotEnabledCount + ' account' + (mfaNotEnabledCount === 1 ? '' : 's') + ' represent an exposure gap against 100% policy.' : 'All accounts compliant with 100% mandatory MFA policy.')) : 'Active directory telemetry pending.') + '</div>' +
+            '</div>' +
+          '</section>' +
+
+          // Right: USER-REPORTED PHISHING Threat Card
           renderModernThreatCard(ph, m, {
             key: 'phishing',
             tag: 'USER-REPORTED PHISHING',
@@ -5918,7 +5812,7 @@
 
   function serviceView() {
     const m = state.m, fl = n => flat.find(x => x.name === n);
-    const ftf = fl('First-time fix rate %'), p1 = fl('P1 response SLA %'), p2 = fl('P2 response SLA %'), rs = fl('Resolution SLA %'), ro = fl('Reopened incidents');
+    const ftf = fl('First-time fix rate %'), p1 = fl('P1 response SLA %'), p2 = fl('P2 response SLA %'), rs = fl('Resolution SLA %'), ro = fl('Reopened incidents'), on = fl('Onboarding completed'), off = fl('Offboarding completed'), ot = fl('Open ticket backlog (month end)');
     const sc = [ftf, p1, p2, rs], g = sc.filter(r => r.rag[m] === 1).length, bad = sc.filter(r => r.rag[m] === -1).length;
     const bt = (h, s) => '<div class="bt"><h2>' + h + '</h2><span class="sub">' + s + '</span></div>';
     const nm = r => r.name.replace(/ %$/, '');
@@ -5937,85 +5831,79 @@
     const resolvedInSla = (typeof slVal === 'number') ? slVal : totalResolved;
     const fixedFirstContact = (typeof fcVal === 'number') ? fcVal : 0;
 
-    const capsuleSteps = [
-      {
-        rank: 1,
-        row: ra || { r: 52 },
-        name: 'Tickets Raised',
-        count: totalRaised + ' support requests raised',
-        pct: totalRaised > 0 ? 100 : 0,
-        displayPct: totalRaised > 0 ? '100.0%' : '0.0%',
-        color: 'blue'
-      },
-      {
-        rank: 2,
-        row: rv || { r: 53 },
-        name: 'Tickets Resolved',
-        count: totalResolved + ' of ' + totalRaised + ' requests resolved',
-        pct: totalRaised > 0 ? Math.min(100, Math.round((totalResolved / totalRaised) * 1000) / 10) : 0,
-        displayPct: totalRaised > 0 ? (Math.min(100, (totalResolved / totalRaised) * 100)).toFixed(1) + '%' : '0.0%',
-        color: 'blue'
-      },
-      {
-        rank: 3,
-        row: rs || { r: 64 },
-        name: 'Resolved within SLA',
-        count: resolvedInSla + ' of ' + totalResolved + ' resolved within SLA',
-        pct: totalResolved > 0 ? Math.min(100, Math.round((resolvedInSla / totalResolved) * 1000) / 10) : 0,
-        displayPct: totalResolved > 0 ? (Math.min(100, (resolvedInSla / totalResolved) * 100)).toFixed(1) + '%' : '0.0%',
-        color: 'green'
-      },
-      {
-        rank: 4,
-        row: ftf || { r: 54 },
-        name: 'Fixed at First Contact',
-        count: fixedFirstContact + ' of ' + totalRaised + ' solved on 1st contact',
-        pct: totalRaised > 0 ? Math.min(100, Math.round((fixedFirstContact / totalRaised) * 1000) / 10) : 0,
-        displayPct: totalRaised > 0 ? (Math.min(100, (fixedFirstContact / totalRaised) * 100)).toFixed(1) + '%' : '0.0%',
-        color: 'amber'
-      }
-    ];
+    const ticketBarRow = (label, color, count, pct, barW, rId, titleText, isLast) =>
+      '<div class="dep-bar-row ticket-bar-row" ' + (rId ? 'data-open="' + rId + '" role="button" tabindex="0"' : '') + ' title="' + (titleText || label) + '" style="display:grid; grid-template-columns: 220px 1fr 105px; align-items:center; gap:16px; padding:12px 0;' + (isLast ? '' : ' border-bottom:1px solid var(--line);') + ' cursor:pointer;">' +
+        '<span style="font-size:13.5px; font-weight:600; color:var(--tx-heading);">' + label + '</span>' +
+        '<div style="height:15px; background:rgba(148, 163, 184, 0.14); border-radius:8px; overflow:hidden; width:100%;">' +
+          '<div style="height:100%; width:' + barW + '%; background:' + color + '; border-radius:8px; transition:width 0.5s ease;"></div>' +
+        '</div>' +
+        '<div style="text-align:right; font-size:13.5px; font-weight:700; color:var(--tx-heading); white-space:nowrap; font-family:\'JetBrains Mono\', monospace;">' +
+          count + ' <span style="font-size:12px; font-weight:500; color:var(--tx-muted); margin-left:3px;">(' + pct + '%)</span>' +
+        '</div>' +
+      '</div>';
+
+    const raisedPct = totalRaised > 0 ? '100.0' : '0.0';
+    const resolvedPct = totalRaised > 0 ? (Math.min(100, (totalResolved / totalRaised) * 100)).toFixed(1) : '0.0';
+    const slaPct = totalResolved > 0 ? (Math.min(100, (resolvedInSla / totalResolved) * 100)).toFixed(1) : (totalRaised > 0 ? '100.0' : '0.0');
+    const firstContactPct = totalRaised > 0 ? (Math.min(100, (fixedFirstContact / totalRaised) * 100)).toFixed(1) : '0.0';
 
     const funnel = hasFunnelData
-      ? '<div class="glowing-capsules-list" style="margin:8px 0">' + capsuleSteps.map(item =>
-          '<div class="glowing-capsule-item" data-open="' + item.row.r + '" role="button" tabindex="0" title="Click to view ' + item.name + ' telemetry">' +
-            '<div class="capsule-rank-num">' + item.rank + '</div>' +
-            '<div class="capsule-label-wrap">' +
-              '<span class="capsule-label-text">' + item.name + '</span>' +
-              '<span class="capsule-count-text">' + item.count + '</span>' +
-            '</div>' +
-            '<div class="capsule-track-bar">' +
-              '<div class="capsule-fill-bar ' + item.color + '" style="width:' + item.pct + '%">' +
-                (item.pct > 0 ? '<span class="capsule-glow-beacon ' + item.color + '"></span>' : '') +
-              '</div>' +
-            '</div>' +
-            '<div class="capsule-pct-val">' + item.displayPct + '</div>' +
-          '</div>'
-        ).join('') + '</div>'
-      : '<p class="empty">No data for this month yet.</p>';
-    const row = r => {
+      ? '<div style="display:flex; flex-direction:column; padding:2px 0;">' +
+          ticketBarRow('Tickets Raised', '#3b82f6', totalRaised, raisedPct, (totalRaised > 0 ? 100 : 0), (ra?.r || 52), totalRaised + ' support requests raised', false) +
+          ticketBarRow('Tickets Resolved', '#0284c7', totalResolved, resolvedPct, parseFloat(resolvedPct), (rv?.r || 53), totalResolved + ' of ' + totalRaised + ' requests resolved', false) +
+          ticketBarRow('Resolved within SLA', '#10b981', resolvedInSla, slaPct, parseFloat(slaPct), (rs?.r || 64), resolvedInSla + ' of ' + totalResolved + ' resolved within SLA', true) +
+        '</div>'
+      : '<p class="empty" style="padding:16px 0;">No data for this month yet.</p>';
+    const renderSlaCard = (r, sevTag) => {
       const v = r.v[m], x = r.rag[m];
-      return '<tr class="m" data-open="' + r.r + '">' +
-        '<td class="l sla-col-measure">' + nm(r) + '</td>' +
-        '<td class="c sla-col-val"><span class="cell ' + (typeof v === 'number' ? cls(x) : 'n') + ' sel">' + (typeof v === 'number' ? fmt(r, v) : 'No tickets') + '</span></td>' +
-        '<td class="l meta sla-col-target">' + target(r) + '</td>' +
-        '<td class="l meta sla-col-detail">' + (behind(r, m) || '') + '</td>' +
-      '</tr>';
+      const hasVal = typeof v === 'number';
+      const pct = hasVal ? Math.min(100, Math.max(0, v * 100)) : 0;
+      const isBreach = x === -1;
+      const isGood = x === 1;
+      const valStr = hasVal ? fmt(r, v) : 'No tickets';
+      const statusPillText = !hasVal ? 'No Activity' : (isGood ? 'Target Achieved' : (x === 0 ? 'Review Needed' : 'Below Target'));
+      const statusPillClass = !hasVal ? 'neu' : (isGood ? 'good' : 'bad');
+      const fillClass = !hasVal ? 'neu' : (isGood ? 'good' : 'bad');
+      const detailText = behind(r, m) || (hasVal ? 'All tickets handled within target' : 'Zero tickets logged in ' + FULL[m]);
+      const statusIcon = !hasVal ? 'ℹ' : (isGood ? '✓' : '⚠');
+
+      return '<div class="sla-card" data-open="' + r.r + '" role="button" tabindex="0" title="Click to view ' + nm(r) + ' details">' +
+        '<div>' +
+          '<div class="sla-card-head">' +
+            '<span class="sla-badge-label">' + sevTag + '</span>' +
+            '<span class="sla-target-chip">Target: ' + target(r) + '</span>' +
+          '</div>' +
+          '<div class="sla-card-title">' + nm(r) + '</div>' +
+          '<div class="sla-main-row">' +
+            '<div class="sla-val ' + (isBreach ? 'bad' : '') + '">' + valStr + '</div>' +
+            '<span class="sla-status-pill ' + statusPillClass + '">' + statusPillText + '</span>' +
+          '</div>' +
+          '<div class="sla-track-wrap">' +
+            '<div class="sla-track">' +
+              '<div class="sla-fill ' + fillClass + '" style="width:' + pct + '%;"></div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="sla-detail-box ' + (isBreach ? 'bad' : '') + '">' +
+          '<span class="sla-detail-icon ' + (isBreach ? 'bad' : 'good') + '">' + statusIcon + '</span>' +
+          '<span>' + detailText + '</span>' +
+        '</div>' +
+      '</div>';
     };
 
     return '<div class="stack">' +
       '<div class="sechead"><h2>Service Delivery</h2><span class="sub">' + g + ' of ' + sc.length + ' scored metrics on target' + (bad ? ' · ' + bad + ' off target' : '') + '</span></div>' +
       '<div class="blk">' + bt('Response and resolution SLAs', 'Share of tickets handled within the agreed time') +
-        '<section class="card"><div class="scroll" style="margin-top:0"><table class="sc comp-sla-table" style="min-width:0; width:100%"><thead><tr>' +
-          '<th class="l sla-col-measure">Measure</th>' +
-          '<th class="c sla-col-val">' + MON[m] + '</th>' +
-          '<th class="l sla-col-target">Target</th>' +
-          '<th class="l sla-col-detail">' + MON[m] + ' detail</th>' +
-        '</tr></thead><tbody>' + [p1, p2, rs].map(row).join('') + '</tbody></table></div></section></div>' +
+        '<div class="sla-cards-grid">' +
+          renderSlaCard(p1, 'HIGH SEVERITY &bull; EMERGENCY') +
+          renderSlaCard(p2, 'MEDIUM SEVERITY &bull; MAJOR') +
+          renderSlaCard(rs, 'ALL PRIORITIES &bull; RESOLUTION') +
+        '</div>' +
+      '</div>' +
       
       '<div class="blk ticket-funnel-blk">' +
-        '<div class="bt ticket-funnel-head"><h2>How ' + FULL[m] + '’s tickets were handled</h2><span class="sub">Where tickets ended up, from raised to fixed at first contact</span></div>' +
-        '<section class="card ticket-funnel-card">' + funnel + '</section></div>' +
+        '<div class="bt ticket-funnel-head"><h2>How ' + FULL[m] + '’s tickets were handled</h2><span class="sub">Ticket progression from requests raised to resolution within agreed SLA</span></div>' +
+        '<section class="card ticket-funnel-card" style="padding: 12px 24px; border-radius: 12px;">' + funnel + '</section></div>' +
       '<div class="blk">' + bt('First-time fix', 'Share of tickets solved at first contact') +
         renderModernThreatCard(ftf, m, {
           key: 'first_time_fix',
@@ -6039,11 +5927,186 @@
           summary: '<span>🎯</span><span><strong>First-Call Efficacy:</strong> <strong>' + (typeof ftf?.v?.[m] === 'number' ? (ftf.v[m] * 100).toFixed(1) + '%' : '–') + '</strong> of support tickets resolved immediately on first contact without escalation.</span>'
         }) +
       '</div>' +
-      '<div class="blk">' + bt('Open and reopened', 'Tickets still open at month end, and tickets that had to be reopened') + '<div class="row2">' + mcard(fl('Open ticket backlog (month end)'), m) + mcard(ro, m) + '</div></div>' +
+      // Operational Backlog & User Lifecycle 3D Coverflow Carousel (Image 2 Style)
+      '<div class="blk service-ops-block">' +
+        bt('Operational backlog &amp; User lifecycle', 'Month-end backlog volume, reopened incident cases, and tenant user onboarding/offboarding telemetry') +
+        '<div class="dh-3d-stage so-3d-stage">' +
+          '<div class="ih-carousel-wrapper" id="so-carousel-wrapper">' +
+            '<button type="button" class="ih-nav-btn left" id="soNavPrev" aria-label="Previous Operational Metric">' +
+              '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12.5 15l-5-5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '</button>' +
+            '<div class="ih-carousel-track" id="soCarouselTrack">' +
+              endpointMonthCard(ot, m, {
+                title: 'Open ticket backlog',
+                sub: (ot && typeof ot.v[m] === 'number' ? (ot.v[m] + ' open ticket' + (ot.v[m] === 1 ? '' : 's') + ' at month end (' + (delta(ot, m) || 'Stable') + ')') : 'Month-end backlog telemetry'),
+                badge: (ot && ot.v[m] === 0 ? '✓ Zero Backlog' : (ot && ot.v[m] <= 2 ? 'Optimal Backlog' : 'Backlog Active')),
+                targetLabel: 'Target: 0',
+                fillPct: (ot && ot.v[m] === 0 ? 0 : 35)
+              }) +
+              endpointMonthCard(ro, m, {
+                title: 'Reopened incidents',
+                sub: (ro && typeof ro.v[m] === 'number' ? (ro.v[m] === 0 ? '0 tickets reopened (' + (delta(ro, m) || 'Optimal') + ')' : ro.v[m] + ' ticket' + (ro.v[m] === 1 ? '' : 's') + ' reopened') : 'Reopened cases telemetry'),
+                badge: (ro && ro.v[m] === 0 ? '✓ Zero Reopened' : 'Reopened Cases'),
+                targetLabel: 'Target: 0',
+                fillPct: (ro && ro.v[m] === 0 ? 0 : 25)
+              }) +
+              endpointMonthCard(on, m, {
+                title: 'New user provisioning',
+                sub: (on && typeof on.v[m] === 'number' ? (on.v[m] + ' staff member' + (on.v[m] === 1 ? '' : 's') + ' onboarded & provisioned in tenant') : 'Joiner provisioning activity'),
+                badge: (on && on.v[m] > 0 ? '✓ Provisioning Logged' : 'Normal Activity'),
+                targetLabel: 'Joiner Activity',
+                fillPct: 60
+              }) +
+              endpointMonthCard(off, m, {
+                title: 'User deprovisioning',
+                sub: (off && typeof off.v[m] === 'number' ? (off.v[m] + ' departure' + (off.v[m] === 1 ? '' : 's') + ' decommissioned in tenant') : 'Leaver deprovisioning activity'),
+                badge: (off && off.v[m] === 0 ? 'Zero Departures' : 'Decommissioned'),
+                targetLabel: 'Leaver Activity',
+                fillPct: (off && off.v[m] === 0 ? 0 : 40)
+              }) +
+            '</div>' +
+            '<button type="button" class="ih-nav-btn right" id="soNavNext" aria-label="Next Operational Metric">' +
+              '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7.5 15l5-5-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '</button>' +
+          '</div>' +
+          '<div class="ih-indicators" id="soCarouselDots">' +
+            '<div class="ih-dot active" data-dot-idx="0" title="Open Ticket Backlog"></div>' +
+            '<div class="ih-dot" data-dot-idx="1" title="Reopened Incidents"></div>' +
+            '<div class="ih-dot" data-dot-idx="2" title="New User Provisioning"></div>' +
+            '<div class="ih-dot" data-dot-idx="3" title="User Deprovisioning"></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
     '</div>';
   }
 
+  function initServiceOpsCarousel() {
+    const stage = document.querySelector('.so-3d-stage');
+    if (!stage) return;
+    const prevBtn = stage.querySelector('#soNavPrev');
+    const nextBtn = stage.querySelector('#soNavNext');
+    const dots = stage.querySelectorAll('.ih-dot');
+    const cards = Array.from(stage.querySelectorAll('.endpoint-month-card'));
+    const N = cards.length;
+    if (N === 0) return;
+
+    let activeIndex = 0;
+
+    function updatePositions() {
+      cards.forEach((card, idx) => {
+        card.classList.remove('pos-center', 'pos-left', 'pos-right', 'pos-hidden');
+        const offset = (idx - activeIndex + N) % N;
+        if (offset === 0) {
+          card.classList.add('pos-center');
+        } else if (offset === 1) {
+          card.classList.add('pos-right');
+        } else if (offset === N - 1) {
+          card.classList.add('pos-left');
+        } else {
+          card.classList.add('pos-hidden');
+        }
+      });
+
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === activeIndex);
+      });
+    }
+
+    function goToCard(idx) {
+      activeIndex = (idx % N + N) % N;
+      updatePositions();
+    }
+
+    if (prevBtn) {
+      prevBtn.onclick = (e) => {
+        e.stopPropagation();
+        goToCard(activeIndex - 1);
+      };
+    }
+
+    if (nextBtn) {
+      nextBtn.onclick = (e) => {
+        e.stopPropagation();
+        goToCard(activeIndex + 1);
+      };
+    }
+
+    dots.forEach((dot, idx) => {
+      dot.onclick = (e) => {
+        e.stopPropagation();
+        goToCard(idx);
+      };
+    });
+
+    cards.forEach((card, idx) => {
+      card.onclick = (e) => {
+        if (card.classList.contains('pos-left')) {
+          e.stopPropagation();
+          goToCard(activeIndex - 1);
+        } else if (card.classList.contains('pos-right')) {
+          e.stopPropagation();
+          goToCard(activeIndex + 1);
+        }
+      };
+    });
+
+    const wrapper = stage.querySelector('.ih-carousel-wrapper');
+    let isWheelCooldown = false;
+    if (wrapper) {
+      wrapper.addEventListener('wheel', (e) => {
+        const dx = e.deltaX;
+        const dy = e.deltaY;
+        if (Math.abs(dx) > 15 || Math.abs(dy) > 25) {
+          e.preventDefault();
+          if (isWheelCooldown) return;
+          isWheelCooldown = true;
+          setTimeout(() => { isWheelCooldown = false; }, 420);
+          if (dx > 15 || dy > 25) {
+            goToCard(activeIndex + 1);
+          } else {
+            goToCard(activeIndex - 1);
+          }
+        }
+      }, { passive: false });
+
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchMoved = false;
+
+      wrapper.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          touchMoved = false;
+        }
+      }, { passive: true });
+
+      wrapper.addEventListener('touchmove', () => {
+        touchMoved = true;
+      }, { passive: true });
+
+      wrapper.addEventListener('touchend', (e) => {
+        if (!touchMoved) return;
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+          if (diffX < 0) {
+            goToCard(activeIndex + 1);
+          } else {
+            goToCard(activeIndex - 1);
+          }
+        }
+      }, { passive: true });
+    }
+
+    updatePositions();
+  }
+
   function drawServiceCharts() {
+    initServiceOpsCarousel();
     const L = CHART_MONTHS.map(i => MON[i]), fl = n => flat.find(x => x.name === n);
     const mk = (id, cfg) => {
       const el = document.getElementById(id);
@@ -6179,8 +6242,67 @@
 
     const tgtPct = Math.round((comp?.target || 0.8) * 100);
     const compPct = Math.min(100, Math.max(0, compVal * 100));
+    const remainingCompPct = Math.max(0, 100 - compPct);
     const isOnTarget = compVal >= (comp?.target || 0.8);
-    const dashOffset = (301.6 * (1 - compPct / 100)).toFixed(1);
+
+    // Donut SVG Generator matching Device Protection Composition (Image 2 style)
+    const compDonutSvg = (function () {
+      const cx = 110, cy = 110, R = 90, r = 54, rMid = 72;
+      let curAngle = -Math.PI / 2;
+      const paths = [];
+      const texts = [];
+
+      const colorMain = isOnTarget ? '#10b981' : '#ef4444';
+      const segs = [
+        { label: 'Completed', pct: compPct, color: colorMain },
+        { label: 'Remaining', pct: remainingCompPct, color: '#cbd5e1' }
+      ];
+
+      const active = segs.filter(s => s.pct > 0.001);
+
+      if (active.length === 1 && active[0].pct >= 99.99) {
+        paths.push('<circle cx="110" cy="110" r="' + rMid + '" fill="none" stroke="' + active[0].color + '" stroke-width="' + (R - r) + '" class="donut-arc-path"><title>' + active[0].label + ': ' + active[0].pct.toFixed(1) + '%</title></circle>');
+      } else {
+        active.forEach(s => {
+          const span = (s.pct / 100) * 2 * Math.PI;
+          const startA = curAngle;
+          const endA = curAngle + span;
+
+          const x1 = cx + R * Math.cos(startA);
+          const y1 = cy + R * Math.sin(startA);
+          const x2 = cx + R * Math.cos(endA);
+          const y2 = cy + R * Math.sin(endA);
+          const x3 = cx + r * Math.cos(endA);
+          const y3 = cy + r * Math.sin(endA);
+          const x4 = cx + r * Math.cos(startA);
+          const y4 = cy + r * Math.sin(startA);
+          const large = span > Math.PI ? 1 : 0;
+
+          const d = 'M ' + x1.toFixed(2) + ' ' + y1.toFixed(2) +
+            ' A ' + R + ' ' + R + ' 0 ' + large + ' 1 ' + x2.toFixed(2) + ' ' + y2.toFixed(2) +
+            ' L ' + x3.toFixed(2) + ' ' + y3.toFixed(2) +
+            ' A ' + r + ' ' + r + ' 0 ' + large + ' 0 ' + x4.toFixed(2) + ' ' + y4.toFixed(2) + ' Z';
+
+          paths.push('<path d="' + d + '" fill="' + s.color + '" stroke="var(--card, #ffffff)" stroke-width="2.5" class="donut-arc-path" title="' + s.label + ': ' + s.pct.toFixed(1) + '%">' +
+            '<title>' + s.label + ': ' + s.pct.toFixed(1) + '%</title>' +
+          '</path>');
+
+          curAngle = endA;
+        });
+      }
+
+      // Target threshold indicator at bottom of donut ring (like Image 2)
+      texts.push('<text x="110" y="196" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff" pointer-events="none">' + tgtPct + '%</text>');
+
+      return '<svg class="estate-donut-svg" viewBox="0 0 220 220" width="180" height="180" style="display:block;margin:0 auto;overflow:visible;">' +
+        '<g class="donut-segments">' + paths.join('') + '</g>' +
+        '<g class="donut-labels">' + texts.join('') + '</g>' +
+        '<g class="donut-center" pointer-events="none">' +
+          '<text x="110" y="104" text-anchor="middle" font-size="28" font-weight="800" fill="var(--ink)" letter-spacing="-0.5">' + compPct.toFixed(1) + '%</text>' +
+          '<text x="110" y="122" text-anchor="middle" font-size="9" font-weight="700" fill="var(--muted)" letter-spacing="0.8">COMPLETED</text>' +
+        '</g>' +
+      '</svg>';
+    })();
 
     return '<div class="stack">' +
       '<div class="sechead"><h2>Compliance</h2><span class="sub">' + scoredOnTarget + ' of ' + sc.length + ' scored metrics on target</span></div>' +
@@ -6201,20 +6323,19 @@
           '</div>' +
 
           '<div class="comp-exec-body">' +
-            '<div class="comp-gauge-panel">' +
-              '<div class="comp-gauge-wrap">' +
-                '<svg class="comp-gauge-svg" viewBox="0 0 120 120">' +
-                  '<circle class="comp-gauge-bg" cx="60" cy="60" r="48"></circle>' +
-                  '<circle class="comp-gauge-fill ' + (isOnTarget ? 'g' : 'r') + '" cx="60" cy="60" r="48" style="stroke-dasharray:301.6;stroke-dashoffset:' + dashOffset + ';"></circle>' +
-                '</svg>' +
-                '<div class="comp-gauge-inner">' +
-                  '<div class="comp-gauge-val">' + (compVal * 100).toFixed(0) + '%</div>' +
-                  '<div class="comp-gauge-lbl">COMPLETED</div>' +
+            '<div class="estate-donut-panel comp-donut-panel">' +
+              '<div class="estate-donut-wrap">' + compDonutSvg + '</div>' +
+              '<div class="estate-donut-legend-grid" style="width: 100%;">' +
+                '<div class="donut-legend-item" title="Completed: ' + compPct.toFixed(1) + '%">' +
+                  '<span class="donut-legend-swatch" style="background:' + (isOnTarget ? '#10b981' : '#ef4444') + '"></span>' +
+                  '<span class="donut-legend-name">Completed</span>' +
+                  '<span class="donut-legend-val">' + compPct.toFixed(1) + '%</span>' +
                 '</div>' +
-              '</div>' +
-              '<div class="comp-gauge-footer">' +
-                '<span class="comp-gauge-target">SLA Target: ' + tgtPct + '%</span>' +
-                '<span class="comp-gauge-delta ' + (isOnTarget ? 'pos' : 'neg') + '">' + (compPct >= tgtPct ? '+' + (compPct - tgtPct).toFixed(0) + '% above target' : (compPct - tgtPct).toFixed(0) + '% gap') + '</span>' +
+                '<div class="donut-legend-item" title="Remaining: ' + remainingCompPct.toFixed(1) + '%">' +
+                  '<span class="donut-legend-swatch" style="background:#cbd5e1"></span>' +
+                  '<span class="donut-legend-name">Remaining</span>' +
+                  '<span class="donut-legend-val">' + remainingCompPct.toFixed(1) + '%</span>' +
+                '</div>' +
               '</div>' +
             '</div>' +
 
@@ -6296,14 +6417,14 @@
 
         '<div class="gov-grid">' +
           // Card 1: Policy Exceptions (Chosen Month Only)
-          '<div class="gov-card card-green" data-open="' + (ex?.r || 74) + '" role="button" tabindex="0" title="Click to view policy exceptions details">' +
+          '<div class="gov-card" data-open="' + (ex?.r || 74) + '" role="button" tabindex="0" title="Click to view policy exceptions details">' +
             '<div>' +
               '<div class="gov-card-head">' +
                 '<span class="gov-card-badge">CONTROL 01 &bull; POLICY EXCEPTIONS</span>' +
-                '<span class="gov-status-chip green">Zero Breaches</span>' +
+                '<span class="gov-status-chip pos">Zero Breaches</span>' +
               '</div>' +
               '<div class="gov-metric-row">' +
-                '<div class="gov-metric-num green">' + exVal + '</div>' +
+                '<div class="gov-metric-num navy">' + exVal + '</div>' +
                 '<div class="gov-metric-meta">' +
                   '<span class="gov-metric-title">Open Policy Exceptions</span>' +
                   '<span class="gov-metric-delta">Zero open exceptions in ' + FULL[m] + '</span>' +
@@ -6312,34 +6433,32 @@
               '<div class="gov-visual-panel">' +
                 '<div class="gov-visual-head">' +
                   '<span>' + FULL[m] + ' Compliance Status</span>' +
-                  '<span class="gov-visual-pill" style="color:#059669;">100% COMPLIANT</span>' +
+                  '<span class="gov-visual-pill">100% COMPLIANT</span>' +
                 '</div>' +
                 '<div class="capsule-track-bar" style="margin-bottom: 12px;">' +
-                  '<div class="capsule-fill-bar green" style="width: 100%;">' +
-                    '<span class="capsule-glow-beacon green"></span>' +
-                  '</div>' +
+                  '<div class="capsule-fill-bar uniform" style="width: 100%;"></div>' +
                 '</div>' +
-                '<div class="zero-runway-banner" style="margin-bottom:0;">' +
-                  '<span>✓</span>' +
+                '<div class="gov-runway-banner">' +
+                  '<span class="gov-check-icon">✓</span>' +
                   '<span>Zero exceptions or security waivers logged in ' + FULL[m] + '</span>' +
                 '</div>' +
               '</div>' +
             '</div>' +
             '<div class="gov-card-foot">' +
               '<span class="gov-foot-label">Policy Tolerance:</span>' +
-              '<span class="gov-foot-val green">Zero Tolerance Ceiling</span>' +
+              '<span class="gov-foot-val">Zero Tolerance Ceiling</span>' +
             '</div>' +
           '</div>' +
 
           // Card 2: ISO Evidence (Chosen Month Only)
-          '<div class="gov-card card-blue" data-open="' + (iso?.r || 69) + '" role="button" tabindex="0" title="Click to view ISO evidence requests details">' +
+          '<div class="gov-card" data-open="' + (iso?.r || 69) + '" role="button" tabindex="0" title="Click to view ISO evidence requests details">' +
             '<div>' +
               '<div class="gov-card-head">' +
                 '<span class="gov-card-badge">CONTROL 02 &bull; AUDIT EVIDENCE</span>' +
-                '<span class="gov-status-chip blue">ISO/IEC 27001</span>' +
+                '<span class="gov-status-chip neu">ISO/IEC 27001</span>' +
               '</div>' +
               '<div class="gov-metric-row">' +
-                '<div class="gov-metric-num blue">' + isoVal + '</div>' +
+                '<div class="gov-metric-num navy">' + isoVal + '</div>' +
                 '<div class="gov-metric-meta">' +
                   '<span class="gov-metric-title">Evidence Requests Fulfilled</span>' +
                   '<span class="gov-metric-delta">' + (isoVal === 0 ? 'Zero requests pending in ' + FULL[m] : isoVal + ' requests completed in ' + FULL[m]) + '</span>' +
@@ -6348,15 +6467,13 @@
               '<div class="gov-visual-panel">' +
                 '<div class="gov-visual-head">' +
                   '<span>' + FULL[m] + ' Audit Readiness</span>' +
-                  '<span class="gov-visual-pill" style="color:#2563eb;">CERTIFIED READY</span>' +
+                  '<span class="gov-visual-pill">CERTIFIED READY</span>' +
                 '</div>' +
                 '<div class="capsule-track-bar" style="margin-bottom: 12px;">' +
-                  '<div class="capsule-fill-bar blue" style="width: 100%;">' +
-                    '<span class="capsule-glow-beacon blue"></span>' +
-                  '</div>' +
+                  '<div class="capsule-fill-bar uniform" style="width: 100%;"></div>' +
                 '</div>' +
-                '<div class="blue-runway-banner">' +
-                  '<span>✓</span>' +
+                '<div class="gov-runway-banner">' +
+                  '<span class="gov-check-icon">✓</span>' +
                   '<span>' + (isoVal === 0 ? 'All evidence requests fulfilled; zero backlog in ' + FULL[m] : isoVal + ' compliance evidence packages delivered in ' + FULL[m]) + '</span>' +
                 '</div>' +
               '</div>' +
@@ -6368,14 +6485,14 @@
           '</div>' +
 
           // Card 3: Configuration Changes (Chosen Month Only)
-          '<div class="gov-card card-purple" data-open="' + (chg?.r || 70) + '" role="button" tabindex="0" title="Click to view configuration changes details">' +
+          '<div class="gov-card" data-open="' + (chg?.r || 70) + '" role="button" tabindex="0" title="Click to view configuration changes details">' +
             '<div>' +
               '<div class="gov-card-head">' +
                 '<span class="gov-card-badge">CONTROL 03 &bull; CHANGE CONTROL</span>' +
-                '<span class="gov-status-chip purple">Authorized Changes</span>' +
+                '<span class="gov-status-chip neu">Authorized Changes</span>' +
               '</div>' +
               '<div class="gov-metric-row">' +
-                '<div class="gov-metric-num purple">' + chgVal + '</div>' +
+                '<div class="gov-metric-num navy">' + chgVal + '</div>' +
                 '<div class="gov-metric-meta">' +
                   '<span class="gov-metric-title">Configuration Changes</span>' +
                   '<span class="gov-metric-delta">' + chgVal + ' approved changes in ' + FULL[m] + '</span>' +
@@ -6384,15 +6501,13 @@
               '<div class="gov-visual-panel">' +
                 '<div class="gov-visual-head">' +
                   '<span>' + FULL[m] + ' Authorization Rate</span>' +
-                  '<span class="gov-visual-pill" style="color:#9333ea;">100% APPROVED</span>' +
+                  '<span class="gov-visual-pill">100% APPROVED</span>' +
                 '</div>' +
                 '<div class="capsule-track-bar" style="margin-bottom: 12px;">' +
-                  '<div class="capsule-fill-bar purple" style="width: 100%;">' +
-                    '<span class="capsule-glow-beacon purple"></span>' +
-                  '</div>' +
+                  '<div class="capsule-fill-bar uniform" style="width: 100%;"></div>' +
                 '</div>' +
-                '<div class="purple-runway-banner">' +
-                  '<span>✓</span>' +
+                '<div class="gov-runway-banner">' +
+                  '<span class="gov-check-icon">✓</span>' +
                   '<span>All ' + chgVal + ' changes executed under SecOps change window in ' + FULL[m] + '</span>' +
                 '</div>' +
               '</div>' +
@@ -7635,8 +7750,12 @@
   }
 
   // Real-time synchronization engine
-  let lastSeenVersion = 1;
+  let lastSeenVersion = 0;
   function initLiveSync() {
+    fetch('/api/public/version').then(r => r.json()).then(vData => {
+      if (vData && typeof vData.version === 'number') lastSeenVersion = vData.version;
+    }).catch(() => {});
+
     if (typeof EventSource !== 'undefined') {
       try {
         const es = new EventSource('/api/public/live-events');
@@ -7646,7 +7765,7 @@
             if (p && p.type === 'data_updated') {
               if (p.version && p.version > lastSeenVersion) {
                 lastSeenVersion = p.version;
-                const mKey = p.month || (state.year + '-' + String(state.m).padStart(2, '0'));
+                const mKey = state.year + '-' + String(state.m).padStart(2, '0');
                 fetchClientData(mKey);
                 flashSyncBadge('LIVE SYNC: UPDATED FROM MAIN PAGE');
               }
@@ -7661,7 +7780,7 @@
         const bc = new BroadcastChannel('brysa_mss_channel');
         bc.onmessage = e => {
           if (e.data && e.data.type === 'main_page_updated') {
-            const mKey = e.data.month || (state.year + '-' + String(state.m).padStart(2, '0'));
+            const mKey = state.year + '-' + String(state.m).padStart(2, '0');
             fetchClientData(mKey);
             flashSyncBadge('LIVE SYNC: UPDATED FROM MAIN PAGE');
           }
@@ -7670,8 +7789,8 @@
     }
 
     window.addEventListener('storage', e => {
-      if (e.key === 'brysa_data_version' || e.key === 'brysa_active_month') {
-        const mKey = localStorage.getItem('brysa_active_month') || (state.year + '-' + String(state.m).padStart(2, '0'));
+      if (e.key === 'brysa_data_version') {
+        const mKey = state.year + '-' + String(state.m).padStart(2, '0');
         fetchClientData(mKey);
         flashSyncBadge('LIVE SYNC: UPDATED FROM MAIN PAGE');
       }
@@ -7684,7 +7803,7 @@
         const vData = await res.json();
         if (vData && vData.version && vData.version > lastSeenVersion) {
           lastSeenVersion = vData.version;
-          const mKey = vData.activeMonth || (state.year + '-' + String(state.m).padStart(2, '0'));
+          const mKey = state.year + '-' + String(state.m).padStart(2, '0');
           fetchClientData(mKey);
           flashSyncBadge('LIVE SYNC: UPDATED FROM MAIN PAGE');
         }
@@ -7716,36 +7835,6 @@
     if (t.dataset.open) openDrawer(+t.dataset.open);
   });
 
-  // Scorecard live search input listener
-  document.addEventListener('input', e => {
-    if (e.target && e.target.id === 'scorecard-search') {
-      const q = e.target.value.toLowerCase().trim();
-      document.querySelectorAll('.sc-card-row').forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(q) ? 'flex' : 'none';
-      });
-    }
-  });
-
-  // Scorecard status filter tabs
-  document.addEventListener('click', e => {
-    const tab = e.target.closest('.sc-filter-tab');
-    if (tab) {
-      document.querySelectorAll('.sc-filter-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const f = tab.dataset.filter;
-      const searchVal = (document.getElementById('scorecard-search')?.value || '').toLowerCase().trim();
-
-      document.querySelectorAll('.sc-card-row').forEach(row => {
-        const matchesStatus = (f === 'all') ||
-          (f === 'on-target' && row.dataset.status === '1') ||
-          (f === 'near-target' && row.dataset.status === '0') ||
-          (f === 'off-target' && row.dataset.status === '-1');
-        const matchesSearch = !searchVal || row.textContent.toLowerCase().includes(searchVal);
-        row.style.display = (matchesStatus && matchesSearch) ? 'flex' : 'none';
-      });
-    }
-  });
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeDrawer();
@@ -7779,9 +7868,235 @@
 
 
   // Initial immediate render with baseline, followed immediately by live fetch
+
+  // ---------- Ultra-Modern Dark Glow Calendar Controller (Client Portal - Matching Main Page) ----------
+  let calViewYear = 2026;
+  let calViewMonth = 5;
+
+  function updateClientMonthDisplayLabel() {
+    const label = document.getElementById('month-display-text');
+    if (label) {
+      label.textContent = FULL[state.m] + ' ' + state.year;
+    }
+  }
+
+  function syncClientCalendarToState() {
+    calViewYear = state.year;
+    calViewMonth = state.m;
+    updateClientMonthDisplayLabel();
+    renderClientCustomCalendar();
+  }
+
+  function toggleClientCustomCalendar() {
+    const popup = document.getElementById('custom-calendar-popup');
+    const trigger = document.getElementById('month-picker-trigger');
+    if (!popup) return;
+    const isOpen = popup.style.display !== 'none';
+    if (isOpen) {
+      closeClientCustomCalendar();
+    } else {
+      calViewYear = state.year;
+      calViewMonth = state.m;
+      renderClientCustomCalendar();
+      popup.style.display = 'block';
+      if (trigger) trigger.classList.add('active');
+    }
+  }
+
+  function closeClientCustomCalendar() {
+    const popup = document.getElementById('custom-calendar-popup');
+    const trigger = document.getElementById('month-picker-trigger');
+    if (popup) popup.style.display = 'none';
+    if (trigger) trigger.classList.remove('active');
+  }
+
+  function navigateClientCalendarMonth(delta) {
+    calViewMonth += delta;
+    if (calViewMonth < 1) {
+      calViewMonth = 12;
+      calViewYear--;
+    } else if (calViewMonth > 12) {
+      calViewMonth = 1;
+      calViewYear++;
+    }
+    renderClientCustomCalendar();
+  }
+
+  function navigateClientCalendarYear(delta) {
+    calViewYear += delta;
+    renderClientCustomCalendar();
+  }
+
+  function renderClientCustomCalendar() {
+    const titleEl = document.getElementById('cal-month-title');
+    const yearTrack = document.getElementById('cal-year-track');
+    const monthsGrid = document.getElementById('cal-months-grid');
+    if (!titleEl && !monthsGrid) return;
+
+    if (titleEl) {
+      titleEl.textContent = FULL[calViewMonth] + ' ' + calViewYear;
+    }
+
+    if (yearTrack) {
+      yearTrack.innerHTML = '';
+      for (let y = calViewYear - 1; y <= calViewYear + 1; y++) {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'cal-year-chip' + (y === calViewYear ? ' active' : '');
+        chip.textContent = y;
+        chip.title = 'Switch to year ' + y;
+        chip.addEventListener('click', (e) => {
+          e.stopPropagation();
+          calViewYear = y;
+          renderClientCustomCalendar();
+        });
+        yearTrack.appendChild(chip);
+      }
+    }
+
+    if (monthsGrid) {
+      monthsGrid.innerHTML = '';
+      for (let i = 1; i <= 12; i++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cal-month-cell';
+        if (calViewYear === state.year && i === state.m) {
+          btn.classList.add('selected');
+        }
+        btn.textContent = MON[i];
+        btn.title = 'Select ' + FULL[i] + ' ' + calViewYear;
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectClientCalendarMonth(calViewYear, i);
+        });
+        monthsGrid.appendChild(btn);
+      }
+    }
+  }
+
+  async function selectClientCalendarMonth(y, m) {
+    state.year = y;
+    state.m = m;
+    closeClientCustomCalendar();
+    updateClientMonthDisplayLabel();
+    const monthKey = y + '-' + String(m).padStart(2, '0');
+    await fetchClientData(monthKey);
+  }
+
+  function initClientCustomCalendar() {
+    const trigger = document.getElementById('month-picker-trigger');
+    const popup = document.getElementById('custom-calendar-popup');
+    const prevMonthBtn = document.getElementById('prev-month-btn');
+    const nextMonthBtn = document.getElementById('next-month-btn');
+    const calNavPrev = document.getElementById('cal-nav-prev');
+    const calNavNext = document.getElementById('cal-nav-next');
+    const prevYearBtn = document.getElementById('cal-year-scroll-prev');
+    const nextYearBtn = document.getElementById('cal-year-scroll-next');
+    const yearScrollBox = document.getElementById('cal-year-scroll-container');
+
+    updateClientMonthDisplayLabel();
+    renderClientCustomCalendar();
+
+    if (trigger && popup) {
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleClientCustomCalendar();
+      });
+    }
+
+    if (prevMonthBtn) {
+      prevMonthBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        let newM = state.m - 1;
+        let newY = state.year;
+        if (newM < 1) {
+          newM = 12;
+          newY--;
+        }
+        selectClientCalendarMonth(newY, newM);
+      });
+    }
+
+    if (nextMonthBtn) {
+      nextMonthBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        let newM = state.m + 1;
+        let newY = state.year;
+        if (newM > 12) {
+          newM = 1;
+          newY++;
+        }
+        selectClientCalendarMonth(newY, newM);
+      });
+    }
+
+    if (calNavPrev) {
+      calNavPrev.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigateClientCalendarMonth(-1);
+      });
+    }
+
+    if (calNavNext) {
+      calNavNext.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigateClientCalendarMonth(1);
+      });
+    }
+
+    if (prevYearBtn) {
+      prevYearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigateClientCalendarYear(-1);
+      });
+    }
+
+    if (nextYearBtn) {
+      nextYearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigateClientCalendarYear(1);
+      });
+    }
+
+    if (yearScrollBox) {
+      let lastWheelTime = 0;
+      yearScrollBox.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const now = Date.now();
+        if (now - lastWheelTime < 140) return;
+        const delta = (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) > 0 ? 1 : -1;
+        lastWheelTime = now;
+        navigateClientCalendarYear(delta);
+      }, { passive: false });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (popup && popup.style.display !== 'none') {
+        if (!popup.contains(e.target) && !trigger?.contains(e.target)) {
+          closeClientCustomCalendar();
+        }
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeClientCustomCalendar();
+      }
+    });
+  }
+
+  // Initial immediate render with baseline, followed immediately by live fetch
+  try {
+    const stored = localStorage.getItem('brysa_active_month');
+    if (stored && (stored.startsWith('2027') || stored > '2026-12')) {
+      localStorage.removeItem('brysa_active_month');
+    }
+  } catch (e) {}
+
   render();
-  const initToken = extractToken();
-  const initKey = initToken ? 'auto' : (state.year + '-' + String(state.m).padStart(2, '0'));
+  initClientCustomCalendar();
+  const initKey = (state.year + '-' + String(state.m).padStart(2, '0'));
   fetchClientData(initKey);
   initLiveSync();
 
