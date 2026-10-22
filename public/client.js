@@ -5072,18 +5072,18 @@
             const diff = fixedCount - prevVal;
             const pct = prevVal > 0 ? Math.round((Math.abs(diff) / prevVal) * 100) : 0;
             if (diff > 0) {
-              deltaHtml = '<span style="color:#10b981; font-weight:700;">▲ +' + diff + ' remediated (+' + pct + '%) vs ' + MON[prevM] + '</span>';
-              deltaText = '+' + diff + ' remediated vs ' + MON[prevM] + ' (' + pct + '% acceleration)';
+              deltaHtml = '<span style="color:#10b981; font-weight:700;">▲ +' + diff + ' remediated (+' + pct + '%) vs. ' + FULL[prevM] + '</span>';
+              deltaText = '(+' + diff + ' vs. ' + FULL[prevM] + '; ' + pct + '% increase)';
             } else if (diff < 0) {
-              deltaHtml = '<span style="color:#f59e0b; font-weight:700;">▼ ' + diff + ' remediated (' + pct + '%) vs ' + MON[prevM] + '</span>';
-              deltaText = diff + ' remediated vs ' + MON[prevM];
+              deltaHtml = '<span style="color:#f59e0b; font-weight:700;">▼ ' + diff + ' remediated (' + pct + '%) vs. ' + FULL[prevM] + '</span>';
+              deltaText = '(' + diff + ' vs. ' + FULL[prevM] + '; ' + pct + '% decrease)';
             } else {
-              deltaHtml = '<span style="color:var(--sub); font-weight:700;">― Even with ' + MON[prevM] + '</span>';
-              deltaText = 'matching ' + MON[prevM] + ' velocity';
+              deltaHtml = '<span style="color:var(--sub); font-weight:700;">― Even with ' + FULL[prevM] + '</span>';
+              deltaText = '(matching ' + FULL[prevM] + ')';
             }
           } else {
             deltaHtml = '<span style="color:var(--sub); font-weight:700;">Active Reporting Period</span>';
-            deltaText = 'establishing the active baseline cadence';
+            deltaText = '(baseline reporting)';
           }
 
           // Dial SVG
@@ -5140,15 +5140,15 @@
 
           return '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(460px, 1fr)); gap:20px; align-items:stretch; margin:0;">' +
 
-            '<!-- Left Card: Remediation Velocity & Resolution Dynamics -->' +
+            '<!-- Left Card: Vulnerability Remediation Summary -->' +
             '<section class="card chart-card chosen-month-velocity-card" style="margin:0; padding:22px 24px; display:flex; flex-direction:column; justify-content:space-between;">' +
               '<div>' +
                 '<div class="card-head" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">' +
                   '<div>' +
-                    '<h2 class="card-title" style="font-size:16px;font-weight:700;">Remediation Velocity & Resolution Dynamics</h2>' +
-                    '<p class="card-sub" style="margin-top:2px;">Throughput and resolution cadence for <strong>' + FULL[m] + ' ' + state.year + '</strong></p>' +
+                    '<h2 class="card-title" style="font-size:16px;font-weight:700;">Vulnerability Remediation Summary</h2>' +
+                    '<p class="card-sub" style="margin-top:2px;">Remediation performance for <strong>' + FULL[m] + ' ' + state.year + '</strong></p>' +
                   '</div>' +
-                  '<span class="score-badge-status optimal" style="font-weight:700; font-size:11.5px;">' + FULL[m] + ' Active</span>' +
+                  '<span class="score-badge-status optimal" style="font-weight:700; font-size:11.5px; text-transform:uppercase;">' + FULL[m] + ' ' + state.year + '</span>' +
                 '</div>' +
 
                 '<!-- Dial + 3 Vertical Stat Cards -->' +
@@ -5156,7 +5156,7 @@
                   '<!-- Dial Box -->' +
                   '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:14px 10px; background:var(--surface); border:1px solid var(--line-soft); border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,0.02); text-align:center;">' +
                     dialSvg +
-                    '<div style="margin-top:6px; font-size:12px; font-weight:700; color:var(--ink);">' + FULL[m] + ' Velocity</div>' +
+                    '<div style="margin-top:6px; font-size:12px; font-weight:700; color:var(--ink);">' + FULL[m] + ' Performance</div>' +
                     '<div style="margin-top:3px; font-size:10.5px;">' + deltaHtml + '</div>' +
                   '</div>' +
 
@@ -5164,24 +5164,24 @@
                   '<div style="display:flex; flex-direction:column; gap:8px;">' +
                     '<div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">' +
                       '<div>' +
-                        '<div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sub);">Remediation Speed</div>' +
-                        '<div style="font-size:11px; color:var(--sub); margin-top:2px;">Pace: ~' + (hasFx ? Math.round((fixedCount / 4.3) * 10) / 10 : 0) + ' / week</div>' +
+                        '<div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sub);">Remediation Rate</div>' +
+                        '<div style="font-size:11px; color:var(--sub); margin-top:2px;">Avg. ' + (hasFx ? Math.round((fixedCount / 4.3) * 10) / 10 : 0) + ' per week</div>' +
                       '</div>' +
                       '<div style="font-size:18px; font-weight:800; font-family:JetBrains Mono, monospace; color:#10b981;">' + (hasFx ? fixedCount : '–') + ' <span style="font-size:11px; font-weight:600; color:var(--sub);">vulnerabilities</span></div>' +
                     '</div>' +
 
                     '<div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">' +
                       '<div>' +
-                        '<div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sub);">Clearance Rate</div>' +
-                        '<div style="font-size:11px; color:var(--sub); margin-top:2px;">' + fixedCount + ' fixed vs ' + managedTotal + ' in scope</div>' +
+                        '<div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sub);">Remediation Rate</div>' +
+                        '<div style="font-size:11px; color:var(--sub); margin-top:2px;">' + fixedCount + ' of ' + managedTotal + ' remediated</div>' +
                       '</div>' +
                       '<div style="font-size:18px; font-weight:800; font-family:JetBrains Mono, monospace; color:var(--ink);">' + clearanceRatio + '%</div>' +
                     '</div>' +
 
                     '<div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">' +
                       '<div>' +
-                        '<div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sub);">Month-End Backlog</div>' +
-                        '<div style="font-size:11px; color:#10b981; font-weight:600; margin-top:2px;">Zero Critical Breaches</div>' +
+                        '<div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--sub);">Open Backlog at Month-End</div>' +
+                        '<div style="font-size:11px; color:#10b981; font-weight:600; margin-top:2px;">Zero Open Critical Vulnerabilities*</div>' +
                       '</div>' +
                       '<div style="font-size:18px; font-weight:800; font-family:JetBrains Mono, monospace; color:var(--ink);">' + openTotal + ' <span style="font-size:11px; font-weight:600; color:var(--sub);">open</span></div>' +
                     '</div>' +
@@ -5191,7 +5191,7 @@
 
               '<div class="client-explanation-box" style="margin-top:10px;">' +
                 '<i class="ce-icon">ℹ</i>' +
-                '<div class="ce-text"><strong>' + FULL[m] + ' ' + state.year + ' Remediation Pace:</strong> Remediated <strong>' + fixedCount + ' vulnerabilities</strong> (' + deltaText + ') achieving <strong>' + clearanceRatio + '% clearance</strong>.</div>' +
+                '<div class="ce-text"><strong>' + FULL[m] + ' ' + state.year + ' Summary:</strong> Remediated <strong>' + fixedCount + ' vulnerabilities</strong> ' + deltaText + ' achieving a <strong>' + clearanceRatio + '% remediation rate</strong>.</div>' +
               '</div>' +
             '</section>' +
 
