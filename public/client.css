@@ -1943,7 +1943,7 @@ button.exec-kpi-card:hover {
 
 .perf-domain-cols {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(110px, 1.2fr) 60px 84px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(100px, 1.1fr) 56px 104px;
   column-gap: 12px;
   font-size: 10.5px;
   font-weight: 600;
@@ -1955,7 +1955,7 @@ button.exec-kpi-card:hover {
 
 .perf-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(110px, 1.2fr) 60px 84px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(100px, 1.1fr) 56px 104px;
   column-gap: 12px;
   align-items: center;
   padding: 9px 8px;
