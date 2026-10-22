@@ -2866,6 +2866,7 @@ table.sc {
   align-items: center;
   gap: 7px;
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 [data-theme="light"] .v-card-title {
@@ -2876,6 +2877,8 @@ table.sc {
   font-size: 11px;
   font-weight: 600;
   color: #94a3b8;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Performance Wave Chart */
@@ -10513,6 +10516,221 @@ button.vuln-chip:hover {
   }
 }
 
+/* RICH COMPONENT TELEMETRY ARCHITECTURE */
+.v-telem-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: calc(100% - 28px);
+  justify-content: space-between;
+}
+
+.v-telem-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.v-telem-grid.two-cols {
+  grid-template-columns: 1fr 1fr;
+}
+
+.v-telem-grid.one-col {
+  grid-template-columns: 1fr;
+}
+
+.v-telem-tile {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 72px;
+  min-width: 0;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.v-telem-tile:hover {
+  border-color: rgba(56, 189, 248, 0.3);
+  transform: translateY(-1px);
+}
+
+[data-theme="light"] .v-telem-tile {
+  background: rgba(248, 250, 252, 0.88);
+  border-color: rgba(226, 232, 240, 0.9);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.v-telem-tile-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.25;
+  min-height: 24px;
+}
+
+[data-theme="light"] .v-telem-tile-head {
+  color: #64748b;
+}
+
+.v-telem-tile-head span.lbl {
+  white-space: normal;
+  overflow: visible;
+  line-height: 1.2;
+}
+
+.v-telem-tile-body {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.v-telem-tile-val {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+}
+
+.v-telem-tile-unit {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+[data-theme="light"] .v-telem-tile-unit {
+  color: #64748b;
+}
+
+.v-telem-tile-track {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+[data-theme="light"] .v-telem-tile-track {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.v-telem-tile-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.v-telem-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 11px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  border-radius: 8px;
+  font-size: 11px;
+  color: #f1f5f9;
+  line-height: 1.35;
+}
+
+[data-theme="light"] .v-telem-banner {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.25);
+  color: #0f172a;
+}
+
+.v-telem-banner-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.v-telem-banner-text {
+  line-height: 1.35;
+  white-space: normal;
+  overflow: visible;
+}
+
+/* QUARTERLY DISTRIBUTION TILES */
+.v-q-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  height: 100%;
+  align-content: center;
+}
+
+.v-q-card {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+[data-theme="light"] .v-q-card {
+  background: rgba(248, 250, 252, 0.88);
+  border-color: rgba(226, 232, 240, 0.9);
+}
+
+.v-q-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.v-q-name {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+[data-theme="light"] .v-q-name {
+  color: #64748b;
+}
+
+.v-q-name span {
+  font-weight: 500;
+  font-size: 9.5px;
+  color: #64748b;
+}
+
+[data-theme="light"] .v-q-name span {
+  color: #94a3b8;
+}
+
+.v-q-val {
+  font-size: 13.5px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.v-q-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+[data-theme="light"] .v-q-track {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.v-q-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
   /* Single-month May 2026 dedicated bar */
   .month-pills-bar {
     justify-content: center !important;
@@ -17931,54 +18149,147 @@ window.__STATIC_CLIENT_DATA__ = {"success":true,"clientName":"Brysa","share":nul
       '</div>' +
     '</div>';
 
-    // Telemetry Breakdown (Sources-style horizontal progress bars)
+    // Telemetry Breakdown (Rich Visual Component Architecture)
     let sourcesBarsHtml = '';
+    const bText = behind(r, m);
     if (r.helpers && r.helpers.length > 0) {
-      const helperVals = r.helpers.map(h => typeof h.v[m] === 'number' ? h.v[m] : 0);
-      const maxHelper = Math.max(...helperVals, 1);
-      const colorAccents = ['', 'accent-rose', 'accent-emerald', 'accent-indigo'];
+      const getIconAndUnit = (name) => {
+        const n = (name || '').toLowerCase();
+        if (n.includes('patch')) return { icon: '📦', unit: 'patches' };
+        if (n.includes('day')) return { icon: '⏱️', unit: 'days' };
+        if (n.includes('hour') || n.includes('time')) return { icon: '⏳', unit: 'hours' };
+        if (n.includes('user') || n.includes('account') || n.includes('mfa')) return { icon: '👥', unit: 'accounts' };
+        if (n.includes('endpoint') || n.includes('device')) return { icon: '💻', unit: 'endpoints' };
+        if (n.includes('ticket') || n.includes('contact') || n.includes('incident')) return { icon: '🎫', unit: 'tickets' };
+        if (n.includes('remediat') || n.includes('fixed') || n.includes('resolved')) return { icon: '🛡️', unit: 'items' };
+        return { icon: '📊', unit: 'units' };
+      };
 
-      sourcesBarsHtml = '<div class="v-bars-list">' +
-        r.helpers.map((h, idx) => {
-          const valH = typeof h.v[m] === 'number' ? h.v[m] : 0;
-          const pctWidth = Math.min(100, Math.round((valH / maxHelper) * 100));
-          const accentCls = colorAccents[idx % colorAccents.length];
-          return '<div class="v-bar-item">' +
-            '<div class="v-bar-head">' +
-              '<span class="v-bar-name">' + h.name + '</span>' +
-              '<span class="v-bar-count">' + (Number.isInteger(valH) ? valH : valH.toFixed(1)) + '</span>' +
-            '</div>' +
-            '<div class="v-bar-track">' +
-              '<div class="v-bar-fill ' + accentCls + '" style="width:' + pctWidth + '%;"></div>' +
-            '</div>' +
-          '</div>';
-        }).join('') +
+      const formatHelperName = (name) => {
+        let n = (name || '')
+          .replace(/\s*\(sum\s+this\s+month\)/i, '')
+          .replace(/\s*\(count\)/i, '')
+          .trim();
+        if (/total days from vendor release/i.test(n)) return 'Release Time';
+        if (/patches deployed/i.test(n)) return 'Patches Deployed';
+        if (/total days to remediate/i.test(n)) return 'Remediation Time';
+        if (/items remediated/i.test(n)) return 'Remediated Items';
+        if (/compliant managed endpoints/i.test(n)) return 'Compliant Fleet';
+        if (/enabled user accounts with mfa/i.test(n)) return 'MFA Enforced';
+        if (/total enabled user accounts/i.test(n)) return 'Total Accounts';
+        if (/first contact/i.test(n)) return 'First-Contact Fixes';
+        if (/within sla/i.test(n)) return 'Handled in SLA';
+        return n;
+      };
+
+      let tiles = [];
+      r.helpers.forEach((h, idx) => {
+        const val = typeof h.v[m] === 'number' ? h.v[m] : 0;
+        const { icon, unit } = getIconAndUnit(h.name);
+        const cleanName = formatHelperName(h.name);
+        const grad = idx === 0 ? 'linear-gradient(90deg, #0284c7, #38bdf8)' : 'linear-gradient(90deg, #10b981, #34d399)';
+        const valColor = idx === 0 ? '#0284c7' : '#10b981';
+        tiles.push({
+          icon: icon,
+          label: cleanName,
+          value: Number.isInteger(val) ? val.toLocaleString() : val.toFixed(1),
+          unit: unit,
+          gradient: grad,
+          color: valColor
+        });
+      });
+
+      // If only 1 helper, pair it with estate or incident totals if available
+      if (tiles.length === 1) {
+        const endpointsVal = (typeof flat !== 'undefined' ? flat.find(q => q.name === 'Managed endpoints') : null)?.v?.[m];
+        const ticketsVal = (typeof flat !== 'undefined' ? flat.find(q => q.name === 'Incidents resolved') : null)?.v?.[m];
+        if (typeof endpointsVal === 'number' && (r.name.includes('endpoint') || r.name.includes('Patch') || r.name.includes('coverage'))) {
+          tiles.push({
+            icon: '💻',
+            label: 'Total Managed Fleet',
+            value: endpointsVal.toLocaleString(),
+            unit: 'endpoints',
+            gradient: 'linear-gradient(90deg, #6366f1, #818cf8)',
+            color: '#6366f1'
+          });
+        } else if (typeof ticketsVal === 'number' && (r.name.includes('fix') || r.name.includes('SLA') || r.name.includes('ticket'))) {
+          tiles.push({
+            icon: '📋',
+            label: 'Total Incidents Handled',
+            value: ticketsVal.toLocaleString(),
+            unit: 'tickets',
+            gradient: 'linear-gradient(90deg, #6366f1, #818cf8)',
+            color: '#6366f1'
+          });
+        }
+      }
+
+      const gridCls = tiles.length > 1 ? 'two-cols' : 'one-col';
+      const tilesHtml = tiles.map(t =>
+        '<div class="v-telem-tile">' +
+          '<div class="v-telem-tile-head">' +
+            '<span>' + t.icon + '</span>' +
+            '<span class="lbl" title="' + t.label + '">' + t.label + '</span>' +
+          '</div>' +
+          '<div class="v-telem-tile-body">' +
+            '<span class="v-telem-tile-val" style="color:' + t.color + ';">' + t.value + '</span>' +
+            '<span class="v-telem-tile-unit">' + t.unit + '</span>' +
+          '</div>' +
+          '<div class="v-telem-tile-track">' +
+            '<div class="v-telem-tile-fill" style="width:100%; background:' + t.gradient + ';"></div>' +
+          '</div>' +
+        '</div>'
+      ).join('');
+
+      let bannerHtml = '';
+      if (r.name === 'Avg days to critical patch' && r.helpers.length >= 2) {
+        const patchCount = typeof r.helpers[0].v[m] === 'number' ? r.helpers[0].v[m] : 0;
+        const totalDays = typeof r.helpers[1].v[m] === 'number' ? r.helpers[1].v[m] : 0;
+        const avgVal = patchCount > 0 ? (totalDays / patchCount).toFixed(1) : '0';
+        bannerHtml = '<div class="v-telem-banner">' +
+          '<span class="v-telem-banner-icon">⚡</span>' +
+          '<span class="v-telem-banner-text">' +
+            '<strong>Turnaround Rate:</strong> ' + totalDays + ' total days &divide; ' + patchCount + ' patches = <strong>' + avgVal + ' d avg</strong>' +
+          '</span>' +
+        '</div>';
+      } else if (bText) {
+        bannerHtml = '<div class="v-telem-banner">' +
+          '<span class="v-telem-banner-icon">⚡</span>' +
+          '<span class="v-telem-banner-text">' +
+            '<strong>Telemetry Context:</strong> ' + bText +
+          '</span>' +
+        '</div>';
+      }
+
+      sourcesBarsHtml = '<div class="v-telem-wrap">' +
+        '<div class="v-telem-grid ' + gridCls + '">' + tilesHtml + '</div>' +
+        bannerHtml +
       '</div>';
     } else {
       const quarters = [
-        { name: 'Q1 (Jan–Mar)', months: [1, 2, 3], cls: '' },
-        { name: 'Q2 (Apr–Jun)', months: [4, 5, 6], cls: 'accent-emerald' },
-        { name: 'Q3 (Jul–Sep)', months: [7, 8, 9], cls: 'accent-indigo' },
-        { name: 'Q4 (Oct–Dec)', months: [10, 11, 12], cls: 'accent-rose' }
+        { name: 'Q1', full: 'Jan–Mar', months: [1, 2, 3], color: '#38bdf8', grad: 'linear-gradient(90deg, #0284c7, #38bdf8)' },
+        { name: 'Q2', full: 'Apr–Jun', months: [4, 5, 6], color: '#34d399', grad: 'linear-gradient(90deg, #059669, #34d399)' },
+        { name: 'Q3', full: 'Jul–Sep', months: [7, 8, 9], color: '#818cf8', grad: 'linear-gradient(90deg, #4f46e5, #818cf8)' },
+        { name: 'Q4', full: 'Oct–Dec', months: [10, 11, 12], color: '#fb7185', grad: 'linear-gradient(90deg, #e11d48, #fb7185)' }
       ];
       const qAverages = quarters.map(q => {
         const qNums = q.months.map(idx => r.v[idx]).filter(v => typeof v === 'number');
         const avg = qNums.length ? qNums.reduce((a, b) => a + b, 0) / qNums.length : 0;
-        return { name: q.name, avg: avg, cls: q.cls };
+        return { name: q.name, full: q.full, avg: avg, color: q.color, grad: q.grad };
       });
       const maxQ = Math.max(...qAverages.map(q => q.avg), 1);
 
-      sourcesBarsHtml = '<div class="v-bars-list">' +
+      sourcesBarsHtml = '<div class="v-q-grid">' +
         qAverages.map(q => {
           const pct = Math.min(100, Math.round((q.avg / maxQ) * 100));
           const valDisplay = fmt(r, q.avg);
-          return '<div class="v-bar-item">' +
-            '<div class="v-bar-head">' +
-              '<span class="v-bar-name">' + q.name + '</span>' +
-              '<span class="v-bar-count">' + valDisplay + '</span>' +
+          return '<div class="v-q-card">' +
+            '<div class="v-q-head">' +
+              '<span class="v-q-name">' + q.name + ' <span>(' + q.full + ')</span></span>' +
+              '<span class="v-q-val" style="color:' + q.color + ';">' + valDisplay + '</span>' +
             '</div>' +
-            '<div class="v-bar-track">' +
-              '<div class="v-bar-fill ' + q.cls + '" style="width:' + pct + '%;"></div>' +
+            '<div class="v-q-track">' +
+              '<div class="v-q-fill" style="width:' + pct + '%; background:' + q.grad + ';"></div>' +
             '</div>' +
           '</div>';
         }).join('') +
@@ -18125,11 +18436,11 @@ window.__STATIC_CLIENT_DATA__ = {"success":true,"clientName":"Brysa","share":nul
         '<div class="v-split-row">' +
           donutCardHtml +
 
-          '<!-- Horizontal Progress Bars: Telemetry Distribution (Sources Style) -->' +
+          '<!-- Component Telemetry Card (Rich Visual Architecture) -->' +
           '<div class="v-card">' +
             '<div class="v-card-head">' +
-              '<h4 class="v-card-title">📊 Telemetry Distribution</h4>' +
-              '<span class="v-card-tag">' + (r.helpers && r.helpers.length ? 'Component Breakdown' : 'Quarterly Distribution') + '</span>' +
+              '<h4 class="v-card-title"><span>📊</span> Component Telemetry</h4>' +
+              '<span class="v-card-tag">' + (r.helpers && r.helpers.length ? FULL[m] + ' Breakdown' : 'Quarterly Breakdown') + '</span>' +
             '</div>' +
             sourcesBarsHtml +
           '</div>' +
